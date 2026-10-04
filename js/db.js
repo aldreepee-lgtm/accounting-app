@@ -56,7 +56,17 @@ function add(store, data) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(store, 'readwrite');
     const req = tx.objectStore(store).add(data);
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = async () => {
+      const id = req.result;
+      // مزامنة تلقائية
+      if (typeof syncAfterSave === 'function') {
+        try {
+          const saved = { ...data, id };
+          await syncAfterSave(store, saved);
+        } catch(e) { console.warn('Sync add failed:', e); }
+      }
+      resolve(id);
+    };
     req.onerror = () => reject(req.error);
   });
 }
@@ -65,7 +75,17 @@ function put(store, data) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(store, 'readwrite');
     const req = tx.objectStore(store).put(data);
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = async () => {
+      const result = req.result;
+      // مزامنة تلقائية
+      if (typeof syncAfterSave === 'function') {
+        try {
+          const saved = { ...data, id: result };
+          await syncAfterSave(store, saved);
+        } catch(e) { console.warn('Sync put failed:', e); }
+      }
+      resolve(result);
+    };
     req.onerror = () => reject(req.error);
   });
 }

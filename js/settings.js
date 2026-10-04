@@ -5,6 +5,11 @@ let logoChanged = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
   await openDB();
+  
+  // تهيئة المزامنة (إن كانت مُفعّلة)
+  if (typeof syncInit === 'function') {
+    try { await syncInit(); } catch(e) { console.warn('Sync init failed:', e); }
+  }
 
   const userJson = localStorage.getItem('currentUser');
   if (!userJson) { window.location.href = 'index.html'; return; }
