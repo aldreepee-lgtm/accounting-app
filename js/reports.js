@@ -74,6 +74,15 @@ function switchTab(tab) {
       dateFrom.value = fmtDate(d);
       dateTo.value = fmtDate(new Date());
     }
+  } else if (tab === 'profit') {
+    filterLabel.textContent = 'من:';
+    dateFrom.style.display = 'block';
+    dateTo.style.display = 'block';
+    if (!dateFrom.value) {
+      const d = new Date(); d.setDate(1);
+      dateFrom.value = fmtDate(d);
+      dateTo.value = fmtDate(new Date());
+    }
   } else if (tab === 'inventory') {
     filterBar.style.display = 'none';
   }
@@ -144,6 +153,15 @@ async function runReport() {
     buildTxTable(filtered, tbody, tableWrap, emptyMsg);
   }
   // ============== المخزون ==============
+  else if (currentTab === 'profit') {
+    const from = document.getElementById('dateFrom').value;
+    const to = document.getElementById('dateTo').value;
+    titleText = '💰 تقرير الأرباح من ' + from + ' إلى ' + to;
+    filtered = all.filter(t => t.date >= from && t.date <= to);
+    buildProfitReport(filtered, statsRow, tbody, tableWrap, emptyMsg, tableHead);
+    document.getElementById('tableTitle').textContent = titleText;
+    return;
+  }
   else if (currentTab === 'inventory') {
     titleText = '📦 تقرير المخزون';
     await buildInventoryReport(statsRow, tbody, tableWrap, emptyMsg, tableHead);

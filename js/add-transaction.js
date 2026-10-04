@@ -118,7 +118,9 @@ async function handleSave(e) {
         if (!product || product.quantity < 1) { msg.textContent = 'المنتج غير متوفر'; msg.className = 'msg-box err'; return; }
         tx.productId = prodId;
         tx.productName = product.name;
-        tx.description = 'بيع: ' + product.name;
+        tx.purchasePrice = product.lastPurchasePrice || 0;
+        tx.profit = amount - tx.purchasePrice;
+        tx.description = 'بيع: ' + product.name + (tx.profit !== 0 ? ' (ربح: ' + tx.profit + ')' : '');
       }
     } else if (currentType === 'expense') {
       tx.category = document.getElementById('expenseCategory').value;
@@ -128,9 +130,11 @@ async function handleSave(e) {
       const qty = parseInt(document.getElementById('quantity').value) || 0;
       const unitPrice = parseInt(document.getElementById('unitPrice').value) || 0;
       if (!pname || qty < 1 || unitPrice < 1) { msg.textContent = 'أكمل بيانات المنتج'; msg.className = 'msg-box err'; return; }
+      const sellPrice = parseInt(document.getElementById('sellPrice').value) || 0;
       tx.productName = pname;
       tx.quantity = qty;
       tx.unitPrice = unitPrice;
+      tx.sellPrice = sellPrice;
       tx.amount = qty * unitPrice;
       tx.description = `${pname} × ${qty}`;
       tx.note = document.getElementById('purchaseNote').value.trim();
@@ -157,6 +161,7 @@ async function handleSave(e) {
     // إعادة تعيين النموذج
     document.getElementById('txForm').reset();
     document.getElementById('quantity').value = 1;
+    document.getElementById('sellPrice').value = '';
     document.getElementById('productSelectWrap').style.display = 'none';
 
     await refreshView();
@@ -175,6 +180,9 @@ async function updateInventoryOnPurchase(tx) {
   if (product) {
     product.quantity += tx.quantity;
     product.lastPurchasePrice = tx.unitPrice;
+    if (tx.sellPrice && tx.sellPrice > 0) {
+      product.sellPrice = tx.sellPrice;
+    }
     product.updatedAt = new Date().toISOString();
     await put('inventory', product);
   } else {
@@ -182,7 +190,7 @@ async function updateInventoryOnPurchase(tx) {
       name: tx.productName,
       quantity: tx.quantity,
       lastPurchasePrice: tx.unitPrice,
-      sellPrice: 0,
+      sellPrice: tx.sellPrice || 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

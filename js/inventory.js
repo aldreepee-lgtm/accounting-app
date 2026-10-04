@@ -57,18 +57,28 @@ function renderProducts(filter) {
   filtered.forEach(p => {
     const qty = parseInt(p.quantity) || 0;
     const price = parseInt(p.lastPurchasePrice) || 0;
+    const sellPrice = parseInt(p.sellPrice) || 0;
     const value = qty * price;
+    const margin = sellPrice > 0 ? sellPrice - price : 0;
 
     let qtyClass = '';
     if (qty === 0) qtyClass = 'out';
     else if (qty <= 3) qtyClass = 'low';
+
+    let priceLine = 'آخر شراء: ' + price.toLocaleString('en-US');
+    if (sellPrice > 0) {
+      priceLine += ' — بيع: ' + sellPrice.toLocaleString('en-US');
+      if (margin > 0) priceLine += ' — ربح: ' + margin.toLocaleString('en-US');
+      else if (margin < 0) priceLine += ' — خسارة: ' + Math.abs(margin).toLocaleString('en-US');
+    }
+    priceLine += ' — القيمة: ' + value.toLocaleString('en-US') + ' ر.ي';
 
     const div = document.createElement('div');
     div.className = 'inv-item';
     div.innerHTML = `
       <div class="info">
         <div class="name">${escapeHtml(p.name)}</div>
-        <div class="meta">آخر سعر شراء: ${price.toLocaleString('en-US')} ر.ي — القيمة: ${value.toLocaleString('en-US')} ر.ي</div>
+        <div class="meta">${priceLine}</div>
       </div>
       <div class="qty ${qtyClass}">${qty}</div>
     `;
