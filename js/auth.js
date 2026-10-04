@@ -64,3 +64,123 @@ async function handleLogin(e) {
 
   window.location.href = 'app.html';
 }
+
+
+// ===== الدخول السحابي =====
+
+function showCloudLoginForm() {
+  document.getElementById('cloudLoginForm').style.display = 'block';
+  document.getElementById('cloudError').textContent = '';
+}
+
+function hideCloudLoginForm() {
+  document.getElementById('cloudLoginForm').style.display = 'none';
+  document.getElementById('cloudEmail').value = '';
+  document.getElementById('cloudPass').value = '';
+  document.getElementById('cloudError').textContent = '';
+}
+
+async function doCloudLogin() {
+  const email = document.getElementById('cloudEmail').value.trim();
+  const pass = document.getElementById('cloudPass').value;
+  const errEl = document.getElementById('cloudError');
+
+  errEl.textContent = '';
+
+  if (!email || !email.includes('@')) {
+    errEl.textContent = 'أدخل بريداً إلكترونياً صحيحاً';
+    return;
+  }
+  if (!pass || pass.length < 6) {
+    errEl.textContent = 'كلمة المرور مطلوبة (6 على الأقل)';
+    return;
+  }
+
+  errEl.style.color = '#2a5298';
+  errEl.textContent = '⏳ جاري الاتصال بالسحابة...';
+
+  try {
+    if (typeof initFirebase !== 'function') {
+      throw new Error('Firebase SDK غير محمّل — تأكد من الاتصال بالإنترنت');
+    }
+    initFirebase();
+
+    // 1) المصادقة
+    const cred = await firebaseAuth.signInWithEmailAndPassword(email, pass);
+    const user = cred.user;
+    console.log('✅ Firebase:', user.email);
+
+    errEl.textContent = '⏳ جاري تحميل بيانات المكتب...';
+
+    // 2) حفظ حالة المزامنة محلياً
+    await put('settings', { key: 'syncEnabled', value: true });
+    await put('settings', { key: 'syncEmail', value: email });
+    await put('settings', { key: 'syncUserId', value: user.uid });
+    await put('settings', { key: 'license', value: {
+      active: true,
+      officeName: 'سحابي',
+      code: 'CLOUD',
+      activatedAt: new Date().toISOString()
+    }});
+    await put('settings', { key: 'setupDone', value: true });
+
+    // 3) تحميل البيانات من Firestore
+    const collections = ['users', 'settings', 'transactions', 'inventory', 'daily_closings'];
+    let totalLoaded = 0;
+
+    for (const col of collections) {
+      const snapshot = await firebaseDB
+        .collection('offices').doc(user.uid)
+        .collection(col).get();
+
+      // مسح الجدول المحلي قبل الاستبدال
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(col, 'readwrite');
+        const req = tx.objectStore(col).clear();
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+
+      // استعادة البيانات
+      for (const docSnap of snapshot.docs) {
+        const item = docSnap.data().data;
+        if (item) {
+          await put(col, item);
+          totalLoaded++;
+        }
+      }
+      console.log(`📥 ${col}: ${snapshot.size}`);
+    }
+
+    // 4) إعادة حفظ الإعدادات السحابية (حتى لا تُمسح)
+    await put('settings', { key: 'syncEnabled', value: true });
+    await put('settings', { key: 'syncEmail', value: email });
+    await put('settings', { key: 'syncUserId', value: user.uid });
+
+    errEl.style.color = '#2e7d32';
+    errEl.textContent = '✅ تم تحميل ' + totalLoaded + ' سجلاً! سجّل دخولك الآن.';
+
+    setTimeout(() => {
+      alert('✅ تم ربط حسابك السحابي بنجاح!\n\nعدد السجلات المحمّلة: ' + totalLoaded + '\n\nسجّل دخولك ببيانات المستخدم المحلية الآن.');
+      hideCloudLoginForm();
+      // نظّف النموذج العادي
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+    }, 1000);
+
+  } catch (e) {
+    console.error(e);
+    errEl.style.color = '#c62828';
+    let msg = 'فشل الاتصال';
+    if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+      msg = 'البريد أو كلمة المرور غير صحيحة';
+    } else if (e.code === 'auth/user-not-found') {
+      msg = 'لا يوجد حساب بهذا البريد';
+    } else if (e.code === 'auth/network-request-failed') {
+      msg = 'فشل الاتصال بالإنترنت';
+    } else if (e.message) {
+      msg = e.message;
+    }
+    errEl.textContent = '❌ ' + msg;
+  }
+}

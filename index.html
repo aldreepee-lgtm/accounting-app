@@ -55,6 +55,28 @@
         <input type="password" id="password" required autocomplete="current-password">
       </div>
       <button type="submit" class="btn-primary">دخول</button>
+      
+      <div style="text-align:center;margin:15px 0;color:#999;font-size:12px;">— أو —</div>
+      
+      <button type="button" id="cloudLoginBtn" onclick="showCloudLoginForm()" style="width:100%;padding:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">
+        ☁️ الدخول بحساب سحابي موجود
+      </button>
+      
+      <div id="cloudLoginForm" style="display:none;margin-top:15px;padding:15px;background:#f9f9f9;border-radius:10px;">
+        <h3 style="font-size:14px;color:#333;margin-bottom:10px;text-align:center;">🔑 ربط بحساب سحابي</h3>
+        <p style="font-size:12px;color:#666;margin-bottom:10px;text-align:center;line-height:1.6;">
+          استخدم حسابك السحابي لتحميل بيانات مكتبك من الإنترنت.
+        </p>
+        <input type="email" id="cloudEmail" placeholder="البريد الإلكتروني" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;margin-bottom:8px;">
+        <input type="password" id="cloudPass" placeholder="كلمة المرور" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;margin-bottom:10px;">
+        <div id="cloudError" style="text-align:center;color:#c62828;font-size:13px;font-weight:600;min-height:20px;margin-bottom:8px;"></div>
+        <button type="button" onclick="doCloudLogin()" style="width:100%;padding:12px;background:#11998e;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">
+          ☁️ تحميل البيانات والدخول
+        </button>
+        <button type="button" onclick="hideCloudLoginForm()" style="width:100%;padding:8px;background:#e0e0e0;color:#555;border:none;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-top:6px;">
+          ← إلغاء
+        </button>
+      </div>
       <div id="loginError" class="error-msg"></div>
     </form>
   </div>
