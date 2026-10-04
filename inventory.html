@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المخزون</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: #f0f2f5; display: block; padding: 0; min-height: 100vh; }
+
+  .topbar {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .topbar h1 { font-size: 18px; }
+  .topbar .back-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+
+  .container { max-width: 800px; margin: 0 auto; padding: 15px; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px 10px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .stat-card .stat-label { font-size: 11px; color: #888; margin-bottom: 6px; }
+  .stat-card .stat-value { font-size: 20px; font-weight: 800; color: #2a5298; }
+  .stat-card.kinds .stat-value { color: #2196f3; }
+  .stat-card.value .stat-value { color: #2e7d32; }
+
+  .section-title { color: #333; font-size: 16px; font-weight: 700; margin: 20px 0 12px; }
+
+  .inv-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-right: 4px solid #2196f3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .inv-item .info { flex: 1; }
+  .inv-item .name { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 5px; }
+  .inv-item .meta { font-size: 12px; color: #888; }
+  .inv-item .qty {
+    text-align: center;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: #e3f2fd;
+    color: #1565c0;
+    font-weight: 800;
+    font-size: 18px;
+    min-width: 60px;
+  }
+  .inv-item .qty.low { background: #fff3e0; color: #e65100; }
+  .inv-item .qty.out { background: #ffebee; color: #c62828; }
+
+  .empty-msg {
+    text-align: center;
+    color: #aaa;
+    padding: 40px 20px;
+    font-size: 14px;
+    background: #fff;
+    border-radius: 12px;
+    line-height: 1.8;
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .filter-bar input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .filter-bar input:focus { outline: none; border-color: #2a5298; }
+</style>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسبة">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📦 المخزون</h1>
+  <button class="back-btn" onclick="location.href='app.html'">← رجوع</button>
+</div>
+
+<div class="container">
+
+  <div class="stats-row">
+    <div class="stat-card kinds">
+      <div class="stat-label">عدد الأصناف</div>
+      <div class="stat-value" id="statKinds">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">إجمالي القطع</div>
+      <div class="stat-value" id="statTotalQty">0</div>
+    </div>
+    <div class="stat-card value">
+      <div class="stat-label">قيمة المخزون</div>
+      <div class="stat-value" id="statValue">0</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج...">
+  </div>
+
+  <h2 class="section-title">📋 قائمة المنتجات</h2>
+
+  <div id="invList"></div>
+
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/inventory.js"></script>
+
+<div style="text-align:center;color:#aaa;font-size:11px;padding:15px 10px;line-height:1.7;margin-top:10px;">
+  💻 برمجة وتطوير: <b style="color:#2a5298;">م/ ربيع الحريبي</b><br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

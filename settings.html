@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إعدادات المكتب</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: #f0f2f5; display: block; padding: 0; min-height: 100vh; }
+  .topbar { background: linear-gradient(135deg, #1e3c72, #2a5298); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .topbar h1 { font-size: 18px; }
+  .topbar button { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit; }
+  .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+
+  .card { background: #fff; border-radius: 14px; padding: 22px 20px; margin-bottom: 15px; box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
+  .card h2 { color: #2a5298; font-size: 15px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; margin-bottom: 6px; color: #333; font-size: 13px; font-weight: 600; }
+  .form-group input { width: 100%; padding: 11px 13px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .form-group input:focus { outline: none; border-color: #2a5298; }
+
+  .logo-section { text-align: center; }
+  .logo-preview { display: inline-block; margin-bottom: 12px; }
+  .logo-preview img { max-width: 130px; max-height: 130px; border-radius: 12px; border: 2px solid #e0e0e0; background: #fff; padding: 4px; }
+  .logo-preview .placeholder { width: 130px; height: 130px; background: #f0f2f5; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 50px; border: 2px dashed #ccc; }
+  .logo-actions { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+  .btn-upload { padding: 9px 18px; background: #2a5298; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; }
+  .btn-remove { padding: 9px 18px; background: #ffebee; color: #c62828; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; }
+
+  .btn-save { width: 100%; padding: 15px; background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; font-family: inherit; margin-top: 5px; }
+  .msg-box { text-align: center; padding: 12px; margin-top: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; display: none; }
+  .msg-box.show { display: block; }
+  .msg-box.ok { background: #e8f5e9; color: #2e7d32; }
+  .msg-box.err { background: #ffebee; color: #c62828; }
+</style>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسبة">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<div class="topbar">
+  <h1>⚙️ إعدادات المكتب</h1>
+  <button onclick="location.href='app.html'">← رجوع</button>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>🖼 شعار المكتب</h2>
+    <div class="logo-section">
+      <div class="logo-preview" id="logoPreview">
+        <div class="placeholder">📚</div>
+      </div>
+      <div class="logo-actions">
+        <button class="btn-upload" onclick="document.getElementById('logoFile').click()">📷 اختيار صورة</button>
+        <button class="btn-remove" onclick="removeLogo()">🗑 إزالة</button>
+      </div>
+      <input type="file" id="logoFile" accept="image/*" style="display:none;">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📌 بيانات المكتب</h2>
+
+    <div class="form-group">
+      <label>اسم المكتب</label>
+      <input type="text" id="officeName">
+    </div>
+
+    <div class="form-group">
+      <label>رقم الهاتف</label>
+      <input type="text" id="officePhone">
+    </div>
+
+    <div class="form-group">
+      <label>العنوان</label>
+      <input type="text" id="officeAddress">
+    </div>
+
+    <div class="form-group">
+      <label>البريد الإلكتروني</label>
+      <input type="email" id="officeEmail">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💰 إعدادات محاسبية</h2>
+
+    <div class="form-group">
+      <label>العملة</label>
+      <input type="text" id="currency">
+    </div>
+
+    <div class="form-group">
+      <label>الرصيد الافتتاحي (أول تشغيل — لا يتغير بعد أول إغلاق)</label>
+      <input type="number" id="openingBalance" min="0" step="1">
+    </div>
+  </div>
+
+  <button class="btn-save" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+  <div id="msgBox" class="msg-box"></div>
+
+</div>
+
+<div style="text-align:center;color:#aaa;font-size:11px;padding:15px 10px;line-height:1.7;margin-top:10px;">
+  💻 برمجة وتطوير: <b style="color:#2a5298;">م/ ربيع الحريبي</b><br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/settings.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

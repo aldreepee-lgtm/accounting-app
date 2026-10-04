@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إغلاق اليوم</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: #f0f2f5; display: block; padding: 0; min-height: 100vh; }
+
+  .topbar {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .topbar h1 { font-size: 18px; }
+  .topbar .back-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+
+  .container { max-width: 700px; margin: 0 auto; padding: 15px; }
+
+  .day-header {
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px 18px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .day-header .date-info .day { font-size: 16px; font-weight: 700; color: #333; }
+  .day-header .date-info .weekday { font-size: 12px; color: #888; margin-top: 3px; }
+  .day-header .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+  .day-header .status-badge.open { background: #e3f2fd; color: #1565c0; }
+  .day-header .status-badge.closed { background: #e8f5e9; color: #2e7d32; }
+
+  .big-card {
+    border-radius: 14px;
+    padding: 22px 20px;
+    color: #fff;
+    margin-bottom: 12px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .big-card.opening { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .big-card.closing { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .big-card.closing.negative { background: linear-gradient(135deg, #c62828, #ef5350); }
+  .big-card .card-label { font-size: 14px; opacity: 0.9; margin-bottom: 8px; }
+  .big-card .card-amount { font-size: 30px; font-weight: 800; }
+  .big-card .card-currency { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+  .breakdown {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .breakdown-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+  .breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px; }
+  .breakdown-row .row-label { color: #555; }
+  .breakdown-row .row-amount { font-weight: 700; }
+  .breakdown-row.income .row-amount { color: #2e7d32; }
+  .breakdown-row.expense .row-amount { color: #c62828; }
+  .breakdown-row.total { border-top: 2px solid #f0f0f0; margin-top: 8px; padding-top: 12px; font-size: 16px; font-weight: 700; }
+
+  .action-area { text-align: center; margin: 20px 0; }
+  .btn-close-day {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #e91e63, #c2185b);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(233,30,99,0.35);
+    transition: transform 0.2s;
+    font-family: inherit;
+  }
+  .btn-close-day:hover { transform: translateY(-2px); }
+  .btn-close-day:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; transform: none; }
+
+  .msg-box { text-align: center; padding: 12px; margin: 12px 0; border-radius: 10px; font-size: 14px; font-weight: 600; }
+  .msg-box.ok { background: #e8f5e9; color: #2e7d32; }
+  .msg-box.err { background: #ffebee; color: #c62828; }
+  .msg-box.info { background: #e3f2fd; color: #1565c0; }
+
+  .section-title { color: #333; font-size: 15px; font-weight: 700; margin: 25px 0 12px; }
+
+  .history-item {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    border-right: 4px solid #4caf50;
+  }
+  .history-item .h-date { font-size: 14px; font-weight: 700; color: #333; }
+  .history-item .h-meta { font-size: 11px; color: #888; margin-top: 3px; }
+  .history-item .h-balance { font-size: 15px; font-weight: 700; color: #2e7d32; }
+
+  .empty-msg { text-align: center; color: #aaa; padding: 25px; font-size: 13px; background: #fff; border-radius: 10px; }
+</style>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسبة">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🔒 إغلاق اليوم</h1>
+  <button class="back-btn" onclick="location.href='app.html'">← رجوع</button>
+</div>
+
+<div class="container">
+
+  <div class="day-header">
+    <div class="date-info">
+      <div class="day" id="dayDate">---</div>
+      <div class="weekday" id="dayWeekday">---</div>
+    </div>
+    <div class="status-badge open" id="statusBadge">مفتوح</div>
+  </div>
+
+  <div class="big-card opening">
+    <div class="card-label">الرصيد الافتتاحي لليوم</div>
+    <div class="card-amount" id="openingBalance">0</div>
+    <div class="card-currency" id="currencyLabel">ريال يمني</div>
+  </div>
+
+  <div class="breakdown">
+    <div class="breakdown-title">📊 تفصيل حركات اليوم</div>
+    <div id="breakdownBody"></div>
+  </div>
+
+  <div class="big-card closing" id="closingCard">
+    <div class="card-label">الرصيد الختامي المتوقع</div>
+    <div class="card-amount" id="closingBalance">0</div>
+    <div class="card-currency">ريال يمني</div>
+  </div>
+
+  <div id="msgBox" class="msg-box"></div>
+
+  <div class="action-area">
+    <button class="btn-close-day" id="closeBtn" onclick="confirmClose()">
+      🔒 إغلاق اليوم وترحيل الرصيد
+    </button>
+  </div>
+
+  <h2 class="section-title">📅 آخر الإغلاقات</h2>
+  <div id="historyList"></div>
+
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/close-day.js"></script>
+
+<div style="text-align:center;color:#aaa;font-size:11px;padding:15px 10px;line-height:1.7;margin-top:10px;">
+  💻 برمجة وتطوير: <b style="color:#2a5298;">م/ ربيع الحريبي</b><br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

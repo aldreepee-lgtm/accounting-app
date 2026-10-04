@@ -1,0 +1,22 @@
+{
+  "name": "نظام المحاسبة المصغر",
+  "short_name": "المحاسبة",
+  "description": "نظام محاسبي مصغر للمكاتب الأكاديمية - برمجة وتطوير م/ ربيع الحريبي",
+  "start_url": "app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1e3c72",
+  "theme_color": "#1e3c72",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 256x256 384x384 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"]
+}

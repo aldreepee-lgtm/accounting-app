@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الإعداد الأولي</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); align-items: flex-start; padding-top: 30px; }
+  .setup-box { background: #fff; border-radius: 16px; padding: 30px 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 500px; }
+  .setup-box h1 { color: #1e3c72; font-size: 20px; margin-bottom: 6px; text-align: center; }
+  .setup-box .desc { color: #777; font-size: 13px; text-align: center; margin-bottom: 25px; }
+  .section-title { color: #2a5298; font-size: 14px; font-weight: 700; margin: 18px 0 10px; border-bottom: 2px solid #e0e0e0; padding-bottom: 6px; }
+  .btn-row { display: flex; gap: 10px; margin-top: 25px; }
+  .btn-secondary { flex: 1; padding: 12px; background: #e0e0e0; color: #333; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .btn-primary { flex: 2; }
+  .hint { color: #888; font-size: 12px; margin-top: 6px; }
+
+  .logo-upload {
+    border: 2px dashed #c5cae9;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    background: #f8f9ff;
+    transition: all 0.2s;
+  }
+  .logo-upload:hover { border-color: #2a5298; background: #eef1ff; }
+  .logo-upload .icon { font-size: 32px; margin-bottom: 6px; }
+  .logo-upload .txt { font-size: 13px; color: #555; font-weight: 600; }
+  .logo-preview { margin-top: 12px; text-align: center; display: none; }
+  .logo-preview img { max-width: 120px; max-height: 120px; border-radius: 8px; border: 2px solid #e0e0e0; background: #fff; }
+  .btn-remove-logo { display: block; margin: 8px auto 0; background: #ffebee; color: #c62828; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; }
+
+  .dev-footer {
+    text-align: center;
+    color: rgba(255,255,255,0.75);
+    font-size: 12px;
+    margin-top: 20px;
+    padding: 10px;
+    line-height: 1.7;
+  }
+  .dev-footer b { color: #fff; }
+</style>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسبة">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<div class="setup-box">
+  <h1>⚙️ الإعداد الأولي للنظام</h1>
+  <p class="desc">أدخل بيانات المكتب لبدء الاستخدام. يمكنك تعديلها لاحقاً من الإعدادات.</p>
+
+  <form id="setupForm">
+
+    <div class="section-title">🖼 شعار المكتب</div>
+
+    <div class="logo-upload" onclick="document.getElementById('officeLogo').click()">
+      <div class="icon">📷</div>
+      <div class="txt">اضغط لاختيار صورة الشعار</div>
+      <div class="hint">PNG أو JPG — حجم أقل من 500KB</div>
+    </div>
+    <input type="file" id="officeLogo" accept="image/*" style="display:none;">
+
+    <div class="logo-preview" id="logoPreview">
+      <img id="logoImg" src="">
+      <button type="button" class="btn-remove-logo" onclick="removeLogo()">🗑 إزالة الشعار</button>
+    </div>
+
+    <div class="section-title">📌 بيانات المكتب</div>
+
+    <div class="form-group">
+      <label>اسم المكتب <span style="color:#d32f2f">*</span></label>
+      <input type="text" id="officeName" required>
+    </div>
+
+    <div class="form-group">
+      <label>رقم الهاتف</label>
+      <input type="text" id="officePhone">
+    </div>
+
+    <div class="form-group">
+      <label>العنوان</label>
+      <input type="text" id="officeAddress">
+    </div>
+
+    <div class="form-group">
+      <label>البريد الإلكتروني (اختياري)</label>
+      <input type="email" id="officeEmail" placeholder="اتركه فارغاً إن لم يوجد">
+    </div>
+
+    <div class="section-title">💰 إعدادات محاسبية</div>
+
+    <div class="form-group">
+      <label>العملة</label>
+      <input type="text" id="currency" value="ريال يمني" required>
+    </div>
+
+    <div class="form-group">
+      <label>الرصيد الافتتاحي للصندوق اليوم (ريال)</label>
+      <input type="number" id="openingBalance" value="0" min="0" step="1">
+      <div class="hint">الرصيد الموجود في الصندوق عند بدء استخدام النظام.</div>
+    </div>
+
+    <div class="section-title">👤 تغيير بيانات مدير النظام (إلزامي)</div>
+
+    <div class="form-group">
+      <label>اسم المستخدم الجديد <span style="color:#d32f2f">*</span></label>
+      <input type="text" id="newAdminUser" required minlength="3">
+    </div>
+
+    <div class="form-group">
+      <label>كلمة المرور الجديدة <span style="color:#d32f2f">*</span></label>
+      <input type="password" id="newAdminPass" required minlength="4">
+    </div>
+
+    <div class="form-group">
+      <label>تأكيد كلمة المرور <span style="color:#d32f2f">*</span></label>
+      <input type="password" id="newAdminPassConfirm" required minlength="4">
+    </div>
+
+    <div id="setupError" class="error-msg"></div>
+
+    <div class="btn-row">
+      <button type="button" class="btn-secondary" onclick="location.href='index.html'">رجوع</button>
+      <button type="submit" class="btn-primary">حفظ ومتابعة</button>
+    </div>
+
+  </form>
+</div>
+
+<div class="dev-footer">
+  💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+<script>
+  let logoBase64 = null;
+
+  document.getElementById('officeLogo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 500000) {
+      alert('⚠️ حجم الصورة كبير جداً (يجب أقل من 500KB)');
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      logoBase64 = ev.target.result;
+      document.getElementById('logoImg').src = logoBase64;
+      document.getElementById('logoPreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function removeLogo() {
+    logoBase64 = null;
+    document.getElementById('officeLogo').value = '';
+    document.getElementById('logoPreview').style.display = 'none';
+  }
+
+  function getLogoBase64() { return logoBase64; }
+</script>
+
+<script src="js/db.js"></script>
+<script src="js/setup.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

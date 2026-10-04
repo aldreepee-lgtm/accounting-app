@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التقارير</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: #f0f2f5; display: block; padding: 0; min-height: 100vh; }
+  .topbar { background: linear-gradient(135deg, #1e3c72, #2a5298); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .topbar h1 { font-size: 18px; }
+  .topbar .btn-group { display: flex; gap: 8px; }
+  .topbar button { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit; }
+  .container { max-width: 900px; margin: 0 auto; padding: 15px; }
+
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 15px; }
+  .tab { padding: 10px 4px; background: #fff; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 12px; font-weight: 700; color: #555; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+  .tab.active { background: #2a5298; color: #fff; border-color: #2a5298; }
+
+  .filter-bar { background: #fff; padding: 12px 14px; border-radius: 12px; margin-bottom: 15px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .filter-bar label { font-size: 13px; color: #555; font-weight: 600; }
+  .filter-bar input { padding: 9px 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 13px; font-family: inherit; flex: 1; min-width: 120px; }
+  .filter-bar button { padding: 9px 14px; background: #2a5298; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 15px; }
+  .stat-card { background: #fff; border-radius: 12px; padding: 12px 8px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .stat-card .stat-label { font-size: 11px; color: #888; margin-bottom: 5px; }
+  .stat-card .stat-value { font-size: 17px; font-weight: 800; }
+  .stat-card.income .stat-value { color: #2e7d32; }
+  .stat-card.expense .stat-value { color: #c62828; }
+  .stat-card.balance .stat-value { color: #1565c0; }
+  .stat-card.count .stat-value { color: #6a1b9a; }
+
+  .section-title { font-size: 15px; font-weight: 700; color: #333; margin: 18px 0 10px; }
+
+  .report-table { width: 100%; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .report-table table { width: 100%; border-collapse: collapse; }
+  .report-table th { background: #2a5298; color: #fff; padding: 10px 6px; font-size: 11px; text-align: right; font-weight: 700; }
+  .report-table td { padding: 9px 6px; font-size: 12px; border-bottom: 1px solid #f0f0f0; color: #333; }
+  .report-table tr:last-child td { border-bottom: none; }
+  .report-table .amount { font-weight: 700; }
+  .report-table .amount.income { color: #2e7d32; }
+  .report-table .amount.expense { color: #c62828; }
+  .report-table .type-badge { display: inline-block; padding: 2px 6px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+  .type-badge.income { background: #e8f5e9; color: #2e7d32; }
+  .type-badge.expense { background: #ffebee; color: #c62828; }
+  .type-badge.purchase { background: #fff3e0; color: #e65100; }
+  .type-badge.owner_withdraw { background: #f3e5f5; color: #6a1b9a; }
+  .type-badge.owner_personal { background: #efebe9; color: #4e342e; }
+
+  .empty-msg { background: #fff; border-radius: 12px; padding: 35px 20px; text-align: center; color: #aaa; font-size: 14px; }
+
+  .type-block { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .type-block h3 { font-size: 14px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; color: #333; }
+  .type-block .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; color: #555; }
+  .type-block .row.total { border-top: 2px solid #f0f0f0; margin-top: 6px; padding-top: 10px; font-weight: 800; font-size: 15px; color: #333; }
+
+  @media print {
+    body { background: #fff; }
+    .topbar, .tabs, .filter-bar { display: none !important; }
+    .container { max-width: 100%; padding: 0; }
+    .stat-card, .report-table, .type-block { box-shadow: none; border: 1px solid #ddd; }
+  }
+</style>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسبة">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📊 التقارير</h1>
+  <div class="btn-group">
+    <button onclick="window.print()">🖨️ طباعة</button>
+    <button onclick="location.href='app.html'">← رجوع</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab active" data-tab="daily">📅 يومي</button>
+    <button class="tab" data-tab="monthly">📆 شهري</button>
+    <button class="tab" data-tab="cash">💰 الصندوق</button>
+    <button class="tab" data-tab="bytype">📊 حسب النوع</button>
+    <button class="tab" data-tab="withdrawals">💼 المسحوبات</button>
+    <button class="tab" data-tab="inventory">📦 المخزون</button>
+  </div>
+
+  <div class="filter-bar" id="filterBar">
+    <label id="filterLabel">التاريخ:</label>
+    <input type="date" id="dateInput">
+    <input type="date" id="dateFrom" style="display:none;">
+    <input type="date" id="dateTo" style="display:none;">
+    <button onclick="runReport()">عرض</button>
+  </div>
+
+  <div id="statsRow" class="stats-row"></div>
+
+  <h2 class="section-title" id="tableTitle">📋 التفاصيل</h2>
+
+  <div class="report-table" id="tableWrap">
+    <table>
+      <thead id="tableHead"></thead>
+      <tbody id="reportBody"></tbody>
+    </table>
+  </div>
+
+  <div id="emptyMsg" class="empty-msg" style="display:none;">📭 لا توجد بيانات في هذه الفترة</div>
+
+  <div id="extraArea"></div>
+
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/reports.js"></script>
+
+<div style="text-align:center;color:#aaa;font-size:11px;padding:15px 10px;line-height:1.7;margin-top:10px;">
+  💻 برمجة وتطوير: <b style="color:#2a5298;">م/ ربيع الحريبي</b><br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

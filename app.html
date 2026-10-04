@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: #f0f2f5; display: block; padding: 0; min-height: 100vh; }
+
+  .topbar { background: linear-gradient(135deg, #1e3c72, #2a5298); color: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .topbar .brand { display: flex; align-items: center; gap: 10px; }
+  .topbar .brand img { width: 40px; height: 40px; border-radius: 8px; background: #fff; padding: 2px; object-fit: cover; }
+  .topbar .brand .icon-placeholder { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .topbar .brand .info h1 { font-size: 15px; margin-bottom: 2px; }
+  .topbar .brand .info p { font-size: 11px; opacity: 0.85; }
+  .topbar .user-info { display: flex; align-items: center; gap: 8px; }
+  .topbar .user-info .badge { background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px; font-size: 12px; }
+  .topbar .logout-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: inherit; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 18px 14px; }
+
+  .balance-card { background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff; border-radius: 16px; padding: 22px 18px; margin-bottom: 22px; box-shadow: 0 10px 30px rgba(17,153,142,0.3); text-align: center; }
+  .balance-card .label { font-size: 13px; opacity: 0.9; margin-bottom: 8px; }
+  .balance-card .amount { font-size: 30px; font-weight: 700; margin-bottom: 5px; }
+  .balance-card .currency { font-size: 14px; opacity: 0.9; }
+
+  .section-title { color: #333; font-size: 16px; margin-bottom: 12px; font-weight: 700; }
+
+  .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 22px; }
+
+  .menu-card { background: #fff; border-radius: 12px; padding: 18px 12px; text-align: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: transform 0.2s; border: none; font-family: inherit; }
+  .menu-card:hover { transform: translateY(-3px); }
+  .menu-card .icon { font-size: 28px; margin-bottom: 8px; }
+  .menu-card .title { font-size: 13px; font-weight: 600; color: #333; }
+  .menu-card .sub { font-size: 11px; color: #888; margin-top: 4px; }
+
+  .menu-card.income { border-top: 4px solid #4caf50; }
+  .menu-card.expense { border-top: 4px solid #f44336; }
+  .menu-card.purchase { border-top: 4px solid #ff9800; }
+  .menu-card.withdraw { border-top: 4px solid #9c27b0; }
+  .menu-card.personal { border-top: 4px solid #795548; }
+  .menu-card.inventory { border-top: 4px solid #2196f3; }
+  .menu-card.reports { border-top: 4px solid #607d8b; }
+  .menu-card.closing { border-top: 4px solid #e91e63; }
+  .menu-card.backup { border-top: 4px solid #673ab7; }
+
+  .owner-only { display: none; }
+  body.is-owner .owner-only { display: block; }
+
+  .dev-footer { text-align: center; color: #999; font-size: 12px; padding: 22px 10px; line-height: 1.8; border-top: 1px solid #e0e0e0; margin-top: 20px; }
+  .dev-footer b { color: #2a5298; }
+</style>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسبة">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <img id="topLogo" src="" style="display:none;">
+    <div class="icon-placeholder" id="topLogoPlaceholder">📚</div>
+    <div class="info">
+      <h1 id="officeNameTop">مكتب</h1>
+      <p id="officeContactTop"></p>
+    </div>
+  </div>
+  <div class="user-info">
+    <span class="badge" id="userBadge">مستخدم</span>
+    <button class="logout-btn" onclick="location.href='settings.html'">⚙️</button>
+    <button class="logout-btn" onclick="logout()">خروج</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="balance-card">
+    <div class="label">رصيد الصندوق الحالي</div>
+    <div class="amount" id="currentBalance">0</div>
+    <div class="currency" id="currencyLabel">ريال يمني</div>
+  </div>
+
+  <h2 class="section-title">📋 الوحدات الرئيسية</h2>
+
+  <div class="menu-grid">
+
+    <button class="menu-card income" onclick="comingSoon('الإيرادات')">
+      <div class="icon">➕</div>
+      <div class="title">إيراد</div>
+      <div class="sub">بيع / خدمة</div>
+    </button>
+
+    <button class="menu-card expense" onclick="comingSoon('المصروفات')">
+      <div class="icon">➖</div>
+      <div class="title">مصروف مكتب</div>
+      <div class="sub">كهرباء، إيجار...</div>
+    </button>
+
+    <button class="menu-card purchase" onclick="comingSoon('المشتريات')">
+      <div class="icon">🛒</div>
+      <div class="title">مشتريات</div>
+      <div class="sub">تُضاف للمخزون</div>
+    </button>
+
+    <button class="menu-card withdraw owner-only" onclick="comingSoon('مسحوبات المالك')">
+      <div class="icon">💼</div>
+      <div class="title">مسحوبات المالك</div>
+      <div class="sub">سحب شخصي</div>
+    </button>
+
+    <button class="menu-card personal owner-only" onclick="comingSoon('مصروفات شخصية')">
+      <div class="icon">🏠</div>
+      <div class="title">مصروفات شخصية</div>
+      <div class="sub">أكل، قات، عامل</div>
+    </button>
+
+    <button class="menu-card inventory" onclick="comingSoon('المخزون')">
+      <div class="icon">📦</div>
+      <div class="title">المخزون</div>
+      <div class="sub">عرض فقط</div>
+    </button>
+
+    <button class="menu-card reports owner-only" onclick="comingSoon('التقارير')">
+      <div class="icon">📊</div>
+      <div class="title">التقارير</div>
+      <div class="sub">يومي / شهري</div>
+    </button>
+
+    <button class="menu-card backup owner-only" onclick="comingSoon('النسخ الاحتياطي')">
+      <div class="icon">💾</div>
+      <div class="title">النسخ الاحتياطي</div>
+      <div class="sub">تصدير / استيراد</div>
+    </button>
+
+    <button class="menu-card closing owner-only" onclick="comingSoon('إغلاق اليوم')">
+      <div class="icon">🔒</div>
+      <div class="title">إغلاق اليوم</div>
+      <div class="sub">ترحيل الرصيد</div>
+    </button>
+
+  </div>
+
+  <div class="dev-footer">
+    💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>
+    © 2026 — جميع الحقوق محفوظة
+  </div>
+
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

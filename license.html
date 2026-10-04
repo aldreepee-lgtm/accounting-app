@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفعيل النظام</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); align-items: center; min-height: 100vh; padding: 20px; }
+  .lic-box { background: #fff; border-radius: 16px; padding: 35px 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 460px; }
+  .lic-box .icon-top { text-align: center; font-size: 48px; margin-bottom: 10px; }
+  .lic-box h1 { color: #1e3c72; font-size: 20px; text-align: center; margin-bottom: 8px; }
+  .lic-box .desc { color: #777; font-size: 13px; text-align: center; margin-bottom: 25px; line-height: 1.7; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; margin-bottom: 6px; color: #333; font-size: 13px; font-weight: 600; }
+  .form-group input { width: 100%; padding: 13px 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; text-align: center; }
+  .form-group input.code-input { font-family: 'Courier New', monospace; letter-spacing: 2px; font-size: 18px; font-weight: 700; }
+  .form-group input:focus { outline: none; border-color: #2a5298; }
+  .btn-activate { width: 100%; padding: 15px; background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; font-family: inherit; margin-top: 10px; }
+  .error-msg { color: #c62828; text-align: center; margin-top: 12px; font-size: 13px; font-weight: 600; min-height: 20px; }
+  .hint-box { background: #fff3e0; border-right: 3px solid #ff9800; padding: 10px 12px; border-radius: 8px; font-size: 12px; color: #e65100; margin-top: 18px; line-height: 1.6; }
+</style>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسبة">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<div class="lic-box">
+  <div class="icon-top">🔐</div>
+  <h1>تفعيل النظام</h1>
+  <p class="desc">أدخل اسم المكتب ورمز الترخيص الذي حصلت عليه لتفعيل النظام.</p>
+
+  <form id="licenseForm">
+    <div class="form-group">
+      <label>اسم المكتب (كما هو في الرخصة)</label>
+      <input type="text" id="officeName" required autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>رمز الترخيص</label>
+      <input type="text" id="licenseCode" class="code-input" placeholder="XXX-XXXX-XXXX" required autocomplete="off" maxlength="13">
+    </div>
+    <button type="submit" class="btn-activate">🔓 تفعيل النظام</button>
+    <div id="errorMsg" class="error-msg"></div>
+  </form>
+
+  <div class="hint-box">
+    💡 <b>لم تحصل على رمز؟</b> تواصل مع المطور:
+    <br>📱 برمجة وتطوير: م/ ربيع الحريبي
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/license.js"></script>
+<script src="js/license-page.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

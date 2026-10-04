@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إضافة حركة</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: #f0f2f5; display: block; padding: 0; min-height: 100vh; }
+
+  .topbar {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .topbar h1 { font-size: 18px; }
+  .topbar .back-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+
+  .container { max-width: 700px; margin: 0 auto; padding: 15px; }
+
+  .type-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+  }
+  .type-tabs .tab {
+    flex: 0 0 auto;
+    padding: 10px 14px;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .type-tabs .tab.active { background: #2a5298; color: #fff; border-color: #2a5298; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(42,82,152,0.3); }
+  .type-tabs .tab.owner-only { display: none; }
+  body.is-owner .type-tabs .tab.owner-only { display: block; }
+
+  .form-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 22px 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+  }
+
+  .type-fields { display: none; }
+  .type-fields.active { display: block; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; margin-bottom: 6px; color: #333; font-size: 13px; font-weight: 600; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    background: #fff;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #2a5298; }
+
+  .hint { color: #888; font-size: 12px; margin-top: 4px; }
+
+  .btn-save { width: 100%; padding: 14px; background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+  .btn-save:hover { opacity: 0.95; }
+
+  .msg-box { text-align: center; padding: 10px; margin-top: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; min-height: 20px; }
+  .msg-box.ok { background: #e8f5e9; color: #2e7d32; }
+  .msg-box.err { background: #ffebee; color: #c62828; }
+
+  .section-title { color: #333; font-size: 16px; font-weight: 700; margin: 20px 0 12px; display: flex; justify-content: space-between; align-items: center; }
+  .section-title .date-badge { background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+  .summary-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+  .summary-item { background: #fff; padding: 12px 8px; border-radius: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .summary-item .lbl { font-size: 11px; color: #888; margin-bottom: 4px; }
+  .summary-item .val { font-size: 16px; font-weight: 700; }
+  .summary-item.income .val { color: #2e7d32; }
+  .summary-item.expense .val { color: #c62828; }
+  .summary-item.balance .val { color: #1565c0; }
+
+  .tx-item {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    border-right: 4px solid #ccc;
+  }
+  .tx-item.income { border-right-color: #4caf50; }
+  .tx-item.expense { border-right-color: #f44336; }
+  .tx-item.purchase { border-right-color: #ff9800; }
+  .tx-item.owner_withdraw { border-right-color: #9c27b0; }
+  .tx-item.owner_personal { border-right-color: #795548; }
+
+  .tx-item .tx-info { flex: 1; }
+  .tx-item .tx-type { font-size: 11px; color: #888; margin-bottom: 3px; }
+  .tx-item .tx-desc { font-size: 14px; color: #333; font-weight: 600; }
+  .tx-item .tx-time { font-size: 11px; color: #aaa; margin-top: 3px; }
+  .tx-item .tx-amount { font-size: 16px; font-weight: 700; margin-left: 10px; }
+  .tx-item.income .tx-amount { color: #2e7d32; }
+  .tx-item:not(.income) .tx-amount { color: #c62828; }
+  .tx-item .del-btn { background: #ffebee; color: #c62828; border: none; width: 32px; height: 32px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-right: 8px; }
+
+  .empty-msg { text-align: center; color: #aaa; padding: 30px; font-size: 14px; }
+</style>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسبة">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<div class="topbar">
+  <h1 id="pageTitle">📝 إضافة حركة</h1>
+  <button class="back-btn" onclick="location.href='app.html'">← رجوع</button>
+</div>
+
+<div class="container">
+
+  <div class="type-tabs" id="typeTabs">
+    <button type="button" class="tab active" data-type="income">➕ إيراد</button>
+    <button type="button" class="tab" data-type="expense">➖ مصروف مكتب</button>
+    <button type="button" class="tab" data-type="purchase">🛒 مشتريات</button>
+    <button type="button" class="tab owner-only" data-type="owner_withdraw">💼 مسحوبات</button>
+    <button type="button" class="tab owner-only" data-type="owner_personal">🏠 شخصية</button>
+  </div>
+
+  <div class="form-card">
+    <form id="txForm">
+
+      <div class="form-group">
+        <label>المبلغ (ريال يمني) <span style="color:#d32f2f">*</span></label>
+        <input type="number" id="amount" required min="1" step="1" placeholder="0">
+      </div>
+
+      <div class="type-fields active" data-for="income">
+        <div class="form-group">
+          <label>نوع الإيراد</label>
+          <select id="incomeType">
+            <option value="service">خدمة (طباعة، تصوير، تجليد)</option>
+            <option value="product">بيع منتج من المخزون</option>
+          </select>
+        </div>
+        <div class="form-group" id="productSelectWrap" style="display:none;">
+          <label>المنتج</label>
+          <select id="productSelect"><option value="">-- اختر منتج --</option></select>
+        </div>
+        <div class="form-group">
+          <label>الوصف</label>
+          <input type="text" id="incomeDesc" placeholder="مثال: طباعة 10 صفحات">
+        </div>
+      </div>
+
+      <div class="type-fields" data-for="expense">
+        <div class="form-group">
+          <label>البند</label>
+          <select id="expenseCategory">
+            <option>كهرباء</option>
+            <option>إيجار</option>
+            <option>قرطاسية</option>
+            <option>صيانة</option>
+            <option>إنترنت</option>
+            <option>مواصلات</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ملاحظة</label>
+          <input type="text" id="expenseNote" placeholder="اختياري">
+        </div>
+      </div>
+
+      <div class="type-fields" data-for="purchase">
+        <div class="form-group">
+          <label>اسم المنتج <span style="color:#d32f2f">*</span></label>
+          <input type="text" id="productName" placeholder="مثال: قلم أزرق">
+        </div>
+        <div class="form-group">
+          <label>الكمية <span style="color:#d32f2f">*</span></label>
+          <input type="number" id="quantity" min="1" step="1" value="1">
+        </div>
+        <div class="form-group">
+          <label>سعر الوحدة <span style="color:#d32f2f">*</span></label>
+          <input type="number" id="unitPrice" min="1" step="1" placeholder="0">
+        </div>
+        <div class="hint">💡 المبلغ الإجمالي = الكمية × سعر الوحدة</div>
+        <div class="form-group">
+          <label>المورد / ملاحظة</label>
+          <input type="text" id="purchaseNote" placeholder="اختياري">
+        </div>
+      </div>
+
+      <div class="type-fields" data-for="owner_withdraw">
+        <div class="form-group">
+          <label>السبب</label>
+          <input type="text" id="withdrawReason" placeholder="مثال: سحب شخصي">
+        </div>
+      </div>
+
+      <div class="type-fields" data-for="owner_personal">
+        <div class="form-group">
+          <label>البند</label>
+          <select id="personalCategory">
+            <option>أكل</option>
+            <option>قات</option>
+            <option>عامل</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ملاحظة</label>
+          <input type="text" id="personalNote" placeholder="اختياري">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-save">💾 حفظ الحركة</button>
+      <div id="formMsg" class="msg-box"></div>
+
+    </form>
+  </div>
+
+  <h2 class="section-title">
+    📋 حركات اليوم
+    <span class="date-badge" id="todayDate"></span>
+  </h2>
+
+  <div class="summary-bar">
+    <div class="summary-item income">
+      <div class="lbl">الإيرادات</div>
+      <div class="val" id="sumIncome">0</div>
+    </div>
+    <div class="summary-item expense">
+      <div class="lbl">المصروفات</div>
+      <div class="val" id="sumExpense">0</div>
+    </div>
+    <div class="summary-item balance">
+      <div class="lbl">الرصيد الحالي</div>
+      <div class="val" id="sumBalance">0</div>
+    </div>
+  </div>
+
+  <div id="txList"></div>
+
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/add-transaction.js"></script>
+
+<div style="text-align:center;color:#aaa;font-size:11px;padding:15px 10px;line-height:1.7;margin-top:10px;">
+  💻 برمجة وتطوير: <b style="color:#2a5298;">م/ ربيع الحريبي</b><br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>إعادة ضبط النظام</title>
+<style>
+  body { font-family: Tahoma, sans-serif; background: #f0f2f5; text-align: center; padding: 50px 20px; }
+  .box { background: #fff; max-width: 500px; margin: auto; padding: 30px; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+  h1 { color: #c62828; margin-bottom: 15px; }
+  p { color: #555; line-height: 1.7; }
+  button { padding: 14px 30px; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; margin: 8px; font-weight: 700; }
+  .danger { background: #c62828; color: #fff; }
+  .safe { background: #e0e0e0; color: #333; }
+  .msg { margin-top: 20px; color: #2e7d32; font-weight: 700; }
+</style>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسبة">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+<div class="box">
+  <h1>⚠️ إعادة ضبط النظام</h1>
+  <p>سيتم حذف <b>جميع البيانات</b>: المستخدمين، الحركات، المخزون، الإعدادات.</p>
+  <p>استخدم هذا الخيار فقط عند الحاجة لبدء جديد.</p>
+  <button class="danger" onclick="doReset()">نعم، امسح كل شيء وابدأ من جديد</button>
+  <button class="safe" onclick="location.href='index.html'">رجوع</button>
+  <div class="msg" id="msg"></div>
+</div>
+<script>
+function doReset() {
+  if (!confirm('هل أنت متأكد؟ لا يمكن التراجع!')) return;
+  const req = indexedDB.deleteDatabase('OfficeAccountingDB');
+  req.onsuccess = () => {
+    sessionStorage.clear();
+    document.getElementById('msg').textContent = '✅ تم المسح! جاري التحويل...';
+    setTimeout(() => window.location.href = 'index.html', 1500);
+  };
+  req.onerror = () => {
+    document.getElementById('msg').textContent = '⚠️ خطأ، أغلق التبويبات الأخرى وحاول مجدداً';
+    document.getElementById('msg').style.color = '#c62828';
+  };
+  req.onblocked = () => {
+    document.getElementById('msg').textContent = '⚠️ أغلق كل تبويبات localhost الأخرى ثم أعد المحاولة';
+    document.getElementById('msg').style.color = '#c62828';
+  };
+}
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

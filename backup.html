@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>النسخ الاحتياطي</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: #f0f2f5; display: block; padding: 0; min-height: 100vh; }
+
+  .topbar {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .topbar h1 { font-size: 18px; }
+  .topbar button { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit; }
+
+  .container { max-width: 700px; margin: 0 auto; padding: 15px; }
+
+  .info-card {
+    background: #e3f2fd;
+    border-right: 4px solid #1565c0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #0d47a1;
+    line-height: 1.7;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .stat-card .stat-label { font-size: 11px; color: #888; margin-bottom: 5px; }
+  .stat-card .stat-value { font-size: 20px; font-weight: 800; color: #2a5298; }
+  .stat-card.users .stat-value { color: #6a1b9a; }
+  .stat-card.transactions .stat-value { color: #2e7d32; }
+  .stat-card.inventory .stat-value { color: #e65100; }
+  .stat-card.closings .stat-value { color: #c62828; }
+
+  .action-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 22px 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    text-align: center;
+  }
+  .action-card h2 { font-size: 17px; color: #333; margin-bottom: 8px; }
+  .action-card p { font-size: 13px; color: #777; margin-bottom: 18px; line-height: 1.7; }
+
+  .btn-backup {
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+    box-shadow: 0 6px 16px rgba(17,153,142,0.3);
+  }
+  .btn-backup:hover { transform: translateY(-2px); }
+
+  .btn-restore {
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+    box-shadow: 0 6px 16px rgba(245,124,0,0.3);
+  }
+  .btn-restore:hover { transform: translateY(-2px); }
+
+  .file-input-wrap { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+  .file-input-wrap input[type="file"] { position: absolute; left: -9999px; }
+
+  .msg-box {
+    text-align: center;
+    padding: 14px;
+    margin-top: 15px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    display: none;
+  }
+  .msg-box.show { display: block; }
+  .msg-box.ok { background: #e8f5e9; color: #2e7d32; }
+  .msg-box.err { background: #ffebee; color: #c62828; }
+  .msg-box.info { background: #e3f2fd; color: #1565c0; }
+
+  .danger-zone { border-top: 3px dashed #ffcdd2; margin-top: 25px; padding-top: 20px; }
+  .danger-zone h2 { color: #c62828; }
+  .btn-danger {
+    padding: 12px 24px;
+    background: #c62828;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+</style>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسبة">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<div class="topbar">
+  <h1>💾 النسخ الاحتياطي</h1>
+  <button onclick="location.href='app.html'">← رجوع</button>
+</div>
+
+<div class="container">
+
+  <div class="info-card">
+    💡 <b>نصيحة:</b> أنشئ نسخة احتياطية بشكل دوري (أسبوعياً) واحفظها في مكان آمن على الهاتف أو Google Drive.
+  </div>
+
+  <h2 class="section-title" style="font-size:15px;font-weight:700;color:#333;margin-bottom:12px;">📊 البيانات الحالية</h2>
+
+  <div class="stats-grid">
+    <div class="stat-card users">
+      <div class="stat-label">المستخدمون</div>
+      <div class="stat-value" id="statUsers">0</div>
+    </div>
+    <div class="stat-card transactions">
+      <div class="stat-label">الحركات</div>
+      <div class="stat-value" id="statTx">0</div>
+    </div>
+    <div class="stat-card inventory">
+      <div class="stat-label">المنتجات</div>
+      <div class="stat-value" id="statInv">0</div>
+    </div>
+    <div class="stat-card closings">
+      <div class="stat-label">الإغلاقات</div>
+      <div class="stat-value" id="statClosings">0</div>
+    </div>
+  </div>
+
+  <div class="action-card">
+    <h2>💾 إنشاء نسخة احتياطية</h2>
+    <p>سيتم تنزيل ملف JSON يحتوي على كل البيانات.<br>احفظه في مكان آمن.</p>
+    <button class="btn-backup" onclick="doBackup()">💾 تصدير البيانات</button>
+  </div>
+
+  <div class="action-card">
+    <h2>📥 استيراد نسخة احتياطية</h2>
+    <p>سيتم <b>استبدال جميع البيانات الحالية</b> بالبيانات الموجودة في الملف.<br>⚠️ لا يمكن التراجع!</p>
+    <div class="file-input-wrap">
+      <input type="file" id="fileInput" accept=".json,application/json" onchange="doRestore(event)">
+      <button class="btn-restore" onclick="document.getElementById('fileInput').click()">📥 اختر ملف النسخة</button>
+    </div>
+  </div>
+
+  <div id="msgBox" class="msg-box"></div>
+
+  <div class="action-card danger-zone">
+    <h2>⚠️ منطقة الخطر</h2>
+    <p>مسح جميع البيانات نهائياً والبدء من جديد.</p>
+    <button class="btn-danger" onclick="doFullReset()">🗑 مسح كل البيانات</button>
+  </div>
+
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/backup.js"></script>
+
+<div style="text-align:center;color:#aaa;font-size:11px;padding:15px 10px;line-height:1.7;margin-top:10px;">
+  💻 برمجة وتطوير: <b style="color:#2a5298;">م/ ربيع الحريبي</b><br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>
