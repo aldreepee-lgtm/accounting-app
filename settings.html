@@ -126,6 +126,17 @@
     </div>
   </div>
 
+  <div class="card" id="usersSection">
+    <h2>👥 إدارة المستخدمين</h2>
+    <div id="usersListBox">
+      <div style="text-align:center;color:#888;padding:20px;">⏳ جاري التحميل...</div>
+    </div>
+    <div class="hint" style="color:#666;font-size:12px;margin-top:12px;line-height:1.7;">
+      💡 انقر على 🔒 لقفل مستخدم (منع الدخول)، أو 🔓 لفتحه.
+      <br>⏰ آخر دخول يُحدّث تلقائياً عند كل تسجيل دخول.
+    </div>
+  </div>
+
   <button class="btn-save" onclick="saveSettings()">💾 حفظ الإعدادات</button>
   <div id="msgBox" class="msg-box"></div>
 
@@ -143,6 +154,7 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/db.js"></script>
+<script src="js/users-ui.js"></script>
 <script src="js/sync-ui.js"></script>
 <script src="js/settings.js"></script>
 

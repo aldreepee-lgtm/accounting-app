@@ -41,6 +41,17 @@ async function handleLogin(e) {
     return;
   }
 
+  // 🔒 فحص القفل
+  if (user.locked === true) {
+    errorEl.style.color = '#c62828';
+    errorEl.innerHTML = '🔒 حسابك مقفل<br><small style="font-size:12px;">تواصل مع مدير المكتب</small>';
+    return;
+  }
+
+  // تحديث آخر دخول
+  user.lastLogin = new Date().toISOString();
+  await put('users', user);
+
   localStorage.setItem('currentUser', JSON.stringify(user));
 
   // التحقق من الترخيص أولاً
