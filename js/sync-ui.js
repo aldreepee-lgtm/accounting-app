@@ -1,24 +1,49 @@
 // ===== واجهة المزامنة في الإعدادات =====
 
 document.addEventListener('DOMContentLoaded', async () => {
-  if (!document.getElementById('syncSection')) return;
-  await renderSyncUI();
+  const section = document.getElementById('syncSection');
+  if (!section) return;
+
+  try {
+    // انتظر حتى تُفتح قاعدة البيانات
+    let tries = 0;
+    while (!db && tries < 50) {
+      try { await openDB(); } catch(e) {}
+      if (!db) await new Promise(r => setTimeout(r, 100));
+      tries++;
+    }
+    if (!db) throw new Error('قاعدة البيانات غير متاحة');
+
+    // تحقق من Firebase
+    if (typeof initFirebase !== 'function') {
+      throw new Error('Firebase SDK غير محمّل');
+    }
+
+    await renderSyncUI();
+  } catch (e) {
+    console.error('sync-ui error:', e);
+    const s = document.getElementById('syncStatusBox');
+    if (s) {
+      s.innerHTML = '⚠️ خطأ في المزامنة<br><small style="font-size:11px;">' + (e.message || e) + '</small>';
+      s.style.background = '#ffebee';
+      s.style.color = '#c62828';
+    }
+  }
 });
 
 async function renderSyncUI() {
   const enabled = await isSyncEnabled();
   const email = await getSyncEmail();
-  
+
   const statusBox = document.getElementById('syncStatusBox');
   const actions = document.getElementById('syncActions');
   const forms = document.getElementById('syncForms');
-  
+
   if (enabled && email) {
-    // ===== المزامنة مُفعّلة =====
     statusBox.innerHTML = '✅ المزامنة مُفعّلة<br><small style="font-weight:400;">الحساب: ' + email + '</small>';
     statusBox.style.background = '#e8f5e9';
     statusBox.style.color = '#2e7d32';
-    
+
     actions.innerHTML = `
       <button onclick="manualSync()" style="width:100%;padding:12px;background:#2a5298;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">
         🔄 مزامنة الآن
@@ -29,11 +54,10 @@ async function renderSyncUI() {
     `;
     forms.style.display = 'none';
   } else {
-    // ===== المزامنة غير مُفعّلة =====
     statusBox.innerHTML = '⚪ المزامنة غير مُفعّلة';
     statusBox.style.background = '#f5f5f5';
     statusBox.style.color = '#666';
-    
+
     actions.innerHTML = `
       <button onclick="showRegisterForm()" style="width:100%;padding:12px;background:linear-gradient(135deg,#11998e,#38ef7d);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">
         🆕 تسجيل حساب جديد (أول جهاز)
@@ -46,7 +70,6 @@ async function renderSyncUI() {
   }
 }
 
-// ===== نموذج التسجيل =====
 function showRegisterForm() {
   const forms = document.getElementById('syncForms');
   forms.style.display = 'block';
@@ -72,18 +95,18 @@ async function doRegister() {
   const pass = document.getElementById('regPass').value;
   const pass2 = document.getElementById('regPass2').value;
   const msg = document.getElementById('regMsg');
-  
+
   if (!email || !email.includes('@')) { msg.style.color='#c62828'; msg.textContent='بريد إلكتروني غير صحيح'; return; }
   if (pass.length < 6) { msg.style.color='#c62828'; msg.textContent='كلمة المرور قصيرة (6 على الأقل)'; return; }
   if (pass !== pass2) { msg.style.color='#c62828'; msg.textContent='كلمتا المرور غير متطابقتين'; return; }
-  
+
   msg.style.color = '#2a5298';
   msg.textContent = '⏳ جاري إنشاء الحساب ورفع البيانات...';
-  
+
   try {
     await syncRegister(email, pass);
     msg.style.color = '#2e7d32';
-    msg.textContent = '✅ تم بنجاح! سيُحدّث الآن...';
+    msg.textContent = '✅ تم بنجاح!';
     setTimeout(() => { alert('✅ تم تفعيل المزامنة بنجاح!\n\nسيتم استخدام نفس البيانات على أي جهاز يدخل بحسابك.'); location.reload(); }, 1500);
   } catch (e) {
     console.error(e);
@@ -91,12 +114,12 @@ async function doRegister() {
     if (e.code === 'auth/email-already-in-use') errorMsg = 'البريد مستخدم مسبقاً';
     else if (e.code === 'auth/weak-password') errorMsg = 'كلمة المرور ضعيفة';
     else if (e.code === 'auth/invalid-email') errorMsg = 'بريد غير صحيح';
+    else if (e.message) errorMsg = e.message;
     msg.style.color = '#c62828';
     msg.textContent = '❌ ' + errorMsg;
   }
 }
 
-// ===== نموذج الدخول =====
 function showLoginForm() {
   const forms = document.getElementById('syncForms');
   forms.style.display = 'block';
@@ -123,30 +146,29 @@ async function doLogin() {
   const email = document.getElementById('logEmail').value.trim();
   const pass = document.getElementById('logPass').value;
   const msg = document.getElementById('logMsg');
-  
+
   if (!email || !pass) { msg.style.color='#c62828'; msg.textContent='املأ كل الحقول'; return; }
-  
   if (!confirm('⚠️ سيتم مسح البيانات الحالية واستبدالها بالبيانات من السحابة.\n\nهل أنت متأكد؟')) return;
-  
+
   msg.style.color = '#2a5298';
   msg.textContent = '⏳ جاري الدخول وتحميل البيانات...';
-  
+
   try {
     await syncLogin(email, pass);
     msg.style.color = '#2e7d32';
-    msg.textContent = '✅ تم بنجاح! سيُحدّث الآن...';
+    msg.textContent = '✅ تم بنجاح!';
     setTimeout(() => { alert('✅ تم الدخول بنجاح!\n\nالبيانات محدّثة من السحابة.'); location.reload(); }, 1500);
   } catch (e) {
     console.error(e);
     let errorMsg = 'فشل الدخول';
     if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') errorMsg = 'البريد أو كلمة المرور غير صحيحة';
     else if (e.code === 'auth/user-not-found') errorMsg = 'الحساب غير موجود';
+    else if (e.message) errorMsg = e.message;
     msg.style.color = '#c62828';
     msg.textContent = '❌ ' + errorMsg;
   }
 }
 
-// ===== مزامنة يدوية =====
 async function manualSync() {
   if (!confirm('هل تريد مزامنة البيانات الآن؟')) return;
   try {
@@ -158,7 +180,6 @@ async function manualSync() {
   }
 }
 
-// ===== إيقاف المزامنة =====
 async function disableSync() {
   if (!confirm('⚠️ سيتم إيقاف المزامنة على هذا الجهاز.\n\nالبيانات تبقى في السحابة، لكن هذا الجهاز لن يُزامن.\n\nهل أنت متأكد؟')) return;
   await syncLogout();
