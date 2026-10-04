@@ -94,6 +94,7 @@
     <button class="tab" data-tab="cash">💰 الصندوق</button>
     <button class="tab" data-tab="bytype">📊 حسب النوع</button>
     <button class="tab" data-tab="withdrawals">💼 المسحوبات</button>
+    <button class="tab" data-tab="charts">📈 مخططات</button>
     <button class="tab" data-tab="profit">💰 الأرباح</button>
     <button class="tab" data-tab="inventory">📦 المخزون</button>
   </div>
@@ -119,6 +120,21 @@
 
   <div id="emptyMsg" class="empty-msg" style="display:none;">📭 لا توجد بيانات في هذه الفترة</div>
 
+  <div id="chartsContainer" style="display:none;">
+    <div style="background:#fff;border-radius:14px;padding:15px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,0.06);">
+      <h3 style="color:#2a5298;font-size:15px;margin-bottom:12px;">📊 الإيرادات والمصروفات - آخر 6 أشهر</h3>
+      <canvas id="chartMonthly" style="max-height:280px;"></canvas>
+    </div>
+    <div style="background:#fff;border-radius:14px;padding:15px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,0.06);">
+      <h3 style="color:#2a5298;font-size:15px;margin-bottom:12px;">🥧 توزيع مصروفات المكتب</h3>
+      <canvas id="chartExpenses" style="max-height:280px;"></canvas>
+    </div>
+    <div style="background:#fff;border-radius:14px;padding:15px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,0.06);">
+      <h3 style="color:#2a5298;font-size:15px;margin-bottom:12px;">📈 الرصيد اليومي (هذا الشهر)</h3>
+      <canvas id="chartBalance" style="max-height:280px;"></canvas>
+    </div>
+  </div>
+
   <div id="extraArea"></div>
 
 </div>
@@ -130,6 +146,7 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/db.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="js/reports.js"></script>
 
 <div style="text-align:center;color:#aaa;font-size:11px;padding:15px 10px;line-height:1.7;margin-top:10px;">

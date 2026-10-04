@@ -25,17 +25,26 @@ async function applyBranding() {
   const phoneVal = (phone && phone.value) ? phone.value : '';
   const addrVal = (address && address.value) ? address.value : '';
 
-  let wm = document.getElementById('watermark');
-  if (!wm) {
-    wm = document.createElement('div');
-    wm.id = 'watermark';
-    document.body.insertBefore(wm, document.body.firstChild);
+  // هل هذه صفحة كشف؟
+  const isReport = document.querySelectorAll('[data-office-header]').length > 0;
+
+  if (isReport) {
+    document.body.classList.add('report-page');
+  } else {
+    // علامة مائية خلفية للصفحات العادية
+    let wm = document.getElementById('watermark');
+    if (!wm) {
+      wm = document.createElement('div');
+      wm.id = 'watermark';
+      document.body.insertBefore(wm, document.body.firstChild);
+    }
+    wm.innerHTML = '<img src="' + logoUrl + '" alt="">';
   }
-  wm.innerHTML = '<img src="' + logoUrl + '" alt="">';
 
   const headerTargets = document.querySelectorAll('[data-office-header]');
   headerTargets.forEach(el => {
     el.innerHTML =
+      '<div class="report-watermark-top"><img src="' + logoUrl + '" alt=""></div>' +
       '<div class="office-header">' +
         '<div class="office-header-logo">' +
           ((logo && logo.value) ? '<img src="' + logo.value + '" alt="logo">' : '<div class="placeholder">📚</div>') +

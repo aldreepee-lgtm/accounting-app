@@ -83,6 +83,12 @@ function switchTab(tab) {
       dateFrom.value = fmtDate(d);
       dateTo.value = fmtDate(new Date());
     }
+  } else if (tab === 'charts') {
+    filterLabel.textContent = 'الشهر:';
+    dateInput.type = 'month';
+    dateInput.style.display = 'block';
+    const now = new Date();
+    dateInput.value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
   } else if (tab === 'inventory') {
     filterBar.style.display = 'none';
   }
@@ -93,6 +99,8 @@ function switchTab(tab) {
 }
 
 async function runReport() {
+  const cc = document.getElementById('chartsContainer');
+  if (cc) cc.style.display = 'none';
   const all = await getAll('transactions');
   const statsRow = document.getElementById('statsRow');
   const emptyMsg = document.getElementById('emptyMsg');
@@ -153,6 +161,17 @@ async function runReport() {
     buildTxTable(filtered, tbody, tableWrap, emptyMsg);
   }
   // ============== المخزون ==============
+  else if (currentTab === 'charts') {
+    const month = document.getElementById('dateInput').value;
+    titleText = '📈 مخططات شهر ' + month;
+    document.getElementById('tableTitle').textContent = titleText;
+    tableWrap.style.display = 'none';
+    emptyMsg.style.display = 'none';
+    statsRow.innerHTML = '';
+    document.getElementById('chartsContainer').style.display = 'block';
+    await buildCharts(all, month);
+    return;
+  }
   else if (currentTab === 'profit') {
     const from = document.getElementById('dateFrom').value;
     const to = document.getElementById('dateTo').value;
@@ -396,4 +415,167 @@ function esc(t) {
   const d = document.createElement('div');
   d.textContent = t || '';
   return d.innerHTML;
+}
+
+// ===== المخططات البيانية =====
+
+let chart1 = null, chart2 = null, chart3 = null;
+
+async function buildCharts(all, month) {
+  // حذف المخططات القديمة
+  if (chart1) { chart1.destroy(); chart1 = null; }
+  if (chart2) { chart2.destroy(); chart2 = null; }
+  if (chart3) { chart3.destroy(); chart3 = null; }
+
+  buildMonthlyChart(all);
+  buildExpensesChart(all, month);
+  buildBalanceChart(all, month);
+}
+
+// 1) الإيرادات والمصروفات - آخر 6 أشهر
+function buildMonthlyChart(all) {
+  const months = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
+  }
+
+  const labels = months.map(m => {
+    const parts = m.split('-');
+    const date = new Date(parts[0], parts[1]-1, 1);
+    return date.toLocaleDateString('ar-EG', { month: 'short', year: '2-digit' });
+  });
+
+  const income = months.map(m => {
+    return all.filter(t => t.type === 'income' && t.date && t.date.startsWith(m))
+      .reduce((s, t) => s + (parseInt(t.amount)||0), 0);
+  });
+
+  const expense = months.map(m => {
+    return all.filter(t => t.type !== 'income' && t.date && t.date.startsWith(m))
+      .reduce((s, t) => s + (parseInt(t.amount)||0), 0);
+  });
+
+  const ctx = document.getElementById('chartMonthly');
+  if (!ctx) return;
+  chart1 = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'الإيرادات', data: income, backgroundColor: '#4caf50' },
+        { label: 'المصروفات', data: expense, backgroundColor: '#f44336' }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Tahoma' } } }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+// 2) توزيع مصروفات المكتب
+function buildExpensesChart(all, month) {
+  const expenses = all.filter(t => t.type === 'expense' && t.date && t.date.startsWith(month));
+  const cats = {};
+  expenses.forEach(t => {
+    const k = t.category || 'أخرى';
+    cats[k] = (cats[k] || 0) + (parseInt(t.amount)||0);
+  });
+
+  const labels = Object.keys(cats);
+  const data = Object.values(cats);
+
+  const ctx = document.getElementById('chartExpenses');
+  if (!ctx) return;
+
+  if (labels.length === 0) {
+    ctx.parentElement.innerHTML = '<h3 style="color:#2a5298;font-size:15px;margin-bottom:12px;">🥧 توزيع مصروفات المكتب</h3><div style="text-align:center;color:#999;padding:30px;">لا توجد مصروفات هذا الشهر</div>';
+    return;
+  }
+
+  const colors = ['#2196f3', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#795548', '#607d8b', '#e91e63'];
+
+  chart2 = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: colors.slice(0, labels.length)
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Tahoma' } } }
+      }
+    }
+  });
+}
+
+// 3) الرصيد اليومي خلال الشهر
+function buildBalanceChart(all, month) {
+  const closing = all.filter(t => t.type === 'income');
+  const [year, mon] = month.split('-').map(Number);
+  const daysInMonth = new Date(year, mon, 0).getDate();
+
+  const labels = [];
+  const data = [];
+
+  let balance = 0;
+
+  // احسب الرصيد قبل بداية الشهر
+  all.forEach(t => {
+    if (t.date && t.date < month + '-01') {
+      const a = parseInt(t.amount) || 0;
+      if (t.type === 'income') balance += a;
+      else balance -= a;
+    }
+  });
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayStr = month + '-' + String(d).padStart(2, '0');
+    const dayTx = all.filter(t => t.date === dayStr);
+    dayTx.forEach(t => {
+      const a = parseInt(t.amount) || 0;
+      if (t.type === 'income') balance += a;
+      else balance -= a;
+    });
+    labels.push(d);
+    data.push(balance);
+  }
+
+  const ctx = document.getElementById('chartBalance');
+  if (!ctx) return;
+
+  chart3 = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'الرصيد',
+        data: data,
+        borderColor: '#2a5298',
+        backgroundColor: 'rgba(42,82,152,0.1)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: false }
+      }
+    }
+  });
 }

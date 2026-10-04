@@ -259,3 +259,36 @@ body.dark-mode .dev-footer b {
 .dark-toggle-btn:hover {
   background: rgba(255,255,255,0.25);
 }
+
+/* ===== علامة مائية علوية للكشوفات ===== */
+.report-watermark-top {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 0 5px;
+  pointer-events: none;
+  z-index: 0;
+}
+.report-watermark-top img {
+  max-height: 130px;
+  max-width: 55%;
+  opacity: 0.22;
+  transform: rotate(-18deg);
+  object-fit: contain;
+}
+
+/* إخفاء العلامة المائية الخلفية في الكشوفات */
+body.report-page #watermark {
+  display: none !important;
+}
+
+/* في الطباعة: أظهر العلامة العلوية فقط */
+@media print {
+  #watermark { display: none !important; }
+  .report-watermark-top img {
+    opacity: 0.25 !important;
+    max-height: 120px;
+  }
+}
