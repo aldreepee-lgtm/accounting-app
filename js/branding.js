@@ -44,7 +44,6 @@ async function applyBranding() {
   const headerTargets = document.querySelectorAll('[data-office-header]');
   headerTargets.forEach(el => {
     el.innerHTML =
-      '<div class="report-watermark-top"><img src="' + logoUrl + '" alt=""></div>' +
       '<div class="office-header">' +
         '<div class="office-header-logo">' +
           ((logo && logo.value) ? '<img src="' + logo.value + '" alt="logo">' : '<div class="placeholder">📚</div>') +

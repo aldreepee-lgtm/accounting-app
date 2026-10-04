@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadSettings() {
-  const keys = ['officeName', 'officePhone', 'officeAddress', 'officeEmail', 'currency', 'openingBalance', 'officeLogo'];
+  const keys = ['officeName', 'officePhone', 'officeAddress', 'officeEmail', 'currency', 'openingBalance', 'officeLogo', 'lowStockAlert'];
   for (const k of keys) {
     const item = await get('settings', k);
     if (item && item.value !== undefined && document.getElementById(k)) {
@@ -79,6 +79,8 @@ async function saveSettings() {
   }
 
   const ob = parseInt(document.getElementById('openingBalance').value) || 0;
+  const ls = parseInt(document.getElementById('lowStockAlert').value) || 3;
+  await put('settings', { key: 'lowStockAlert', value: ls });
   await put('settings', { key: 'openingBalance', value: ob });
 
   if (logoChanged) {

@@ -292,3 +292,50 @@ body.report-page #watermark {
     max-height: 120px;
   }
 }
+
+/* ===== تحديث العلامة المائية - في الأمام ===== */
+#watermark {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: auto !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+  z-index: 99999 !important;
+  overflow: visible !important;
+}
+#watermark img {
+  max-width: 60vw !important;
+  max-height: 60vh !important;
+  opacity: 0.22 !important;
+  transform: rotate(-22deg) !important;
+  object-fit: contain !important;
+}
+
+/* في الطباعة: تثبيت الموقع */
+@media print {
+  #watermark {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 99999 !important;
+    opacity: 0.22 !important;
+  }
+  #watermark img {
+    opacity: 0.22 !important;
+    max-width: 55vw !important;
+    max-height: 55vh !important;
+  }
+}
+
+/* ===== نوع جديد: راتب العامل ===== */
+.type-badge.worker_salary { background: #fff3e0; color: #bf360c; }
+.tx-item.worker_salary { border-right-color: #ff5722; }
+.type-badge.worker_salary { background: #fff3e0; color: #bf360c; }
+.type-badge.worker_salary{background:#fff3e0;color:#bf360c;}
+.tx-item.worker_salary{border-right-color:#ff5722;}

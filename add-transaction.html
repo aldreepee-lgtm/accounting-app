@@ -150,6 +150,7 @@
     <button type="button" class="tab" data-type="purchase">🛒 مشتريات</button>
     <button type="button" class="tab owner-only" data-type="owner_withdraw">💼 مسحوبات</button>
     <button type="button" class="tab owner-only" data-type="owner_personal">🏠 شخصية</button>
+    <button type="button" class="tab owner-only" data-type="worker_salary">💵 راتب العامل</button>
   </div>
 
   <div class="form-card">
@@ -226,6 +227,21 @@
         <div class="form-group">
           <label>السبب</label>
           <input type="text" id="withdrawReason" placeholder="مثال: سحب شخصي">
+        </div>
+      </div>
+
+      <div class="type-fields" data-for="worker_salary">
+        <div class="form-group">
+          <label>اسم العامل</label>
+          <input type="text" id="salaryWorker" placeholder="مثال: أحمد">
+        </div>
+        <div class="form-group">
+          <label>الشهر</label>
+          <input type="month" id="salaryMonth">
+        </div>
+        <div class="form-group">
+          <label>ملاحظة</label>
+          <input type="text" id="salaryNote" placeholder="اختياري">
         </div>
       </div>
 

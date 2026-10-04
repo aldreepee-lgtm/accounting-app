@@ -89,6 +89,14 @@ function switchTab(tab) {
     dateInput.style.display = 'block';
     const now = new Date();
     dateInput.value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  } else if (tab === 'salary') {
+    filterLabel.textContent = 'من:';
+    dateFrom.style.display = 'block';
+    dateTo.style.display = 'block';
+      const d = new Date(); d.setDate(1);
+      dateFrom.value = fmtDate(d);
+      dateTo.value = fmtDate(new Date());
+    }
   } else if (tab === 'inventory') {
     filterBar.style.display = 'none';
   }
@@ -181,6 +189,16 @@ async function runReport() {
     document.getElementById('tableTitle').textContent = titleText;
     return;
   }
+  else if (currentTab === 'salary') {
+    const from = document.getElementById('dateFrom').value;
+    const to = document.getElementById('dateTo').value;
+    filtered = all.filter(t => t.type === 'worker_salary' && t.date >= from && t.date <= to);
+    titleText = '💵 الرواتب من ' + from + ' إلى ' + to;
+    tableHead.innerHTML = '<tr><th>التاريخ</th><th>العامل</th><th>الشهر</th><th>المبلغ</th></tr>';
+    buildSalaryReport(filtered, statsRow, tbody, tableWrap, emptyMsg);
+    document.getElementById('tableTitle').textContent = titleText;
+    return;
+  }
   else if (currentTab === 'inventory') {
     titleText = '📦 تقرير المخزون';
     await buildInventoryReport(statsRow, tbody, tableWrap, emptyMsg, tableHead);
@@ -232,7 +250,7 @@ function buildTxTable(list, tbody, tableWrap, emptyMsg) {
   }
   tableWrap.style.display = 'block';
   emptyMsg.style.display = 'none';
-  const labels = { income:'إيراد', expense:'مصروف', purchase:'مشترى', owner_withdraw:'مسحوبات', owner_personal:'شخصي' };
+  const labels = { income:'إيراد', expense:'مصروف', purchase:'مشترى', owner_withdraw:'مسحوبات', owner_personal:'شخصي', worker_salary:'راتب' };
   list.sort((a,b) => (b.time||'').localeCompare(a.time||''));
   tbody.innerHTML = list.map(t => {
     const amt = parseInt(t.amount) || 0;
@@ -578,4 +596,47 @@ function buildBalanceChart(all, month) {
       }
     }
   });
+}
+
+// ===== تقرير الرواتب =====
+function buildSalaryReport(list, statsRow, tbody, tableWrap, emptyMsg) {
+  let total = 0;
+  const byWorker = {};
+  
+  list.forEach(t => {
+    const a = parseInt(t.amount) || 0;
+    total += a;
+    const w = t.workerName || 'غير محدد';
+    byWorker[w] = (byWorker[w] || 0) + a;
+  });
+  
+  const workersCount = Object.keys(byWorker).length;
+  
+  statsRow.innerHTML = `
+    <div class="stat-card expense"><div class="stat-label">إجمالي الرواتب</div><div class="stat-value">${total.toLocaleString('en-US')}</div></div>
+    <div class="stat-card"><div class="stat-label">عدد العمال</div><div class="stat-value" style="color:#6a1b9a;">${workersCount}</div></div>
+    <div class="stat-card count"><div class="stat-label">عدد الدفعات</div><div class="stat-value">${list.length}</div></div>
+  `;
+  
+  if (list.length === 0) {
+    tableWrap.style.display = 'none';
+    emptyMsg.style.display = 'block';
+    emptyMsg.textContent = 'لا توجد رواتب مسجّلة في هذه الفترة';
+    return;
+  }
+  
+  tableWrap.style.display = 'block';
+  emptyMsg.style.display = 'none';
+  
+  list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  
+  tbody.innerHTML = list.map(t => {
+    const a = parseInt(t.amount) || 0;
+    return `<tr>
+      <td>${t.date || ''}</td>
+      <td style="font-weight:700;">${esc(t.workerName || 'غير محدد')}</td>
+      <td>${t.salaryMonth || '-'}</td>
+      <td class="amount expense">${a.toLocaleString('en-US')}</td>
+    </tr>`;
+  }).join('');
 }

@@ -140,6 +140,13 @@ async function handleSave(e) {
       tx.note = document.getElementById('purchaseNote').value.trim();
     } else if (currentType === 'owner_withdraw') {
       tx.description = document.getElementById('withdrawReason').value.trim() || 'مسحوبات';
+    } else if (currentType === 'worker_salary') {
+      const workerName = document.getElementById('salaryWorker').value.trim();
+      const salaryMonth = document.getElementById('salaryMonth').value;
+      const salaryNote = document.getElementById('salaryNote').value.trim();
+      tx.workerName = workerName;
+      tx.salaryMonth = salaryMonth || todayStr.slice(0, 7);
+      tx.description = 'راتب: ' + workerName + ' (' + tx.salaryMonth + ')' + (salaryNote ? ' - ' + salaryNote : '');
     } else if (currentType === 'owner_personal') {
       tx.category = document.getElementById('personalCategory').value;
       tx.description = tx.category + (document.getElementById('personalNote').value.trim() ? ' - ' + document.getElementById('personalNote').value.trim() : '');

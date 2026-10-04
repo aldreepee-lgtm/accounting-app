@@ -65,7 +65,7 @@ async function refreshView() {
   // تجميع حسب النوع
   const sum = {
     income: 0, expense: 0, purchase: 0,
-    owner_withdraw: 0, owner_personal: 0
+    owner_withdraw: 0, owner_personal: 0, worker_salary: 0
   };
   todayTx.forEach(t => {
     const a = parseInt(t.amount) || 0;
@@ -146,7 +146,7 @@ async function confirmClose() {
 
     const sum = {
       income: 0, expense: 0, purchase: 0,
-      owner_withdraw: 0, owner_personal: 0
+      owner_withdraw: 0, owner_personal: 0, worker_salary: 0
     };
     todayTx.forEach(t => {
       const a = parseInt(t.amount) || 0;

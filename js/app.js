@@ -105,3 +105,55 @@ function comingSoon(moduleName) {
 
   alert('📌 وحدة "' + moduleName + '" غير متوفرة بعد');
 }
+
+// ===== تنبيه المخزون المنخفض =====
+async function checkLowStock() {
+  try {
+    const limitSetting = await get('settings', 'lowStockAlert');
+    const limit = limitSetting ? (parseInt(limitSetting.value) || 3) : 3;
+
+    const products = await getAll('inventory');
+    const lowProducts = products.filter(p => {
+      const q = parseInt(p.quantity) || 0;
+      return q > 0 && q <= limit;
+    });
+
+    const box = document.getElementById('lowStockAlertBox');
+    const list = document.getElementById('lowStockList');
+    if (!box || !list) return;
+
+    if (lowProducts.length === 0) {
+      box.style.display = 'none';
+      return;
+    }
+
+    box.style.display = 'block';
+    list.innerHTML = lowProducts.map(p => {
+      const q = parseInt(p.quantity) || 0;
+      return '• <b>' + escapeHtmlAlert(p.name) + '</b> — المتبقي: <span style=\"color:#c62828;font-weight:700;\">' + q + '</span>';
+    }).join('<br>');
+  } catch(e) {
+    console.warn('low stock check:', e);
+  }
+}
+
+function escapeHtmlAlert(text) {
+  const d = document.createElement('div');
+  d.textContent = text || '';
+  return d.innerHTML;
+}
+
+// استدعاء عند فتح لوحة التحكم
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    if (typeof openDB !== 'function') return;
+    let tries = 0;
+    while (!db && tries < 30) {
+      try { await openDB(); } catch(e) {}
+      if (!db) await new Promise(r => setTimeout(r, 100));
+      tries++;
+    }
+    if (!db) return;
+    await checkLowStock();
+  } catch(e) {}
+});
