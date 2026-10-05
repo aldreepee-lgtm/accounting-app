@@ -115,7 +115,9 @@ async function checkLowStock() {
     const products = await getAll('inventory');
     const lowProducts = products.filter(p => {
       const q = parseInt(p.quantity) || 0;
-      return q > 0 && q <= limit;
+      const customLimit = parseInt(p.alertThreshold) || 0;
+      const effectiveLimit = customLimit > 0 ? customLimit : limit;
+      return q > 0 && q <= effectiveLimit;
     });
 
     const box = document.getElementById('lowStockAlertBox');

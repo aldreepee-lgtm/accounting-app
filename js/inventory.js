@@ -147,6 +147,7 @@ async function openStocktake(productId) {
 
   document.getElementById('stocktakeQty').value = q;
   document.getElementById('stocktakeReason').value = '';
+  document.getElementById('stocktakeAlert').value = p.alertThreshold || '';
   document.getElementById('stocktakeMsg').textContent = '';
   document.getElementById('stocktakeModal').style.display = 'flex';
 }
@@ -161,6 +162,7 @@ async function saveStocktake() {
   if (!currentStocktakeProduct) return;
 
   const newQty = parseInt(document.getElementById('stocktakeQty').value);
+  const alertVal = document.getElementById('stocktakeAlert').value.trim();
   const reason = document.getElementById('stocktakeReason').value.trim() || 'جرد فعلي';
 
   if (isNaN(newQty) || newQty < 0) {
@@ -181,6 +183,11 @@ async function saveStocktake() {
   try {
     // 1) حدّث كمية المنتج
     currentStocktakeProduct.quantity = newQty;
+    if (alertVal !== '') {
+      currentStocktakeProduct.alertThreshold = parseInt(alertVal) || 0;
+    } else {
+      currentStocktakeProduct.alertThreshold = 0;
+    }
     currentStocktakeProduct.lastStocktake = new Date().toISOString();
     currentStocktakeProduct.updatedAt = new Date().toISOString();
     await put('inventory', currentStocktakeProduct);
