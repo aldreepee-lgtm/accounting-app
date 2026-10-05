@@ -148,19 +148,40 @@
   document.getElementById('officeLogo').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 500000) {
-      alert('⚠️ حجم الصورة كبير جداً (يجب أقل من 500KB)');
-      e.target.value = '';
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      logoBase64 = ev.target.result;
+    compressImageSetup(file, 800, 0.75).then(function(dataUrl) {
+      logoBase64 = dataUrl;
       document.getElementById('logoImg').src = logoBase64;
       document.getElementById('logoPreview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
+    }).catch(function(err) {
+      alert('⚠️ فشل: ' + err.message);
+    });
   });
+
+  function compressImageSetup(file, maxSize, quality) {
+    return new Promise(function(resolve, reject) {
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const img = new Image();
+        img.onload = function() {
+          let w = img.width, h = img.height;
+          if (w > maxSize || h > maxSize) {
+            if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+            else { w = Math.round(w * maxSize / h); h = maxSize; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = ev.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
 
   function removeLogo() {
     logoBase64 = null;

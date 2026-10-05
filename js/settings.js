@@ -47,18 +47,41 @@ function showLogoPreview(src) {
 function handleLogoUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
-  if (file.size > 500000) {
-    alert('⚠️ حجم الصورة كبير (يجب أقل من 500KB)');
-    e.target.value = '';
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    newLogoBase64 = ev.target.result;
+  compressImage(file, 800, 0.75).then(function(dataUrl) {
+    newLogoBase64 = dataUrl;
     logoChanged = true;
     showLogoPreview(newLogoBase64);
-  };
-  reader.readAsDataURL(file);
+  }).catch(function(err) {
+    alert('⚠️ فشل تحميل الصورة: ' + err.message);
+  });
+}
+
+// ضغط الصورة تلقائياً
+function compressImage(file, maxSize, quality) {
+  return new Promise(function(resolve, reject) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const img = new Image();
+      img.onload = function() {
+        let w = img.width;
+        let h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+          else { w = Math.round(w * maxSize / h); h = maxSize; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = ev.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 function removeLogo() {
