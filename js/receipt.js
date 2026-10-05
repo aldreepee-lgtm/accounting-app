@@ -44,15 +44,10 @@ async function loadReceiptData() {
 
 function renderReceipt() {
   const body = document.getElementById('rBody');
-  const meta = document.getElementById('rStats');
+  const stats = document.getElementById('rStats');
   const total = document.getElementById('rTotal');
 
   if (!receiptData) {
-    meta.innerHTML =
-    '<div class="r-stat"><div class="lbl">📅</div><div class="val">' + dateStr + '</div></div>' +
-    '<div class="r-stat"><div class="lbl">🕐</div><div class="val">' + timeStr + '</div></div>' +
-    '<div class="r-stat"><div class="lbl">🔢</div><div class="val">#' + (tx.id || '---') + '</div></div>' +
-    '<div class="r-stat"><div class="lbl">👤</div><div class="val">' + escR(tx.username || '---') + '</div></div>';
     body.innerHTML = '';
     return;
   }
@@ -66,11 +61,11 @@ function renderReceipt() {
     ? new Date(tx.time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
     : now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
-  meta.innerHTML =
-    '<div class="cell"><span class="lbl">📅 التاريخ</span><span class="val">' + dateStr + '</span></div>' +
-    '<div class="cell"><span class="lbl">🕐 الوقت</span><span class="val">' + timeStr + '</span></div>' +
-    '<div class="cell"><span class="lbl">🔢 رقم الإيصال</span><span class="val">#' + (tx.id || '---') + '</span></div>' +
-    '<div class="cell"><span class="lbl">👤 الكاشير</span><span class="val">' + escapeHtmlR(tx.username || '---') + '</span></div>';
+    stats.innerHTML =
+    '<div class="r-stat"><span class="lbl">📅</span><span class="val">' + dateStr + '</span></div>' +
+    '<div class="r-stat"><span class="lbl">🔢</span><span class="val">#' + (tx.id || '---') + '</span></div>' +
+    '<div class="r-stat"><span class="lbl">🕐</span><span class="val">' + timeStr + '</span></div>' +
+    '<div class="r-stat"><span class="lbl">👤</span><span class="val">' + escapeHtmlR(tx.username || '---') + '</span></div>';
 
   const desc = tx.description || tx.productName || 'خدمة';
   body.innerHTML = '<tr><td class="desc">' + escapeHtmlR(desc) + '</td><td class="amt">' + amount.toLocaleString('en-US') + '</td></tr>';
