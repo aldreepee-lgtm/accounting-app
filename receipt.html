@@ -4,56 +4,256 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>إيصال</title>
-<link rel="stylesheet" href="css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
-  body { background: #f0f2f5; display: block; padding: 15px; min-height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; }
-  .receipt-box { background: #fff; max-width: 380px; margin: 0 auto; border-radius: 10px; padding: 20px 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
-  .receipt-box .r-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-22deg); max-width: 70%; max-height: 70%; opacity: 0.08; pointer-events: none; z-index: 0; }
-  .receipt-box > *:not(.r-watermark) { position: relative; z-index: 1; }
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+  
+  body {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    min-height: 100vh;
+    padding: 60px 15px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-  .r-header { text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 12px; margin-bottom: 12px; }
-  .r-header img { max-width: 70px; max-height: 70px; margin-bottom: 6px; }
-  .r-header .placeholder { font-size: 36px; margin-bottom: 6px; }
-  .r-header h1 { font-size: 18px; color: #1e3c72; margin-bottom: 4px; }
-  .r-header .contact { font-size: 11px; color: #666; line-height: 1.7; }
-  .r-meta { font-size: 12px; color: #444; margin-bottom: 12px; line-height: 1.8; }
-  .r-meta .row { display: flex; justify-content: space-between; }
-  .r-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-  .r-table th { background: #2a5298; color: #fff; padding: 8px; font-size: 12px; text-align: right; }
-  .r-table td { padding: 8px; font-size: 13px; border-bottom: 1px solid #eee; }
-  .r-total { display: flex; justify-content: space-between; padding: 10px; background: #e8f5e9; border-radius: 8px; font-weight: 800; font-size: 16px; color: #2e7d32; }
-  .r-footer { text-align: center; border-top: 2px dashed #ccc; margin-top: 15px; padding-top: 12px; font-size: 11px; color: #888; line-height: 1.8; }
+  /* سهم الرجوع الأنيق */
+  .back-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    z-index: 100;
+  }
+  .back-btn:hover { transform: scale(1.1); background: #f0f0f0; }
+  .back-btn svg { width: 22px; height: 22px; stroke: #2a5298; stroke-width: 3; fill: none; }
+
+  .page-title {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  /* صندوق الإيصال */
+  .receipt-box {
+    background: #fff;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 20px;
+    padding: 28px 22px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05);
+  }
+  .receipt-box .r-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%) rotate(-22deg);
+    max-width: 70%;
+    max-height: 70%;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .receipt-box > *:not(.r-watermark) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* رأس الإيصال */
+  .r-header {
+    text-align: center;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 2px dashed #d0d0d0;
+    position: relative;
+  }
+  .r-header .logo-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .r-header img {
+    max-width: 75px;
+    max-height: 75px;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #fff;
+    padding: 4px;
+    border: 2px solid #f0f0f0;
+  }
+  .r-header .placeholder {
+    font-size: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 75px;
+    height: 75px;
+    background: #f0f2f5;
+    border-radius: 12px;
+  }
+  .r-header h1 {
+    font-size: 20px;
+    color: #1e3c72;
+    font-weight: 800;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .r-header .contact {
+    font-size: 11.5px;
+    color: #666;
+    line-height: 1.8;
+  }
+
+  /* معلومات الإيصال */
+  .r-meta {
+    font-size: 12px;
+    color: #444;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    background: #f8f9ff;
+    border-radius: 10px;
+    line-height: 1.9;
+  }
+  .r-meta .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .r-meta .row span:first-child { color: #666; }
+  .r-meta .row span:last-child { color: #2a5298; font-weight: 700; }
+
+  /* الجدول */
+  .r-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .r-table th {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    padding: 10px 12px;
+    font-size: 12px;
+    text-align: right;
+    font-weight: 700;
+  }
+  .r-table td {
+    padding: 11px 12px;
+    font-size: 13px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+  }
+  .r-table tr:last-child td { border-bottom: none; }
+  .r-table .desc { font-weight: 600; color: #333; }
+  .r-table .amt { font-weight: 800; color: #2e7d32; text-align: left; }
+
+  /* الإجمالي */
+  .r-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    border-radius: 12px;
+    margin-top: 6px;
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(17,153,142,0.25);
+  }
+  .r-total span:first-child { font-size: 14px; font-weight: 600; opacity: 0.95; }
+  .r-total span:last-child { font-size: 20px; font-weight: 800; }
+
+  /* الفوتر */
+  .r-footer {
+    text-align: center;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 2px dashed #d0d0d0;
+    font-size: 11px;
+    color: #888;
+    line-height: 1.9;
+  }
   .r-footer b { color: #2a5298; }
+  .r-footer .thanks {
+    display: inline-block;
+    margin-top: 6px;
+    color: #2e7d32;
+    font-weight: 700;
+    font-size: 12px;
+  }
 
-  .actions { max-width: 380px; margin: 20px auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .actions button { padding: 12px 8px; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  /* الأزرار */
+  .actions {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 25px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .actions button {
+    padding: 14px 10px;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #fff;
+  }
+  .actions button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+  .actions button:active { transform: translateY(0); }
   .actions .full { grid-column: 1 / -1; }
-  .btn-thermal { background: #2a5298; color: #fff; }
-  .btn-a4 { background: #673ab7; color: #fff; }
-  .btn-share { background: #25d366; color: #fff; }
-  .btn-wa { background: #128c7e; color: #fff; }
-  .btn-back { background: #e0e0e0; color: #333; grid-column: 1 / -1; }
+  .btn-thermal { background: linear-gradient(135deg, #1e3c72, #2a5298); }
+  .btn-a4 { background: linear-gradient(135deg, #673ab7, #512da8); }
+  .btn-share { background: linear-gradient(135deg, #25d366, #128c7e); }
 
-  /* وضع الطباعة الحرارية: حجم صغير */
-  body.print-thermal .receipt-box { max-width: 80mm; font-size: 12px; }
-  body.print-thermal .r-header h1 { font-size: 15px; }
-  body.print-thermal .r-table th, body.print-thermal .r-table td { padding: 5px; font-size: 11px; }
-
+  /* وضع الطباعة */
   @media print {
     body { background: #fff; padding: 0; }
-    .receipt-box { box-shadow: none; border-radius: 0; padding: 5mm; max-width: 100%; }
-    .actions { display: none; }
-    body.print-thermal .receipt-box { max-width: 80mm; }
+    .back-btn, .page-title, .actions { display: none !important; }
+    .receipt-box { box-shadow: none; border-radius: 0; max-width: 100%; padding: 5mm; }
   }
+  body.print-thermal .receipt-box { max-width: 80mm; }
+  body.print-thermal .r-header h1 { font-size: 15px; }
+  body.print-thermal .r-table th, body.print-thermal .r-table td { padding: 5px; font-size: 11px; }
 </style>
 </head>
 <body>
 
+<button class="back-btn" onclick="window.history.back()" title="رجوع">
+  <svg viewBox="0 0 24 24">
+    <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<div class="page-title">🧾 إيصال الدفع</div>
+
 <div class="receipt-box" id="receiptBox">
   <img class="r-watermark" id="rWatermark" src="" alt="">
+
   <div class="r-header">
-    <div id="rLogoWrap"><div class="placeholder">📚</div></div>
+    <div class="logo-wrap" id="rLogoWrap"><div class="placeholder">📚</div></div>
     <h1 id="rOfficeName">اسم المكتب</h1>
     <div class="contact" id="rContact"></div>
   </div>
@@ -62,29 +262,31 @@
 
   <table class="r-table">
     <thead>
-      <tr><th>الوصف</th><th>المبلغ</th></tr>
+      <tr>
+        <th>الوصف</th>
+        <th style="text-align:left;">المبلغ</th>
+      </tr>
     </thead>
     <tbody id="rBody"></tbody>
   </table>
 
   <div class="r-total">
-    <span>الإجمالي</span>
+    <span>💰 الإجمالي</span>
     <span id="rTotal">0</span>
   </div>
 
   <div class="r-footer">
     💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>
-    📞 778983131<br>
-    شكراً لتعاملكم معنا
+    📞 778983131
+    <br>
+    <span class="thanks">✨ شكراً لتعاملكم معنا ✨</span>
   </div>
 </div>
 
 <div class="actions">
   <button class="btn-thermal" onclick="printThermal()">🖨️ طباعة حرارية</button>
-  <button class="btn-a4" onclick="printA4()">🖨️ طباعة A4</button>
+  <button class="btn-a4" onclick="printA4()">📄 طباعة A4</button>
   <button class="btn-share full" onclick="shareAsImage()">📤 مشاركة كصورة</button>
-  <button class="btn-wa full" onclick="shareToWhatsApp()">💬 إرسال واتساب</button>
-  <button class="btn-back" onclick="window.history.back()">← رجوع</button>
 </div>
 
 <script src="js/db.js"></script>

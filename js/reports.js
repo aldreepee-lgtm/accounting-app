@@ -471,3 +471,56 @@ function buildBalanceChart(all, month) {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } }
   });
 }
+
+// ===== مشاركة التقرير كصورة =====
+async function shareAsImageR() {
+  const container = document.querySelector('.container');
+  const topbar = document.querySelector('.topbar');
+  const tabs = document.querySelector('.tabs');
+  const filterBar = document.querySelector('.filter-bar');
+  const actions = document.querySelector('.topbar .btn-group');
+
+  if (topbar) topbar.style.display = 'none';
+  if (tabs) tabs.style.display = 'none';
+  if (filterBar) filterBar.style.display = 'none';
+
+  try {
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      backgroundColor: '#f0f2f5',
+      useCORS: true,
+      logging: false,
+      windowWidth: container.scrollWidth,
+      windowHeight: container.scrollHeight
+    });
+
+    if (topbar) topbar.style.display = '';
+    if (tabs) tabs.style.display = '';
+    if (filterBar) filterBar.style.display = '';
+
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    const file = new File([blob], 'report-' + Date.now() + '.png', { type: 'image/png' });
+
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'تقرير',
+        text: document.getElementById('tableTitle').textContent
+      });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'report-' + Date.now() + '.png';
+      a.click();
+      URL.revokeObjectURL(url);
+      alert('✅ تم تنزيل التقرير كصورة');
+    }
+  } catch(e) {
+    console.error(e);
+    if (topbar) topbar.style.display = '';
+    if (tabs) tabs.style.display = '';
+    if (filterBar) filterBar.style.display = '';
+    alert('⚠️ فشل: ' + e.message);
+  }
+}

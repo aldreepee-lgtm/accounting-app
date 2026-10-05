@@ -78,7 +78,8 @@
 <div class="topbar">
   <h1>📊 التقارير</h1>
   <div class="btn-group">
-    <button onclick="window.print()">🖨️ طباعة</button>
+    <button onclick="shareAsImageR()" style="background:rgba(37,211,102,0.25);">📤 مشاركة</button>
+      <button onclick="window.print()">🖨️ طباعة</button>
     <button onclick="location.href='app.html'">← رجوع</button>
   </div>
 </div>
@@ -146,6 +147,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/sync.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="js/db.js"></script>
 <script src="js/auto-backup.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
