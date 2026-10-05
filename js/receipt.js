@@ -22,9 +22,9 @@ async function loadOfficeInfo() {
   document.getElementById('rOfficeName').textContent = (name && name.value) ? name.value : 'اسم المكتب';
 
   const parts = [];
-  if (address && address.value) parts.push('📍 ' + address.value);
-  if (phone && phone.value) parts.push('📞 ' + phone.value);
-  document.getElementById('rContact').innerHTML = parts.join('<br>');
+  if (address && address.value) parts.push('<div>📍 ' + escR(address.value) + '</div>');
+  if (phone && phone.value) parts.push('<div>📞 ' + escR(phone.value) + '</div>');
+  document.getElementById('rContact').innerHTML = parts.join('');
 
   document.title = 'إيصال - ' + ((name && name.value) ? name.value : '');
 }
@@ -48,7 +48,11 @@ function renderReceipt() {
   const total = document.getElementById('rTotal');
 
   if (!receiptData) {
-    meta.innerHTML = '<div style="color:#c62828;text-align:center;padding:10px;font-weight:700;">⚠️ لا توجد بيانات</div>';
+    meta.innerHTML =
+    '<div class="r-stat"><div class="lbl">📅 التاريخ</div><div class="val">' + dateStr + '</div></div>' +
+    '<div class="r-stat"><div class="lbl">🕐 الوقت</div><div class="val">' + timeStr + '</div></div>' +
+    '<div class="r-stat"><div class="lbl">🔢 الإيصال</div><div class="val">#' + (tx.id || '---') + '</div></div>' +
+    '<div class="r-stat"><div class="lbl">👤 الكاشير</div><div class="val">' + escR(tx.username || '---') + '</div></div>';
     body.innerHTML = '';
     return;
   }
@@ -140,6 +144,13 @@ async function shareAsImage() {
 }
 
 function escapeHtmlR(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML;
+}
+
+// ===== دالة مساعدة =====
+function escR(t) {
   const d = document.createElement('div');
   d.textContent = t || '';
   return d.innerHTML;
