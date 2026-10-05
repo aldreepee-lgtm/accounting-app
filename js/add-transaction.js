@@ -164,6 +164,20 @@ async function handleSave(e) {
 
     msg.textContent = '✅ تم حفظ الحركة بنجاح';
     msg.className = 'msg-box ok';
+    
+    // زر طباعة الإيصال للإيرادات
+    if (currentType === 'income') {
+      const receiptBtn = document.createElement('button');
+      receiptBtn.type = 'button';
+      receiptBtn.innerHTML = '🖨️ طباعة إيصال للعميل';
+      receiptBtn.style.cssText = 'width:100%;padding:12px;background:#2a5298;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;';
+      receiptBtn.onclick = function() {
+        sessionStorage.setItem('receiptData', JSON.stringify({...tx, id: txId}));
+        window.open('receipt.html', '_blank');
+      };
+      msg.appendChild(document.createElement('br'));
+      msg.appendChild(receiptBtn);
+    }
 
     // إعادة تعيين النموذج
     document.getElementById('txForm').reset();

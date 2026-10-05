@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إيصال</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  body { background: #f0f2f5; display: block; padding: 15px; min-height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; }
+  .receipt-box { background: #fff; max-width: 380px; margin: 0 auto; border-radius: 10px; padding: 20px 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
+  .receipt-box .r-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-22deg); max-width: 70%; max-height: 70%; opacity: 0.08; pointer-events: none; z-index: 0; }
+  .receipt-box > *:not(.r-watermark) { position: relative; z-index: 1; }
+
+  .r-header { text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 12px; margin-bottom: 12px; }
+  .r-header img { max-width: 70px; max-height: 70px; margin-bottom: 6px; }
+  .r-header .placeholder { font-size: 36px; margin-bottom: 6px; }
+  .r-header h1 { font-size: 18px; color: #1e3c72; margin-bottom: 4px; }
+  .r-header .contact { font-size: 11px; color: #666; line-height: 1.7; }
+  .r-meta { font-size: 12px; color: #444; margin-bottom: 12px; line-height: 1.8; }
+  .r-meta .row { display: flex; justify-content: space-between; }
+  .r-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  .r-table th { background: #2a5298; color: #fff; padding: 8px; font-size: 12px; text-align: right; }
+  .r-table td { padding: 8px; font-size: 13px; border-bottom: 1px solid #eee; }
+  .r-total { display: flex; justify-content: space-between; padding: 10px; background: #e8f5e9; border-radius: 8px; font-weight: 800; font-size: 16px; color: #2e7d32; }
+  .r-footer { text-align: center; border-top: 2px dashed #ccc; margin-top: 15px; padding-top: 12px; font-size: 11px; color: #888; line-height: 1.8; }
+  .r-footer b { color: #2a5298; }
+
+  .actions { max-width: 380px; margin: 20px auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .actions button { padding: 12px 8px; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .actions .full { grid-column: 1 / -1; }
+  .btn-thermal { background: #2a5298; color: #fff; }
+  .btn-a4 { background: #673ab7; color: #fff; }
+  .btn-share { background: #25d366; color: #fff; }
+  .btn-wa { background: #128c7e; color: #fff; }
+  .btn-back { background: #e0e0e0; color: #333; grid-column: 1 / -1; }
+
+  /* وضع الطباعة الحرارية: حجم صغير */
+  body.print-thermal .receipt-box { max-width: 80mm; font-size: 12px; }
+  body.print-thermal .r-header h1 { font-size: 15px; }
+  body.print-thermal .r-table th, body.print-thermal .r-table td { padding: 5px; font-size: 11px; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .receipt-box { box-shadow: none; border-radius: 0; padding: 5mm; max-width: 100%; }
+    .actions { display: none; }
+    body.print-thermal .receipt-box { max-width: 80mm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="receipt-box" id="receiptBox">
+  <img class="r-watermark" id="rWatermark" src="" alt="">
+  <div class="r-header">
+    <div id="rLogoWrap"><div class="placeholder">📚</div></div>
+    <h1 id="rOfficeName">اسم المكتب</h1>
+    <div class="contact" id="rContact"></div>
+  </div>
+
+  <div class="r-meta" id="rMeta"></div>
+
+  <table class="r-table">
+    <thead>
+      <tr><th>الوصف</th><th>المبلغ</th></tr>
+    </thead>
+    <tbody id="rBody"></tbody>
+  </table>
+
+  <div class="r-total">
+    <span>الإجمالي</span>
+    <span id="rTotal">0</span>
+  </div>
+
+  <div class="r-footer">
+    💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>
+    📞 778983131<br>
+    شكراً لتعاملكم معنا
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn-thermal" onclick="printThermal()">🖨️ طباعة حرارية</button>
+  <button class="btn-a4" onclick="printA4()">🖨️ طباعة A4</button>
+  <button class="btn-share full" onclick="shareAsImage()">📤 مشاركة كصورة</button>
+  <button class="btn-wa full" onclick="shareToWhatsApp()">💬 إرسال واتساب</button>
+  <button class="btn-back" onclick="window.history.back()">← رجوع</button>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/receipt.js"></script>
+</body>
+</html>
