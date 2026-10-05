@@ -131,10 +131,12 @@ async function handleSave(e) {
       const unitPrice = parseInt(document.getElementById('unitPrice').value) || 0;
       if (!pname || qty < 1 || unitPrice < 1) { msg.textContent = 'أكمل بيانات المنتج'; msg.className = 'msg-box err'; return; }
       const sellPrice = parseInt(document.getElementById('sellPrice').value) || 0;
+      const category = document.getElementById('productCategory').value.trim();
       tx.productName = pname;
       tx.quantity = qty;
       tx.unitPrice = unitPrice;
       tx.sellPrice = sellPrice;
+      tx.productCategory = category || '';
       tx.amount = qty * unitPrice;
       tx.description = `${pname} × ${qty}`;
       tx.note = document.getElementById('purchaseNote').value.trim();
@@ -183,6 +185,7 @@ async function handleSave(e) {
     document.getElementById('txForm').reset();
     document.getElementById('quantity').value = 1;
     document.getElementById('sellPrice').value = '';
+    document.getElementById('productCategory').value = '';
     document.getElementById('productSelectWrap').style.display = 'none';
 
     await refreshView();
@@ -204,6 +207,9 @@ async function updateInventoryOnPurchase(tx) {
     if (tx.sellPrice && tx.sellPrice > 0) {
       product.sellPrice = tx.sellPrice;
     }
+    if (tx.productCategory) {
+      product.category = tx.productCategory;
+    }
     product.updatedAt = new Date().toISOString();
     await put('inventory', product);
   } else {
@@ -212,6 +218,7 @@ async function updateInventoryOnPurchase(tx) {
       quantity: tx.quantity,
       lastPurchasePrice: tx.unitPrice,
       sellPrice: tx.sellPrice || 0,
+      category: tx.productCategory || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
