@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (!db) return;
     await applyBranding();
+    await initDarkMode();
   } catch(e) { console.warn('branding error:', e); }
 });
 
@@ -25,21 +26,18 @@ async function applyBranding() {
   const phoneVal = (phone && phone.value) ? phone.value : '';
   const addrVal = (address && address.value) ? address.value : '';
 
-  // هل هذه صفحة كشف؟
-  const isReport = document.querySelectorAll('[data-office-header]').length > 0;
-
-  if (isReport) {
-    document.body.classList.add('report-page');
-  } else {
-    // علامة مائية خلفية للصفحات العادية
-    let wm = document.getElementById('watermark');
-    if (!wm) {
-      wm = document.createElement('div');
-      wm.id = 'watermark';
-      document.body.insertBefore(wm, document.body.firstChild);
-    }
-    wm.innerHTML = '<img src="' + logoUrl + '" alt="">';
+  // 1) العلامة المائية - في وسط الشاشة وأمام كل شيء
+  let wm = document.getElementById('watermark');
+  if (!wm) {
+    wm = document.createElement('div');
+    wm.id = 'watermark';
+    document.body.appendChild(wm);
   }
+  wm.innerHTML = '<img src="' + logoUrl + '" alt="">';
+
+  // 2) ترويسة الكشوفات
+  const isReport = document.querySelectorAll('[data-office-header]').length > 0;
+  if (isReport) document.body.classList.add('report-page');
 
   const headerTargets = document.querySelectorAll('[data-office-header]');
   headerTargets.forEach(el => {
@@ -74,7 +72,6 @@ async function initDarkMode() {
 }
 
 function addDarkToggle(enabled) {
-  // ابحث عن شريط الترويسة أو الفوتر
   const topbar = document.querySelector('.topbar');
   if (!topbar) return;
   if (topbar.querySelector('.dark-toggle-btn')) return;
@@ -85,7 +82,6 @@ function addDarkToggle(enabled) {
   btn.title = enabled ? 'وضع نهاري' : 'وضع ليلي';
   btn.onclick = toggleDarkMode;
 
-  // نضيفه قبل آخر زر في الترويسة
   topbar.appendChild(btn);
 }
 
@@ -99,18 +95,3 @@ async function toggleDarkMode() {
     btn.title = isDark ? 'وضع نهاري' : 'وضع ليلي';
   }
 }
-
-// استدعاء الوضع الداكن بعد التحميل
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    if (typeof openDB !== 'function') return;
-    let tries = 0;
-    while (!db && tries < 50) {
-      try { await openDB(); } catch(e) {}
-      if (!db) await new Promise(r => setTimeout(r, 100));
-      tries++;
-    }
-    if (!db) return;
-    await initDarkMode();
-  } catch(e) { console.warn('dark mode error:', e); }
-});
