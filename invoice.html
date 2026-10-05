@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فاتورة متعددة البنود</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background:#f0f2f5; display:block; padding:0; min-height:100vh; }
+  .topbar { background:linear-gradient(135deg,#1e3c72,#2a5298); color:#fff; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+  .topbar h1 { font-size:17px; }
+  .topbar button { background:rgba(255,255,255,0.15); border:none; color:#fff; padding:7px 14px; border-radius:6px; cursor:pointer; font-size:13px; font-family:inherit; }
+  .container { max-width:800px; margin:0 auto; padding:15px; }
+  
+  .inv-type { display:flex; gap:8px; margin-bottom:15px; }
+  .inv-type button { flex:1; padding:12px; background:#fff; border:2px solid #e0e0e0; border-radius:10px; font-family:inherit; font-size:14px; font-weight:700; color:#555; cursor:pointer; }
+  .inv-type button.active { background:#2a5298; color:#fff; border-color:#2a5298; }
+  .inv-type button.active.sell { background:#4caf50; border-color:#4caf50; }
+  .inv-type button.active.buy { background:#ff9800; border-color:#ff9800; }
+  
+  .card { background:#fff; border-radius:14px; padding:18px; margin-bottom:12px; box-shadow:0 4px 14px rgba(0,0,0,0.06); }
+  .card h2 { font-size:14px; color:#2a5298; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #f0f0f0; }
+  
+  .item-row { display:flex; flex-direction:column; gap:8px; background:#f8f9ff; padding:12px; border-radius:10px; margin-bottom:10px; border:1px solid #e6ebff; }
+  .item-row .fields { display:grid; grid-template-columns:1fr 70px 80px 40px; gap:6px; align-items:center; }
+  .item-row input, .item-row select { padding:10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:inherit; background:#fff; box-sizing:border-box; width:100%; }
+  .item-row input:focus, .item-row select:focus { outline:none; border-color:#2a5298; }
+  .item-row .del { background:#ffebee; color:#c62828; border:none; width:36px; height:36px; border-radius:8px; cursor:pointer; font-size:16px; padding:0; }
+  .item-row .total-line { font-size:12px; color:#666; text-align:left; }
+  .item-row .total-line b { color:#2e7d32; font-size:14px; }
+  
+  .btn-add { width:100%; padding:12px; background:#e3f2fd; color:#1565c0; border:2px dashed #90caf9; border-radius:10px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+  
+  .summary-line { display:flex; justify-content:space-between; padding:10px 0; font-size:14px; color:#333; }
+  .summary-line.grand { font-size:18px; font-weight:800; color:#2e7d32; border-top:2px solid #f0f0f0; margin-top:8px; padding-top:14px; }
+  
+  .btn-save { width:100%; padding:16px; background:linear-gradient(135deg,#11998e,#38ef7d); color:#fff; border:none; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; margin-top:12px; }
+  .msg { text-align:center; padding:12px; margin-top:10px; border-radius:10px; font-size:14px; font-weight:600; min-height:20px; }
+  .msg.ok { background:#e8f5e9; color:#2e7d32; }
+  .msg.err { background:#ffebee; color:#c62828; }
+  
+  .dev-footer { text-align:center; color:#999; font-size:11px; padding:20px 10px; line-height:1.7; }
+  .dev-footer b { color:#2a5298; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🧾 فاتورة متعددة البنود</h1>
+  <button onclick="location.href='app.html'">← رجوع</button>
+</div>
+
+<div class="container">
+
+  <div class="inv-type">
+    <button type="button" class="active sell" data-type="sell" onclick="setInvType('sell')">💰 فاتورة بيع</button>
+    <button type="button" data-type="buy" onclick="setInvType('buy')">🛒 فاتورة شراء</button>
+  </div>
+
+  <div class="card">
+    <h2>📋 بنود الفاتورة</h2>
+    <div id="itemsArea"></div>
+    <button type="button" class="btn-add" onclick="addItemRow()">➕ إضافة بند جديد</button>
+  </div>
+
+  <div class="card">
+    <h2>📊 الملخص</h2>
+    <div class="summary-line"><span>عدد البنود:</span><span id="sumCount">0</span></div>
+    <div class="summary-line grand"><span>💰 الإجمالي:</span><span id="sumTotal">0 ر.ي</span></div>
+  </div>
+
+  <div class="card">
+    <h2>📝 ملاحظات (اختياري)</h2>
+    <input type="text" id="invNote" placeholder="اسم العميل، رقم الطلب، أي ملاحظة..." style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+  </div>
+
+  <button type="button" class="btn-save" onclick="saveInvoice()">💾 حفظ الفاتورة</button>
+  <div id="saveMsg" class="msg"></div>
+
+</div>
+
+<div class="dev-footer">
+  💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>
+  📞 778983131<br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/units.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auto-backup.js"></script>
+<script src="js/invoice.js"></script>
+<script src="js/branding.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js?v=99').catch(err => {});
+    });
+  }
+</script>
+</body>
+</html>
