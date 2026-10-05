@@ -67,13 +67,32 @@ async function handleChange(e) {
     fullUser.password = newPassword;
     fullUser.mustChange = false;
     fullUser.updatedAt = new Date().toISOString();
+    
+    // توليد رمز استرداد جديد
+    const recoveryCode = generateRecoveryCodeCC();
+    fullUser.recoveryCode = recoveryCode;
+    fullUser.recoveryCodeGenerated = new Date().toISOString();
 
     await put('users', fullUser);
 
     // تحديث الجلسة
     localStorage.setItem('currentUser', JSON.stringify(fullUser));
 
-    alert('✅ تم تغيير بياناتك بنجاح!\n\nاسم المستخدم الجديد: ' + newUsername + '\n\nاحتفظ بهذه البيانات في مكان آمن.');
+    // عرض رمز الاسترداد بشكل بارز
+    const msg = '✅ تم تغيير بياناتك بنجاح!\n\n' +
+                '👤 اسم المستخدم: ' + newUsername + '\n' +
+                '🔒 كلمة المرور: ' + newPassword + '\n\n' +
+                '━━━━━━━━━━━━━━━━━━━\n' +
+                '🔑 *رمز الاسترداد* (احفظه!):\n' +
+                '━━━━━━━━━━━━━━━━━━━\n\n' +
+                '        ' + fullUser.recoveryCode + '\n\n' +
+                '━━━━━━━━━━━━━━━━━━━\n' +
+                '⚠️ *مهم جداً:*\n' +
+                'هذا الرمز يظهر مرة واحدة فقط.\n' +
+                'احفظه في مكان آمن لاسترداد حسابك\n' +
+                'إذا نسيت كلمة المرور مستقبلاً.';
+    
+    alert(msg);
 
     window.location.href = 'app.html';
 
@@ -81,4 +100,15 @@ async function handleChange(e) {
     console.error(err);
     errorEl.textContent = 'حدث خطأ: ' + err.message;
   }
+}
+
+// ===== توليد رمز الاسترداد =====
+function generateRecoveryCodeCC() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    if (i === 3) code += '-';
+  }
+  return code;
 }

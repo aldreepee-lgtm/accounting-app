@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استرداد الحساب</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body{background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .rec-box{background:#fff;border-radius:16px;padding:30px 22px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:480px;}
+  .rec-box h1{color:#1e3c72;font-size:20px;text-align:center;margin-bottom:8px;}
+  .rec-box .desc{color:#777;font-size:13px;text-align:center;margin-bottom:22px;line-height:1.7;}
+  .rec-option{background:#f8f9ff;border:2px solid #e6ebff;border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;}
+  .rec-option:hover{border-color:#2a5298;background:#eef1ff;}
+  .rec-option .title{font-size:14px;font-weight:700;color:#1e3c72;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+  .rec-option .sub{font-size:12px;color:#777;line-height:1.6;}
+  .form-group{margin-bottom:12px;}
+  .form-group label{display:block;margin-bottom:6px;color:#333;font-size:13px;font-weight:600;}
+  .form-group input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:9px;font-size:14px;font-family:inherit;}
+  .form-group input:focus{outline:none;border-color:#2a5298;}
+  .btn-main{width:100%;padding:13px;background:linear-gradient(135deg,#11998e,#38ef7d);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;}
+  .btn-back{width:100%;padding:10px;background:#e0e0e0;color:#333;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;}
+  .msg{text-align:center;font-size:13px;font-weight:600;min-height:20px;margin-top:10px;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="rec-box">
+  <h1>🔑 استرداد الحساب</h1>
+  <p class="desc">اختر طريقة استرداد كلمة المرور</p>
+
+  <div id="optionsArea">
+    <div class="rec-option" onclick="showForm('code')">
+      <div class="title">🔢 رمز الاسترداد</div>
+      <div class="sub">إذا احتفظت بالرمز الذي ظهر عند إنشاء حسابك</div>
+    </div>
+    <div class="rec-option" onclick="showForm('email')">
+      <div class="title">📧 البريد الإلكتروني</div>
+      <div class="sub">سيُرسل رابط إعادة التعيين على بريدك السحابي</div>
+    </div>
+    <div class="rec-option" onclick="showForm('master')">
+      <div class="title">👨‍💻 مفتاح المطور</div>
+      <div class="sub">إذا تواصلت مع المطور للحصول على مفتاح طارئ</div>
+    </div>
+    <button class="btn-back" onclick="location.href='index.html'">← رجوع لتسجيل الدخول</button>
+  </div>
+
+  <div id="formArea" class="hidden">
+    <div id="formTitle" style="text-align:center;font-size:14px;font-weight:700;color:#1e3c72;margin-bottom:15px;"></div>
+    <div id="formFields"></div>
+    <div id="formMsg" class="msg"></div>
+    <button id="formBtn" class="btn-main" onclick="doRecover()">تحقق</button>
+    <button class="btn-back" onclick="backToOptions()">← رجوع</button>
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/recovery.js"></script>
+</body>
+</html>
