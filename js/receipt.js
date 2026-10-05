@@ -61,11 +61,26 @@ function renderReceipt() {
     ? new Date(tx.time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
     : now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
-    stats.innerHTML =
-    '<div class="r-stat"><span class="lbl">📅</span><span class="val">' + dateStr + '</span></div>' +
-    '<div class="r-stat"><span class="lbl">🔢</span><span class="val">#' + (tx.id || '---') + '</span></div>' +
-    '<div class="r-stat"><span class="lbl">🕐</span><span class="val">' + timeStr + '</span></div>' +
-    '<div class="r-stat"><span class="lbl">👤</span><span class="val">' + escapeHtmlR(tx.username || '---') + '</span></div>';
+  stats.innerHTML =
+    '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f8f9ff;border-radius:10px;border:1px solid #e6ebff;box-sizing:border-box;overflow:hidden;">' +
+      '<span style="font-size:18px;line-height:1;flex-shrink:0;">📅</span>' +
+      '<span style="font-size:12px;font-weight:800;color:#1e3c72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + dateStr + '</span>' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f8f9ff;border-radius:10px;border:1px solid #e6ebff;box-sizing:border-box;overflow:hidden;">' +
+      '<span style="font-size:18px;line-height:1;flex-shrink:0;">🔢</span>' +
+      '<span style="font-size:12px;font-weight:800;color:#1e3c72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">#' + (tx.id || '---') + '</span>' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f8f9ff;border-radius:10px;border:1px solid #e6ebff;box-sizing:border-box;overflow:hidden;">' +
+      '<span style="font-size:18px;line-height:1;flex-shrink:0;">🕐</span>' +
+      '<span style="font-size:12px;font-weight:800;color:#1e3c72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + timeStr + '</span>' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f8f9ff;border-radius:10px;border:1px solid #e6ebff;box-sizing:border-box;overflow:hidden;">' +
+      '<span style="font-size:18px;line-height:1;flex-shrink:0;">👤</span>' +
+      '<span style="font-size:12px;font-weight:800;color:#1e3c72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtmlR(tx.username || '---') + '</span>' +
+    '</div>';
+
+  // إجبار التنسيق مباشرة (يتجاوز أي CSS مخزّن)
+  stats.style.cssText = 'display:grid !important;grid-template-columns:1fr 1fr !important;gap:8px !important;margin-bottom:14px !important;width:100% !important;box-sizing:border-box !important;';
 
   const desc = tx.description || tx.productName || 'خدمة';
   body.innerHTML = '<tr><td class="desc">' + escapeHtmlR(desc) + '</td><td class="amt">' + amount.toLocaleString('en-US') + '</td></tr>';
