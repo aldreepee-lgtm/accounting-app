@@ -168,16 +168,18 @@ async function doCloudLogin() {
     await put('settings', { key: 'syncEmail', value: email });
     await put('settings', { key: 'syncUserId', value: user.uid });
 
+    // تحويل المالك إلى عامل محلياً (هذا جهاز ثانوي)
+    // ملاحظة: لن نطلب من المستخدم الآن — سنعرض النموذج بعد التوجيه
+
     errEl.style.color = '#2e7d32';
-    errEl.textContent = '✅ تم تحميل ' + totalLoaded + ' سجلاً! سجّل دخولك الآن.';
+    errEl.textContent = '✅ تم تحميل ' + totalLoaded + ' سجلاً! جاري التحويل...';
+
+    // حفظ علامة "جهاز ثانوي"
+    await put('settings', { key: 'deviceIsSecondary', value: true });
 
     setTimeout(() => {
-      alert('✅ تم ربط حسابك السحابي بنجاح!\n\nعدد السجلات المحمّلة: ' + totalLoaded + '\n\nسجّل دخولك ببيانات المستخدم المحلية الآن.');
-      hideCloudLoginForm();
-      // نظّف النموذج العادي
-      document.getElementById('username').value = '';
-      document.getElementById('password').value = '';
-    }, 1000);
+      location.href = 'new-worker.html';
+    }, 800);
 
   } catch (e) {
     console.error(e);
@@ -195,3 +197,4 @@ async function doCloudLogin() {
     errEl.textContent = '❌ ' + msg;
   }
 }
+
