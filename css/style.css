@@ -426,3 +426,15 @@ body.report-page
 .r-stat{display:flex !important;flex-direction:row !important;align-items:center !important;gap:8px !important;padding:10px 12px !important;background:#f8f9ff !important;border-radius:10px !important;border:1px solid #e6ebff !important;box-shadow:0 2px 6px rgba(42,82,152,0.05) !important;}
 .r-stat .lbl{font-size:18px !important;color:#2a5298 !important;margin:0 !important;line-height:1 !important;flex-shrink:0;}
 .r-stat .val{font-size:12px !important;font-weight:800 !important;color:#1e3c72 !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ============ العلامة المائية ============ */
+
+
+@media print {
+  
+}
+
+/* === العلامة المائية === */
+#watermark{position:fixed !important;top:50% !important;left:50% !important;width:100vw !important;height:100vh !important;transform:translate(-50%,-50%) !important;display:flex !important;align-items:center !important;justify-content:center !important;pointer-events:none !important;z-index:9998 !important;margin:0 !important;padding:0 !important;overflow:hidden !important;background:transparent !important;}
+#watermark img{max-width:55vw !important;max-height:55vh !important;width:auto !important;height:auto !important;opacity:0.22 !important;transform:rotate(-22deg) !important;object-fit:contain !important;display:block !important;margin:0 !important;padding:0 !important;border:none !important;background:transparent !important;box-shadow:none !important;}
+@media print{#watermark{display:none !important;}}
