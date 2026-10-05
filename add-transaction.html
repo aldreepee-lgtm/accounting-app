@@ -123,6 +123,11 @@
   .tx-item .del-btn { background: #ffebee; color: #c62828; border: none; width: 32px; height: 32px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-right: 8px; }
 
   .empty-msg { text-align: center; color: #aaa; padding: 30px; font-size: 14px; }
+  .unit-tpl { padding:8px 12px; background:#f0f2f5; border:2px solid #e0e0e0; border-radius:20px; font-family:inherit; font-size:12px; font-weight:700; color:#555; cursor:pointer; transition:all 0.2s; }
+  .unit-tpl.active { background:#2a5298; color:#fff; border-color:#2a5298; }
+  .unit-def-row { display:grid; grid-template-columns:1fr 60px 1fr 30px; gap:6px; align-items:center; margin-bottom:6px; }
+  .unit-def-row input { padding:8px; border:2px solid #e0e0e0; border-radius:8px; font-size:12px; font-family:inherit; text-align:center; }
+  .unit-def-row .del { background:#ffebee; color:#c62828; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px; }
 </style>
 
 <!-- PWA -->
@@ -214,6 +219,27 @@
             <option value="مستلزمات طباعة">🖨️ مستلزمات طباعة</option>
             <option value="أخرى">📦 أخرى</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label>📐 نظام وحدات المنتج</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+            <button type="button" class="unit-tpl active" data-tpl="none" onclick="selectUnitTemplate('none')">📦 قطعة فقط</button>
+            <button type="button" class="unit-tpl" data-tpl="pen" onclick="selectUnitTemplate('pen')">🖊️ قلم/علبة/كرتون</button>
+            <button type="button" class="unit-tpl" data-tpl="paper" onclick="selectUnitTemplate('paper')">📄 ورقة/رزمة/عصب</button>
+            <button type="button" class="unit-tpl" data-tpl="custom" onclick="selectUnitTemplate('custom')">⚙️ مخصص</button>
+          </div>
+        </div>
+
+        <div id="unitDefArea" style="display:none;background:#f8f9ff;border:1px solid #e6ebff;border-radius:10px;padding:12px;margin-bottom:12px;">
+          <div style="font-size:12px;color:#555;margin-bottom:8px;font-weight:600;">📋 وحدات المنتج:</div>
+          <div id="unitDefs"></div>
+          <button type="button" onclick="addUnitDef()" style="width:100%;padding:8px;background:#e3f2fd;color:#1565c0;border:2px dashed #90caf9;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px;">➕ إضافة وحدة</button>
+        </div>
+
+        <div class="form-group" id="purchaseUnitGroup" style="display:none;">
+          <label>🛒 وحدة الشراء</label>
+          <select id="purchaseUnit"></select>
         </div>
 
         <div class="form-group">
@@ -310,6 +336,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/sync.js"></script>
+<script src="js/units.js"></script>
 <script src="js/db.js"></script>
 <script src="js/auto-backup.js"></script>
 <script src="js/add-transaction.js"></script>

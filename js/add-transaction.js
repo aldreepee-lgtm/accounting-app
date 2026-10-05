@@ -132,11 +132,19 @@ async function handleSave(e) {
       if (!pname || qty < 1 || unitPrice < 1) { msg.textContent = 'أكمل بيانات المنتج'; msg.className = 'msg-box err'; return; }
       const sellPrice = parseInt(document.getElementById('sellPrice').value) || 0;
       const category = document.getElementById('productCategory').value.trim();
+      const units = typeof getCurrentUnits === 'function' ? getCurrentUnits() : { base: 'قطعة', units: [] };
+      const purchaseUnitFactor = parseInt(document.getElementById('purchaseUnit').value) || 1;
+      const purchaseUnitName = document.getElementById('purchaseUnit').options[document.getElementById('purchaseUnit').selectedIndex].textContent.split(' (')[0];
       tx.productName = pname;
-      tx.quantity = qty;
-      tx.unitPrice = unitPrice;
+      tx.quantity = qty * purchaseUnitFactor;
+      tx.displayQty = qty;
+      tx.displayUnit = purchaseUnitName;
+      tx.unitPrice = Math.round(unitPrice / purchaseUnitFactor);
+      tx.purchasePriceTotal = unitPrice;
       tx.sellPrice = sellPrice;
       tx.productCategory = category || '';
+      tx.baseUnit = units.base;
+      tx.units = units.units;
       tx.amount = qty * unitPrice;
       tx.description = `${pname} × ${qty}`;
       tx.note = document.getElementById('purchaseNote').value.trim();
@@ -210,6 +218,8 @@ async function updateInventoryOnPurchase(tx) {
     if (tx.productCategory) {
       product.category = tx.productCategory;
     }
+    if (tx.baseUnit) product.baseUnit = tx.baseUnit;
+    if (tx.units) product.units = tx.units;
     product.updatedAt = new Date().toISOString();
     await put('inventory', product);
   } else {
@@ -219,6 +229,8 @@ async function updateInventoryOnPurchase(tx) {
       lastPurchasePrice: tx.unitPrice,
       sellPrice: tx.sellPrice || 0,
       category: tx.productCategory || '',
+      baseUnit: tx.baseUnit || 'قطعة',
+      units: tx.units || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

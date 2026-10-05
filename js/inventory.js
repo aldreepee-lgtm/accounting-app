@@ -82,10 +82,13 @@ function renderProducts(filter) {
     const div = document.createElement('div');
     div.className = 'inv-item';
     const categoryBadge = p.category ? '<span style="background:#e3f2fd;color:#1565c0;font-size:10px;padding:2px 8px;border-radius:10px;margin-right:6px;">' + escapeHtml(p.category) + '</span>' : '';
+    const unitsList = (p.units && p.units.length) ? p.units.map(function(u) { return u.name + '=' + u.factor; }).join(' · ') : '';
+    const unitsBadge = unitsList ? '<div style="font-size:10px;color:#6a1b9a;margin-top:3px;">📐 ' + unitsList + '</div>' : '';
     div.innerHTML = `
       <div class="info">
         <div class="name">${categoryBadge}${escapeHtml(p.name)}</div>
         <div class="meta">${priceLine}</div>
+        ${unitsBadge}
       </div>
       <div class="qty ${qtyClass}">${qty}</div>
     `;
