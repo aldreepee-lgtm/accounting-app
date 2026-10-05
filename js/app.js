@@ -99,7 +99,7 @@ function comingSoon(moduleName) {
   if (moduleName === 'النسخ الاحتياطي') { window.location.href = 'backup.html'; return; }
 
   if (map[moduleName]) {
-    window.location.href = 'add-transaction.html?type=' + map[moduleName];
+    window.location.href = 'add-tx.html?type=' + map[moduleName];
     return;
   }
 
