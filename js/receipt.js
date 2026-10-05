@@ -49,10 +49,10 @@ function renderReceipt() {
 
   if (!receiptData) {
     meta.innerHTML =
-    '<div class="r-stat"><div class="lbl">📅 التاريخ</div><div class="val">' + dateStr + '</div></div>' +
-    '<div class="r-stat"><div class="lbl">🕐 الوقت</div><div class="val">' + timeStr + '</div></div>' +
-    '<div class="r-stat"><div class="lbl">🔢 الإيصال</div><div class="val">#' + (tx.id || '---') + '</div></div>' +
-    '<div class="r-stat"><div class="lbl">👤 الكاشير</div><div class="val">' + escR(tx.username || '---') + '</div></div>';
+    '<div class="r-stat"><div class="lbl">📅</div><div class="val">' + dateStr + '</div></div>' +
+    '<div class="r-stat"><div class="lbl">🕐</div><div class="val">' + timeStr + '</div></div>' +
+    '<div class="r-stat"><div class="lbl">🔢</div><div class="val">#' + (tx.id || '---') + '</div></div>' +
+    '<div class="r-stat"><div class="lbl">👤</div><div class="val">' + escR(tx.username || '---') + '</div></div>';
     body.innerHTML = '';
     return;
   }
@@ -94,54 +94,6 @@ function printA4() {
 }
 
 // ===== مشاركة كصورة =====
-async function shareAsImage() {
-  const box = document.getElementById('receiptBox');
-  const actions = document.querySelector('.actions');
-  const backBtn = document.querySelector('.back-btn');
-  const pageTitle = document.querySelector('.page-title');
-
-  actions.style.display = 'none';
-  if (backBtn) backBtn.style.display = 'none';
-  if (pageTitle) pageTitle.style.display = 'none';
-
-  try {
-    const canvas = await html2canvas(box, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      useCORS: true,
-      logging: false
-    });
-
-    actions.style.display = '';
-    if (backBtn) backBtn.style.display = '';
-    if (pageTitle) pageTitle.style.display = '';
-
-    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-    const file = new File([blob], 'receipt-' + Date.now() + '.png', { type: 'image/png' });
-
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: 'إيصال',
-        text: 'إيصال من ' + document.getElementById('rOfficeName').textContent
-      });
-    } else {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'receipt-' + Date.now() + '.png';
-      a.click();
-      URL.revokeObjectURL(url);
-      alert('✅ تم تنزيل الصورة');
-    }
-  } catch(e) {
-    console.error(e);
-    actions.style.display = '';
-    if (backBtn) backBtn.style.display = '';
-    if (pageTitle) pageTitle.style.display = '';
-    alert('⚠️ فشل: ' + e.message);
-  }
-}
 
 function escapeHtmlR(t) {
   const d = document.createElement('div');
@@ -150,8 +102,99 @@ function escapeHtmlR(t) {
 }
 
 // ===== دالة مساعدة =====
+
+// ===== تحويل SVG إلى PNG =====
+function svgToPng(svgSrc, w, h) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(w, 200);
+        canvas.height = Math.max(h, 200);
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+      } catch(e) { reject(e); }
+    };
+    img.onerror = reject;
+    img.src = svgSrc;
+  });
+}
+
 function escR(t) {
   const d = document.createElement('div');
   d.textContent = t || '';
   return d.innerHTML;
+}
+
+async function shareAsImage() {
+  const box = document.getElementById('receiptBox');
+  const actions = document.querySelector('.actions');
+  const backBtn = document.querySelector('.back-btn');
+  const pageTitle = document.querySelector('.page-title');
+  actions.style.display = 'none';
+  if (backBtn) backBtn.style.display = 'none';
+  if (pageTitle) pageTitle.style.display = 'none';
+  try {
+    const imgs = box.querySelectorAll('img');
+    await Promise.all(Array.from(imgs).map(function(img) {
+      if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+      return new Promise(function(resolve) {
+        img.onload = resolve;
+        img.onerror = resolve;
+        setTimeout(resolve, 3000);
+      });
+    }));
+    const originalSrcs = [];
+    for (const img of imgs) {
+      const src = img.getAttribute('src') || '';
+      if (src.endsWith('.svg') || src.startsWith('data:image/svg')) {
+        try {
+          const png = await svgToPng(src, 300, 300);
+          originalSrcs.push({ img: img, src: src });
+          img.src = png;
+          await new Promise(function(r) {
+            img.onload = r;
+            img.onerror = r;
+            setTimeout(r, 2000);
+          });
+        } catch(err) { console.warn('SVG failed:', err); }
+      }
+    }
+    const canvas = await html2canvas(box, {
+      scale: 3,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      allowTaint: true,
+      imageTimeout: 0,
+      logging: false
+    });
+    originalSrcs.forEach(function(o) { o.img.src = o.src; });
+    actions.style.display = '';
+    if (backBtn) backBtn.style.display = '';
+    if (pageTitle) pageTitle.style.display = '';
+    const blob = await new Promise(function(r) { canvas.toBlob(r, 'image/png'); });
+    const file = new File([blob], 'receipt-' + Date.now() + '.png', { type: 'image/png' });
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'receipt', text: 'receipt' });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'receipt-' + Date.now() + '.png';
+      a.click();
+      URL.revokeObjectURL(url);
+      alert('Done');
+    }
+  } catch(e) {
+    console.error(e);
+    actions.style.display = '';
+    if (backBtn) backBtn.style.display = '';
+    if (pageTitle) pageTitle.style.display = '';
+    alert('Error: ' + e.message);
+  }
 }
