@@ -29,10 +29,9 @@ function selectUnitTemplate(tpl) {
   const template = UNIT_TEMPLATES[tpl];
 
   defs.innerHTML = '';
-  // الصف الأساسي
   const baseRow = document.createElement('div');
-  baseRow.className = 'unit-def-row';
-  baseRow.innerHTML = '<input type="text" class="unit-base" value="' + template.base + '" placeholder="الوحدة الأساسية" readonly style="background:#e8f5e9;color:#2e7d32;font-weight:700;"><span style="text-align:center;color:#888;">الأساس</span><span></span><span></span>';
+  baseRow.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:8px;background:#e8f5e9;padding:8px 10px;border-radius:8px;';
+  baseRow.innerHTML = '<span style="flex:1;text-align:right;font-size:13px;font-weight:700;color:#2e7d32;">' + template.base + '</span><span style="font-size:11px;color:#666;flex-shrink:0;">الوحدة الأساسية</span>';
   defs.appendChild(baseRow);
 
   template.units.forEach(function(u) {
@@ -47,11 +46,42 @@ function addUnitDef(name, factor) {
   const defs = document.getElementById('unitDefs');
   const row = document.createElement('div');
   row.className = 'unit-def-row';
-  row.innerHTML = '<input type="text" class="unit-name" value="' + (name || '') + '" placeholder="اسم الوحدة"><span style="text-align:center;font-size:11px;color:#666;">=</span><input type="number" class="unit-factor" value="' + (factor || 1) + '" min="1" step="1" placeholder="عدد"><button type="button" class="del" onclick="this.parentElement.remove(); updatePurchaseUnitOptions();">×</button>';
+  row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px;background:#f8f9ff;padding:6px 8px;border-radius:8px;border:1px solid #e6ebff;';
+  
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.className = 'unit-name';
+  nameInput.value = name || '';
+  nameInput.placeholder = 'اسم الوحدة';
+  nameInput.style.cssText = 'flex:1;min-width:0;padding:8px 10px;border:2px solid #e0e0e0;border-radius:8px;font-size:12px;font-family:inherit;text-align:right;box-sizing:border-box;background:#fff;';
+  
+  const eqSpan = document.createElement('span');
+  eqSpan.textContent = '=';
+  eqSpan.style.cssText = 'font-size:14px;font-weight:700;color:#888;flex-shrink:0;';
+  
+  const factorInput = document.createElement('input');
+  factorInput.type = 'number';
+  factorInput.className = 'unit-factor';
+  factorInput.value = factor || 1;
+  factorInput.min = '1';
+  factorInput.step = '1';
+  factorInput.placeholder = 'عدد';
+  factorInput.style.cssText = 'width:60px;padding:8px 4px;border:2px solid #e0e0e0;border-radius:8px;font-size:12px;font-family:inherit;text-align:center;box-sizing:border-box;background:#fff;flex-shrink:0;';
+  
+  const delBtn = document.createElement('button');
+  delBtn.type = 'button';
+  delBtn.textContent = '×';
+  delBtn.style.cssText = 'background:#ffebee;color:#c62828;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;padding:0;flex-shrink:0;line-height:1;';
+  delBtn.onclick = function() { row.remove(); updatePurchaseUnitOptions(); };
+  
+  row.appendChild(nameInput);
+  row.appendChild(eqSpan);
+  row.appendChild(factorInput);
+  row.appendChild(delBtn);
   defs.appendChild(row);
-
-  row.querySelector('.unit-name').addEventListener('input', updatePurchaseUnitOptions);
-  row.querySelector('.unit-factor').addEventListener('input', updatePurchaseUnitOptions);
+  
+  nameInput.addEventListener('input', updatePurchaseUnitOptions);
+  factorInput.addEventListener('input', updatePurchaseUnitOptions);
 }
 
 function updatePurchaseUnitOptions() {
