@@ -44,7 +44,7 @@ async function loadReceiptData() {
 
 function renderReceipt() {
   const body = document.getElementById('rBody');
-  const meta = document.getElementById('rMeta');
+  const meta = document.getElementById('rStats');
   const total = document.getElementById('rTotal');
 
   if (!receiptData) {

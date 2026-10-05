@@ -360,3 +360,78 @@ body.report-page
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ============ الترويسة المشتركة ============ */
+.office-header, .r-header {
+  display: grid !important;
+  grid-template-columns: 50px 1fr 110px !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  background: #fff !important;
+  border-radius: 12px !important;
+  border-bottom: 3px solid #2a5298 !important;
+  margin-bottom: 12px !important;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05) !important;
+  min-height: 58px !important;
+  direction: rtl !important;
+}
+.office-header-logo, .logo-wrap {
+  grid-column: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.office-header-logo img, .logo-wrap img, .r-header img {
+  width: 46px !important;
+  height: 46px !important;
+  max-width: 46px !important;
+  max-height: 46px !important;
+  object-fit: contain !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  padding: 2px !important;
+  border: 1px solid #eee !important;
+  display: block !important;
+}
+.logo-wrap .placeholder, .office-header-logo .placeholder {
+  width: 46px !important;
+  height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 26px !important;
+  background: #f0f2f5 !important;
+  border-radius: 8px !important;
+}
+.office-header-center, .header-info {
+  grid-column: 2 !important;
+  text-align: center !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+.office-header-center h1, .header-info h1, .r-header h1 {
+  font-size: 15px !important;
+  color: #1e3c72 !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.office-header-left, .r-header .contact {
+  grid-column: 3 !important;
+  text-align: right !important;
+  font-size: 10px !important;
+  line-height: 1.5 !important;
+  color: #444 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  direction: rtl !important;
+}
+.office-header-left div, .r-header .contact div {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
