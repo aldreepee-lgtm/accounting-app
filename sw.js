@@ -10,6 +10,7 @@ const ASSETS = [
   './change-credentials.html',
   './add-transaction.html',
   './add-tx.html',
+  './purchases.html',
   './close-day.html',
   './inventory.html',
   './reports.html',

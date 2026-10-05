@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سجل المشتريات</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background:#f0f2f5; display:block; padding:0; min-height:100vh; }
+  .topbar { background:linear-gradient(135deg,#1e3c72,#2a5298); color:#fff; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+  .topbar h1 { font-size:18px; }
+  .topbar button { background:rgba(255,255,255,0.15); border:none; color:#fff; padding:7px 14px; border-radius:6px; cursor:pointer; font-size:13px; font-family:inherit; }
+  .container { max-width:800px; margin:0 auto; padding:15px; }
+  
+  .stats-box { background:#fff; border-radius:12px; padding:14px; margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+  .stat-item { text-align:center; padding:8px; }
+  .stat-item .lbl { font-size:11px; color:#888; margin-bottom:4px; }
+  .stat-item .val { font-size:16px; font-weight:800; color:#2a5298; }
+  .stat-item.count .val { color:#6a1b9a; }
+  
+  .filter-bar { background:#fff; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+  .filter-bar input { width:100%; padding:11px 13px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; font-family:inherit; margin-bottom:8px; box-sizing:border-box; }
+  .filter-bar input:focus { outline:none; border-color:#2a5298; }
+  .filter-row { display:flex; gap:8px; }
+  .filter-row input { margin-bottom:0; }
+  .filter-row button { padding:11px 16px; background:#2a5298; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  
+  .purchase-item { background:#fff; border-radius:12px; padding:14px 16px; margin-bottom:10px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-right:4px solid #ff9800; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .purchase-item .info { flex:1; min-width:0; }
+  .purchase-item .name { font-size:14px; font-weight:700; color:#333; margin-bottom:4px; word-wrap:break-word; }
+  .purchase-item .meta { font-size:12px; color:#888; line-height:1.7; }
+  .purchase-item .meta b { color:#2a5298; }
+  .purchase-item .amount { font-size:15px; font-weight:800; color:#c62828; white-space:nowrap; }
+  .purchase-item .del-btn { background:#ffebee; color:#c62828; border:none; width:34px; height:34px; border-radius:8px; font-size:16px; cursor:pointer; flex-shrink:0; }
+  
+  .empty-msg { background:#fff; border-radius:12px; padding:40px 20px; text-align:center; color:#aaa; font-size:14px; }
+  .dev-footer { text-align:center; color:#999; font-size:11px; padding:20px 10px; line-height:1.7; }
+  .dev-footer b { color:#2a5298; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📦 سجل المشتريات</h1>
+  <button onclick="location.href='app.html'">← رجوع</button>
+</div>
+
+<div class="container">
+
+  <div class="stats-box">
+    <div class="stat-item count">
+      <div class="lbl">عدد المشتريات</div>
+      <div class="val" id="statCount">0</div>
+    </div>
+    <div class="stat-item">
+      <div class="lbl">إجمالي المبلغ</div>
+      <div class="val" id="statTotal">0</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج أو مورد...">
+    <div class="filter-row">
+      <input type="date" id="dateFrom">
+      <input type="date" id="dateTo">
+      <button onclick="resetFilter()">🔄</button>
+    </div>
+  </div>
+
+  <div id="purchasesList"></div>
+
+</div>
+
+<div class="dev-footer">
+  💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>
+  📞 778983131<br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/purchases.js"></script>
+</body>
+</html>
