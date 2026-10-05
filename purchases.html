@@ -21,9 +21,31 @@
   .filter-bar { background:#fff; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
   .filter-bar input { width:100%; padding:11px 13px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; font-family:inherit; margin-bottom:8px; box-sizing:border-box; }
   .filter-bar input:focus { outline:none; border-color:#2a5298; }
-  .filter-row { display:flex; gap:8px; }
-  .filter-row input { margin-bottom:0; }
-  .filter-row button { padding:11px 16px; background:#2a5298; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .filter-row { display:flex; gap:8px; align-items:stretch; }
+  .filter-row input { margin-bottom:0; flex:1; min-width:0; height:44px; padding:0 12px; line-height:44px; }
+  .filter-row button { padding:0 14px; background:#2a5298; color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; font-family:inherit; white-space:nowrap; height:44px; display:flex; align-items:center; justify-content:center; }
+
+  /* ضبط تاريخ الـ input */
+  input[type="date"] {
+    text-align:right;
+    font-family:inherit;
+    direction:rtl;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-left:8px;
+    cursor:pointer;
+  }
+  input[type="date"]::-webkit-datetime-edit {
+    text-align:right;
+    direction:rtl;
+  }
+  input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    direction:rtl;
+  }
+  input[type="date"]::-webkit-datetime-edit-text {
+    color:#888;
+    padding:0 2px;
+  }
   
   .purchase-item { background:#fff; border-radius:12px; padding:14px 16px; margin-bottom:10px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-right:4px solid #ff9800; display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .purchase-item .info { flex:1; min-width:0; }
@@ -79,5 +101,6 @@
 
 <script src="js/db.js"></script>
 <script src="js/purchases.js"></script>
+<script src="js/branding.js"></script>
 </body>
 </html>
