@@ -173,24 +173,35 @@ async function saveStocktake() {
 
   const oldQty = parseInt(currentStocktakeProduct.quantity) || 0;
   const diff = newQty - oldQty;
+  const oldAlert = parseInt(currentStocktakeProduct.alertThreshold) || 0;
+  const newAlert = alertVal !== '' ? (parseInt(alertVal) || 0) : 0;
+  const alertChanged = oldAlert !== newAlert;
 
-  if (diff === 0) {
+  // إذا لم يتغير شيء
+  if (diff === 0 && !alertChanged) {
     msg.style.color = '#2a5298';
-    msg.textContent = 'لا يوجد فرق — الكمية مطابقة';
+    msg.textContent = 'لا يوجد تغيير';
     return;
   }
 
   try {
-    // 1) حدّث كمية المنتج
+    // 1) حدّث كمية المنتج وحد التنبيه
     currentStocktakeProduct.quantity = newQty;
-    if (alertVal !== '') {
-      currentStocktakeProduct.alertThreshold = parseInt(alertVal) || 0;
-    } else {
-      currentStocktakeProduct.alertThreshold = 0;
-    }
+    currentStocktakeProduct.alertThreshold = newAlert;
     currentStocktakeProduct.lastStocktake = new Date().toISOString();
     currentStocktakeProduct.updatedAt = new Date().toISOString();
     await put('inventory', currentStocktakeProduct);
+
+    // إذا لا يوجد فرق في الكمية، لا نسجّل حركة — فقط تحديث التنبيه
+    if (diff === 0) {
+      msg.style.color = '#2e7d32';
+      msg.textContent = '✅ تم تحديث حد التنبيه';
+      setTimeout(async () => {
+        closeStocktake();
+        await loadInventory();
+      }, 1000);
+      return;
+    }
 
     // 2) سجّل حركة الجرد
     const today = new Date();
