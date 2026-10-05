@@ -90,7 +90,7 @@ function renderProducts(filter) {
         <div class="meta">${priceLine}</div>
         ${unitsBadge}
       </div>
-      <div class="qty ${qtyClass}">${qty}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:center;"><div class="qty ${qtyClass}">${qty}</div><button onclick="openStocktake(${p.id})" style="background:#e3f2fd;color:#1565c0;border:none;padding:5px 10px;border-radius:6px;font-family:inherit;font-size:10px;font-weight:700;cursor:pointer;">📊 جرد</button></div>
     `;
     list.appendChild(div);
   });
@@ -128,4 +128,95 @@ function setCategoryFilter(cat) {
   const sv = si ? si.value.trim().toLowerCase() : '';
   renderProducts(sv);
   renderCategoryFilters();
+}
+
+// ===== الجرد الفعلي =====
+let currentStocktakeProduct = null;
+
+async function openStocktake(productId) {
+  const p = await get('inventory', productId);
+  if (!p) { alert('المنتج غير موجود'); return; }
+  currentStocktakeProduct = p;
+
+  const q = parseInt(p.quantity) || 0;
+  const u = p.baseUnit || 'قطعة';
+
+  document.getElementById('stocktakeInfo').innerHTML =
+    '<div>📦 <b>' + escapeHtml(p.name) + '</b></div>' +
+    '<div>الكمية في النظام: <b style="color:#1565c0;">' + q + ' ' + u + '</b></div>';
+
+  document.getElementById('stocktakeQty').value = q;
+  document.getElementById('stocktakeReason').value = '';
+  document.getElementById('stocktakeMsg').textContent = '';
+  document.getElementById('stocktakeModal').style.display = 'flex';
+}
+
+function closeStocktake() {
+  document.getElementById('stocktakeModal').style.display = 'none';
+  currentStocktakeProduct = null;
+}
+
+async function saveStocktake() {
+  const msg = document.getElementById('stocktakeMsg');
+  if (!currentStocktakeProduct) return;
+
+  const newQty = parseInt(document.getElementById('stocktakeQty').value);
+  const reason = document.getElementById('stocktakeReason').value.trim() || 'جرد فعلي';
+
+  if (isNaN(newQty) || newQty < 0) {
+    msg.style.color = '#c62828';
+    msg.textContent = 'أدخل كمية صحيحة';
+    return;
+  }
+
+  const oldQty = parseInt(currentStocktakeProduct.quantity) || 0;
+  const diff = newQty - oldQty;
+
+  if (diff === 0) {
+    msg.style.color = '#2a5298';
+    msg.textContent = 'لا يوجد فرق — الكمية مطابقة';
+    return;
+  }
+
+  try {
+    // 1) حدّث كمية المنتج
+    currentStocktakeProduct.quantity = newQty;
+    currentStocktakeProduct.lastStocktake = new Date().toISOString();
+    currentStocktakeProduct.updatedAt = new Date().toISOString();
+    await put('inventory', currentStocktakeProduct);
+
+    // 2) سجّل حركة الجرد
+    const today = new Date();
+    const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+
+    const tx = {
+      type: 'stocktake',
+      amount: 0,
+      date: dateStr,
+      time: today.toISOString(),
+      productId: currentStocktakeProduct.id,
+      productName: currentStocktakeProduct.name,
+      oldQty: oldQty,
+      newQty: newQty,
+      diff: diff,
+      reason: reason,
+      description: 'جرد: ' + currentStocktakeProduct.name + ' (' + oldQty + ' → ' + newQty + ')',
+      username: 'system',
+      role: 'system'
+    };
+    await add('transactions', tx);
+
+    msg.style.color = '#2e7d32';
+    msg.textContent = '✅ تم الحفظ! الفرق: ' + (diff > 0 ? '+' : '') + diff;
+
+    setTimeout(async () => {
+      closeStocktake();
+      await loadInventory();
+    }, 1200);
+
+  } catch(e) {
+    console.error(e);
+    msg.style.color = '#c62828';
+    msg.textContent = 'خطأ: ' + e.message;
+  }
 }

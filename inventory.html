@@ -170,5 +170,25 @@
   }
 </script>
 <script src="js/branding.js"></script>
+<div id="stocktakeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;align-items:center;justify-content:center;padding:15px;">
+  <div style="background:#fff;border-radius:16px;padding:22px 18px;max-width:400px;width:100%;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+      <h2 style="font-size:17px;color:#1e3c72;">📊 الجرد الفعلي</h2>
+      <button onclick="closeStocktake()" style="background:#ffebee;color:#c62828;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>
+    </div>
+    <div id="stocktakeInfo" style="background:#f8f9ff;border-radius:10px;padding:12px;margin-bottom:15px;font-size:13px;line-height:1.9;"></div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#333;">📦 الكمية الفعلية</label>
+      <input type="number" id="stocktakeQty" min="0" step="1" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:9px;font-size:15px;text-align:center;font-weight:700;font-family:inherit;">
+    </div>
+    <div style="margin-bottom:15px;">
+      <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#333;">📝 سبب التعديل</label>
+      <input type="text" id="stocktakeReason" placeholder="جرد شهري، فقدان، خطأ إدخال" style="width:100%;padding:11px;border:2px solid #e0e0e0;border-radius:9px;font-size:13px;font-family:inherit;">
+    </div>
+    <div id="stocktakeMsg" style="text-align:center;font-size:13px;font-weight:600;min-height:20px;margin-bottom:10px;"></div>
+    <button onclick="saveStocktake()" style="width:100%;padding:14px;background:linear-gradient(135deg,#11998e,#38ef7d);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">💾 حفظ الجرد</button>
+  </div>
+</div>
+
 </body>
 </html>
