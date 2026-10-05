@@ -270,3 +270,68 @@ body.report-page
 /* ===== العلامة المائية ===== */
 #watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:9999;}
 #watermark img{max-width:55vw;max-height:55vh;opacity:0.22;transform:rotate(-22deg);object-fit:contain;}
+
+/* ===== تصحيح ترويسة الكشوفات ===== */
+.office-header {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important;
+  padding: 8px 14px !important;
+  border-radius: 10px !important;
+  margin-bottom: 12px !important;
+  gap: 12px !important;
+  flex-wrap: nowrap !important;
+}
+.office-header-logo img {
+  width: 45px !important;
+  height: 45px !important;
+}
+.office-header-logo .placeholder {
+  width: 45px !important;
+  height: 45px !important;
+  font-size: 26px !important;
+}
+.office-header-center {
+  text-align: center !important;
+  min-width: 0 !important;
+}
+.office-header-center h1 {
+  font-size: 16px !important;
+  margin: 0 !important;
+}
+.office-header-left {
+  text-align: left !important;
+  font-size: 10.5px !important;
+  line-height: 1.5 !important;
+  color: #555 !important;
+}
+
+/* ===== تصحيح رأس الإيصال ===== */
+.r-header {
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  gap: 10px !important;
+  align-items: center !important;
+  padding-bottom: 10px !important;
+  margin-bottom: 12px !important;
+  border-bottom: 2px dashed #d0d0d0 !important;
+}
+.r-header .logo-wrap {
+  grid-column: 1 !important;
+}
+.r-header img {
+  width: 50px !important;
+  height: 50px !important;
+}
+.r-header .header-info {
+  grid-column: 2 !important;
+  text-align: right !important;
+}
+.r-header h1 {
+  font-size: 15px !important;
+  margin-bottom: 2px !important;
+}
+.r-header .contact {
+  font-size: 10px !important;
+  line-height: 1.5 !important;
+}
