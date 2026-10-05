@@ -63,10 +63,10 @@ function renderReceipt() {
     : now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
   meta.innerHTML =
-    '<div class="row"><span>📅 التاريخ:</span><span>' + dateStr + '</span></div>' +
-    '<div class="row"><span>🕐 الوقت:</span><span>' + timeStr + '</span></div>' +
-    '<div class="row"><span>🔢 رقم الإيصال:</span><span>#' + (tx.id || '---') + '</span></div>' +
-    (tx.username ? '<div class="row"><span>👤 الكاشير:</span><span>' + escapeHtmlR(tx.username) + '</span></div>' : '');
+    '<div class="cell"><span class="lbl">📅 التاريخ</span><span class="val">' + dateStr + '</span></div>' +
+    '<div class="cell"><span class="lbl">🕐 الوقت</span><span class="val">' + timeStr + '</span></div>' +
+    '<div class="cell"><span class="lbl">🔢 رقم الإيصال</span><span class="val">#' + (tx.id || '---') + '</span></div>' +
+    '<div class="cell"><span class="lbl">👤 الكاشير</span><span class="val">' + escapeHtmlR(tx.username || '---') + '</span></div>';
 
   const desc = tx.description || tx.productName || 'خدمة';
   body.innerHTML = '<tr><td class="desc">' + escapeHtmlR(desc) + '</td><td class="amt">' + amount.toLocaleString('en-US') + '</td></tr>';

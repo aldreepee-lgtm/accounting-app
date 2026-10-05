@@ -66,11 +66,11 @@ async function renderUsersList() {
     } else if (isOwner) {
       actionBtn = '<span style="color:#999;font-size:12px;padding:6px 10px;">—</span>';
     } else {
-      if (locked) {
-        actionBtn = '<button onclick="toggleLock(' + u.id + ', false)" style="background:#e8f5e9;color:#2e7d32;border:none;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">🔓 فتح</button>';
-      } else {
-        actionBtn = '<button onclick="toggleLock(' + u.id + ', true)" style="background:#ffebee;color:#c62828;border:none;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">🔒 قفل</button>';
-      }
+      var lockBtn = locked
+        ? '<button onclick="toggleLock(' + u.id + ', false)" style="background:#e8f5e9;color:#2e7d32;border:none;padding:7px 11px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">🔓</button>'
+        : '<button onclick="toggleLock(' + u.id + ', true)" style="background:#ffebee;color:#c62828;border:none;padding:7px 11px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">🔒</button>';
+      var permBtn = '<button onclick="openPermissions(' + u.id + ')" style="background:#e3f2fd;color:#1565c0;border:none;padding:7px 11px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-right:5px;">🔑</button>';
+      actionBtn = '<div style="display:flex;gap:5px;">' + permBtn + lockBtn + '</div>';
     }
 
     html += `
@@ -115,4 +115,109 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text || '';
   return div.innerHTML;
+}
+
+// ===== نافذة الصلاحيات =====
+const PERM_LABELS = {
+  addTx: { icon: '➕', label: 'إضافة حركات (إيراد/مصروف/مشتري)' },
+  deleteTx: { icon: '🗑', label: 'حذف الحركات' },
+  viewInventory: { icon: '📦', label: 'رؤية المخزون' },
+  editInventory: { icon: '🛒', label: 'تسجيل مشتريات (تعديل المخزون)' },
+  viewReports: { icon: '📊', label: 'رؤية التقارير' },
+  viewProfit: { icon: '💰', label: 'رؤية الأرباح' },
+  viewWithdrawals: { icon: '💼', label: 'رؤية المسحوبات' },
+  closeDay: { icon: '🔒', label: 'إغلاق اليوم' },
+  backup: { icon: '💾', label: 'النسخ الاحتياطي' },
+  editSettings: { icon: '⚙️', label: 'تعديل الإعدادات' }
+};
+
+const PERM_PRESETS = {
+  worker: { name: '👷 عامل عادي', perms: { addTx:true, deleteTx:false, viewInventory:true, editInventory:true, viewReports:false, viewProfit:false, viewWithdrawals:false, closeDay:false, backup:false, editSettings:false } },
+  accountant: { name: '💼 محاسب', perms: { addTx:true, deleteTx:true, viewInventory:true, editInventory:true, viewReports:true, viewProfit:true, viewWithdrawals:false, closeDay:true, backup:false, editSettings:false } },
+  manager: { name: '👔 مدير فرع', perms: { addTx:true, deleteTx:true, viewInventory:true, editInventory:true, viewReports:true, viewProfit:true, viewWithdrawals:true, closeDay:true, backup:true, editSettings:false } }
+};
+
+async function openPermissions(userId) {
+  const user = await get('users', userId);
+  if (!user) { alert('المستخدم غير موجود'); return; }
+  if (user.role === 'owner') { alert('لا يمكن تعديل صلاحيات المالك'); return; }
+
+  const perms = user.permissions || PERM_PRESETS.worker.perms;
+
+  let html = '';
+  // القوالب الجاهزة
+  html += '<div style="display:flex;gap:6px;margin-bottom:15px;flex-wrap:wrap;">';
+  for (const key in PERM_PRESETS) {
+    html += '<button type="button" onclick="applyPermPreset(\'' + key + '\')" style="flex:1;min-width:100px;padding:9px;background:#f0f2f5;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">' + PERM_PRESETS[key].name + '</button>';
+  }
+  html += '</div>';
+
+  // الصلاحيات
+  html += '<div id="permList">';
+  for (const key in PERM_LABELS) {
+    const p = PERM_LABELS[key];
+    const checked = perms[key] ? 'checked' : '';
+    html += '<label style="display:flex;align-items:center;gap:10px;padding:10px;margin-bottom:6px;background:#f9f9f9;border-radius:8px;cursor:pointer;">';
+    html += '<input type="checkbox" id="perm_' + key + '" ' + checked + ' style="width:20px;height:20px;cursor:pointer;">';
+    html += '<span style="font-size:18px;">' + p.icon + '</span>';
+    html += '<span style="flex:1;font-size:13px;color:#333;">' + p.label + '</span>';
+    html += '</label>';
+  }
+  html += '</div>';
+
+  // Modal
+  const modal = document.createElement('div');
+  modal.id = 'permModal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:15px;overflow-y:auto;';
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:16px;padding:22px 18px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">' +
+        '<h2 style="font-size:17px;color:#1e3c72;">🔑 صلاحيات: ' + escapeHtml(user.username) + '</h2>' +
+        '<button onclick="closePermissions()" style="background:#ffebee;color:#c62828;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>' +
+      '</div>' +
+      html +
+      '<div style="display:flex;gap:8px;margin-top:18px;">' +
+        '<button onclick="closePermissions()" style="flex:1;padding:12px;background:#e0e0e0;color:#333;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">إلغاء</button>' +
+        '<button onclick="savePermissions(' + userId + ')" style="flex:2;padding:12px;background:linear-gradient(135deg,#11998e,#38ef7d);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">💾 حفظ الصلاحيات</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(modal);
+}
+
+function applyPermPreset(presetKey) {
+  const preset = PERM_PRESETS[presetKey];
+  if (!preset) return;
+  for (const key in PERM_LABELS) {
+    const el = document.getElementById('perm_' + key);
+    if (el) el.checked = !!preset.perms[key];
+  }
+}
+
+function closePermissions() {
+  const m = document.getElementById('permModal');
+  if (m) m.remove();
+}
+
+async function savePermissions(userId) {
+  try {
+    const user = await get('users', userId);
+    if (!user) { alert('المستخدم غير موجود'); return; }
+
+    const perms = {};
+    for (const key in PERM_LABELS) {
+      const el = document.getElementById('perm_' + key);
+      perms[key] = el ? el.checked : false;
+    }
+
+    user.permissions = perms;
+    await put('users', user);
+
+    closePermissions();
+    alert('✅ تم حفظ الصلاحيات');
+    await renderUsersList();
+  } catch(e) {
+    console.error(e);
+    alert('خطأ: ' + e.message);
+  }
 }

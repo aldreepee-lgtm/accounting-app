@@ -74,68 +74,82 @@
     z-index: 1;
   }
 
-  /* رأس الإيصال */
+  /* رأس الإيصال - نسخة مضغوطة */
   .r-header {
-    text-align: center;
-    padding-bottom: 16px;
-    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
     border-bottom: 2px dashed #d0d0d0;
-    position: relative;
   }
   .r-header .logo-wrap {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 10px;
+    flex-shrink: 0;
   }
   .r-header img {
-    max-width: 75px;
-    max-height: 75px;
+    width: 55px;
+    height: 55px;
     object-fit: contain;
-    border-radius: 12px;
+    border-radius: 10px;
     background: #fff;
-    padding: 4px;
+    padding: 3px;
     border: 2px solid #f0f0f0;
   }
   .r-header .placeholder {
-    font-size: 42px;
+    font-size: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 75px;
-    height: 75px;
+    width: 55px;
+    height: 55px;
     background: #f0f2f5;
-    border-radius: 12px;
+    border-radius: 10px;
+  }
+  .r-header .header-info {
+    flex: 1;
+    text-align: right;
   }
   .r-header h1 {
-    font-size: 20px;
+    font-size: 16px;
     color: #1e3c72;
     font-weight: 800;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
     line-height: 1.3;
   }
   .r-header .contact {
-    font-size: 11.5px;
+    font-size: 10.5px;
     color: #666;
-    line-height: 1.8;
+    line-height: 1.6;
   }
 
   /* معلومات الإيصال */
   .r-meta {
-    font-size: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    font-size: 11px;
     color: #444;
     margin-bottom: 14px;
-    padding: 10px 12px;
+    padding: 12px;
     background: #f8f9ff;
     border-radius: 10px;
-    line-height: 1.9;
+    border: 1px solid #e6ebff;
   }
-  .r-meta .row {
+  .r-meta .cell {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 3px;
   }
-  .r-meta .row span:first-child { color: #666; }
-  .r-meta .row span:last-child { color: #2a5298; font-weight: 700; }
+  .r-meta .cell .lbl {
+    color: #888;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .r-meta .cell .val {
+    color: #2a5298;
+    font-weight: 700;
+    font-size: 12px;
+  }
 
   /* الجدول */
   .r-table {
@@ -254,7 +268,7 @@
 
   <div class="r-header">
     <div class="logo-wrap" id="rLogoWrap"><div class="placeholder">📚</div></div>
-    <h1 id="rOfficeName">اسم المكتب</h1>
+    <div class="header-info"><h1 id="rOfficeName">اسم المكتب</h1>
     <div class="contact" id="rContact"></div>
   </div>
 

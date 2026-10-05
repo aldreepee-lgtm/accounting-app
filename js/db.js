@@ -44,7 +44,7 @@ async function seedDefaults() {
   const users = await getAll('users');
   if (users.length === 0) {
     await add('users', { username: 'admin', password: 'admin123', role: 'owner', mustChange: true, locked: false, createdAt: new Date().toISOString() });
-    await add('users', { username: 'worker', password: 'worker123', role: 'worker', mustChange: true, locked: false, createdAt: new Date().toISOString() });
+    await add('users', { username: 'worker', password: 'worker123', role: 'worker', mustChange: true, locked: false, permissions: { addTx:true, deleteTx:false, viewInventory:true, editInventory:true, viewReports:false, viewProfit:false, viewWithdrawals:false, closeDay:false, backup:false, editSettings:false }, createdAt: new Date().toISOString() });
   }
   const setupDone = await get('settings', 'setupDone');
   if (!setupDone) {
