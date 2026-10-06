@@ -20,11 +20,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     tab.addEventListener('click', () => switchType(tab.dataset.type));
   });
 
-  // عرض اختيار المنتج عند اختيار بيع منتج
-  document.getElementById('incomeType').addEventListener('change', (e) => {
-    const wrap = document.getElementById('productSelectWrap');
-    wrap.style.display = e.target.value === 'product' ? 'block' : 'none';
-    if (e.target.value === 'product') loadProductsDropdown();
+  // عرض بنود الفاتورة عند اختيار بيع منتج
+  document.getElementById('incomeType').addEventListener('change', async (e) => {
+    const area = document.getElementById('productItemsArea');
+    if (e.target.value === 'product') {
+      area.style.display = 'block';
+      const list = document.getElementById('itemsList');
+      if (list.children.length === 0) {
+        await addSaleItem();
+      }
+    } else {
+      area.style.display = 'none';
+    }
   });
 
   // حساب المبلغ الإجمالي في المشتريات
@@ -110,17 +117,44 @@ async function handleSave(e) {
     if (currentType === 'income') {
       const incomeType = document.getElementById('incomeType').value;
       tx.incomeType = incomeType;
-      tx.description = document.getElementById('incomeDesc').value.trim() || 'إيراد';
       if (incomeType === 'product') {
-        const prodId = parseInt(document.getElementById('productSelect').value);
-        if (!prodId) { msg.textContent = 'اختر منتجاً'; msg.className = 'msg-box err'; return; }
-        const product = await get('inventory', prodId);
-        if (!product || product.quantity < 1) { msg.textContent = 'المنتج غير متوفر'; msg.className = 'msg-box err'; return; }
-        tx.productId = prodId;
-        tx.productName = product.name;
-        tx.purchasePrice = product.lastPurchasePrice || 0;
-        tx.profit = amount - tx.purchasePrice;
-        tx.description = 'بيع: ' + product.name + (tx.profit !== 0 ? ' (ربح: ' + tx.profit + ')' : '');
+        // قراءة البنود
+        const rows = document.querySelectorAll('.sale-item');
+        const items = [];
+        let totalAmount = 0;
+        for (const row of rows) {
+          const sel = row.querySelector('.si-product');
+          const prodId = parseInt(sel.value);
+          const qty = parseInt(row.querySelector('.si-qty').value) || 0;
+          const price = parseInt(row.querySelector('.si-price').value) || 0;
+          if (!prodId) { msg.textContent = 'اختر منتجاً في كل بند'; msg.className = 'msg-box err'; return; }
+          if (qty < 1) { msg.textContent = 'الكمية مطلوبة'; msg.className = 'msg-box err'; return; }
+          if (price < 1) { msg.textContent = 'السعر مطلوب'; msg.className = 'msg-box err'; return; }
+          const product = await get('inventory', prodId);
+          if (!product) { msg.textContent = 'المنتج غير موجود'; msg.className = 'msg-box err'; return; }
+          const lineTotal = qty * price;
+          items.push({
+            productId: prodId,
+            productName: product.name,
+            quantity: qty,
+            unitPrice: price,
+            purchasePrice: parseInt(product.lastPurchasePrice) || 0,
+            lineTotal: lineTotal
+          });
+          totalAmount += lineTotal;
+        }
+        if (items.length === 0) { msg.textContent = 'أضف بنداً واحداً على الأقل'; msg.className = 'msg-box err'; return; }
+        tx.items = items;
+        tx.amount = totalAmount;
+        tx.itemCount = items.length;
+        const desc = document.getElementById('incomeDesc').value.trim();
+        tx.description = desc || ('فاتورة بيع (' + items.length + ' بنود)');
+        // حساب الربح الإجمالي
+        let profitTotal = 0;
+        items.forEach(it => { profitTotal += (it.unitPrice - it.purchasePrice) * it.quantity; });
+        tx.profit = profitTotal;
+      } else {
+        tx.description = document.getElementById('incomeDesc').value.trim() || 'إيراد';
       }
     } else if (currentType === 'expense') {
       tx.category = document.getElementById('expenseCategory').value;
@@ -239,6 +273,19 @@ async function updateInventoryOnPurchase(tx) {
 }
 
 async function updateInventoryOnSale(tx) {
+  // إذا كانت فاتورة متعددة البنود
+  if (tx.items && tx.items.length > 0) {
+    for (const item of tx.items) {
+      const product = await get('inventory', item.productId);
+      if (!product) continue;
+      product.quantity = (parseInt(product.quantity) || 0) - item.quantity;
+      if (product.quantity < 0) product.quantity = 0;
+      product.updatedAt = new Date().toISOString();
+      await put('inventory', product);
+    }
+    return;
+  }
+  // البيع الفردي (القديم)
   const product = await get('inventory', tx.productId);
   if (!product) return;
   product.quantity -= 1;
@@ -320,11 +367,23 @@ async function deleteTx(id) {
         await put('inventory', product);
       }
     }
-  } else if (tx.type === 'income' && tx.incomeType === 'product' && tx.productId) {
-    const product = await get('inventory', tx.productId);
-    if (product) {
-      product.quantity += 1;
-      await put('inventory', product);
+  } else if (tx.type === 'income' && tx.incomeType === 'product') {
+    // فاتورة متعددة البنود
+    if (tx.items && tx.items.length > 0) {
+      for (const item of tx.items) {
+        const product = await get('inventory', item.productId);
+        if (product) {
+          product.quantity = (parseInt(product.quantity) || 0) + item.quantity;
+          await put('inventory', product);
+        }
+      }
+    } else if (tx.productId) {
+      // بيع فردي (القديم)
+      const product = await get('inventory', tx.productId);
+      if (product) {
+        product.quantity += 1;
+        await put('inventory', product);
+      }
     }
   }
 
@@ -339,4 +398,71 @@ function deleteItem(store, key) {
     req.onsuccess = () => resolve();
     req.onerror = () => reject(req.error);
   });
+}
+
+// ===== بنود البيع =====
+async function addSaleItem() {
+  const list = document.getElementById('itemsList');
+  const products = await getAll('inventory');
+
+  const row = document.createElement('div');
+  row.className = 'sale-item';
+  row.style.cssText = 'background:#f8f9ff;border:1px solid #e6ebff;border-radius:10px;padding:10px;margin-bottom:8px;';
+
+  const rowId = 'si_' + Date.now() + Math.random().toString(36).slice(2,6);
+
+  let optionsHtml = '<option value="">-- اختر منتج --</option>';
+  products.forEach(function(p) {
+    if (p.quantity > 0) {
+      const price = parseInt(p.sellPrice) || 0;
+      optionsHtml += '<option value="' + p.id + '" data-price="' + price + '" data-qty="' + p.quantity + '">' + escapeHtmlA(p.name) + ' (متوفر: ' + p.quantity + ')</option>';
+    }
+  });
+
+  row.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 60px 70px 32px;gap:6px;align-items:center;margin-bottom:6px;">' +
+      '<select class="si-product" onchange="onProductSelect(this)" style="padding:9px;border:2px solid #e0e0e0;border-radius:8px;font-size:12px;font-family:inherit;background:#fff;">' + optionsHtml + '</select>' +
+      '<input type="number" class="si-qty" value="1" min="1" step="1" onchange="updateItemsTotal()" oninput="updateItemsTotal()" style="padding:9px 4px;border:2px solid #e0e0e0;border-radius:8px;font-size:12px;font-family:inherit;text-align:center;">' +
+      '<input type="number" class="si-price" value="" min="0" step="1" placeholder="السعر" oninput="updateItemsTotal()" style="padding:9px 4px;border:2px solid #e0e0e0;border-radius:8px;font-size:12px;font-family:inherit;text-align:center;">' +
+      '<button type="button" onclick="this.parentElement.parentElement.remove();updateItemsTotal();" style="background:#ffebee;color:#c62828;border:none;width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;padding:0;">×</button>' +
+    '</div>' +
+    '<div class="si-info" style="font-size:11px;color:#666;text-align:left;">الإجمالي: <b style="color:#2e7d32;">0</b> ر.ي</div>';
+
+  list.appendChild(row);
+}
+
+function onProductSelect(sel) {
+  const opt = sel.options[sel.selectedIndex];
+  const price = parseInt(opt.dataset.price) || 0;
+  const qty = parseInt(opt.dataset.qty) || 0;
+  const row = sel.parentElement.parentElement;
+  const priceInput = row.querySelector('.si-price');
+  const qtyInput = row.querySelector('.si-qty');
+  const info = row.querySelector('.si-info');
+
+  if (price > 0) priceInput.value = price;
+  if (qty > 0) qtyInput.max = qty;
+
+  updateItemsTotal();
+}
+
+function updateItemsTotal() {
+  const rows = document.querySelectorAll('.sale-item');
+  let total = 0;
+  rows.forEach(function(row) {
+    const qty = parseInt(row.querySelector('.si-qty').value) || 0;
+    const price = parseInt(row.querySelector('.si-price').value) || 0;
+    const lineTotal = qty * price;
+    total += lineTotal;
+    const info = row.querySelector('.si-info b');
+    if (info) info.textContent = lineTotal.toLocaleString('en-US');
+  });
+  const el = document.getElementById('itemsTotal');
+  if (el) el.textContent = total.toLocaleString('en-US') + ' ر.ي';
+}
+
+function escapeHtmlA(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML;
 }
