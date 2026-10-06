@@ -1,6 +1,6 @@
 // ===== Service Worker للتخزين المؤقت =====
 
-const CACHE_NAME = 'accounting-v73';
+const CACHE_NAME = 'accounting-v74';
 const ASSETS = [
   './',
   './index.html',
