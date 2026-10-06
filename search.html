@@ -54,7 +54,16 @@
 
 <div class="topbar">
   <h1>🔍 البحث الشامل</h1>
-  <button onclick="location.href='app.html'">← رجوع</button>
+  <div style="display:flex;gap:6px;">
+    <button onclick="exportSearch()" style="background:rgba(76,175,80,0.25);">📤 تصدير</button>
+    <div style="display:flex;gap:6px;">
+    <button onclick="exportSearch()" style="background:rgba(76,175,80,0.25);">📤 تصدير</button>
+    <div style="display:flex;gap:6px;">
+    <button onclick="exportSearch()" style="background:rgba(76,175,80,0.25);">📤 تصدير</button>
+    <button onclick="location.href='app.html'">← رجوع</button>
+  </div>
+  </div>
+  </div>
 </div>
 
 <div class="container">
@@ -124,6 +133,7 @@
 <script src="js/sync.js"></script>
 <script src="js/db.js"></script>
 <script src="js/auto-backup.js"></script>
+<script src="js/export.js"></script>
 <script src="js/search.js"></script>
 <script src="js/branding.js"></script>
 <script>

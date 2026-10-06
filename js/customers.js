@@ -433,3 +433,27 @@ function openStatement(customerName) {
   const url = 'statement.html?type=customer&name=' + encodeURIComponent(customerName);
   window.open(url, '_blank');
 }
+
+// ===== تصدير العملاء =====
+function exportCustomers() {
+  const data = allCustomers.map(function(c) {
+    return {
+      date: c.lastDate || '',
+      type: c.balance > 0 ? 'عليه دين' : 'مسدّد',
+      description: 'إجمالي: ' + c.totalCredit + ' | مدفوع: ' + c.totalPaid + ' | متبقي: ' + c.balance,
+      customerName: c.name + (c.phone ? ' — ' + c.phone : ''),
+      amount: c.balance
+    };
+  });
+
+  if (data.length === 0) {
+    alert('لا يوجد عملاء للتصدير');
+    return;
+  }
+
+  if (typeof showExportMenu === 'function') {
+    showExportMenu(data, 'كشف العملاء والديون');
+  } else {
+    alert('نظام التصدير غير محمّل');
+  }
+}

@@ -238,3 +238,30 @@ async function saveStocktake() {
     msg.textContent = 'خطأ: ' + e.message;
   }
 }
+
+// ===== تصدير المخزون =====
+function exportInventory() {
+  if (!allProducts || allProducts.length === 0) {
+    alert('لا توجد منتجات للتصدير');
+    return;
+  }
+
+  const data = allProducts.map(function(p) {
+    const q = parseInt(p.quantity) || 0;
+    const price = parseInt(p.lastPurchasePrice) || 0;
+    const sell = parseInt(p.sellPrice) || 0;
+    return {
+      date: '',
+      type: p.category || 'بدون تصنيف',
+      description: p.name + ' — شراء: ' + price + ' | بيع: ' + sell,
+      customerName: 'كمية: ' + q,
+      amount: q * price
+    };
+  });
+
+  if (typeof showExportMenu === 'function') {
+    showExportMenu(data, 'تقرير المخزون');
+  } else {
+    alert('نظام التصدير غير محمّل');
+  }
+}

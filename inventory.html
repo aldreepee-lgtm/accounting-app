@@ -109,7 +109,10 @@
 
 <div class="topbar">
   <h1>📦 المخزون</h1>
-  <button class="back-btn" onclick="location.href='app.html'">← رجوع</button>
+  <div style="display:flex;gap:6px;">
+    <button class="back-btn" onclick="exportInventory()" style="background:rgba(76,175,80,0.3);">📤 تصدير</button>
+    <button class="back-btn" onclick="location.href='app.html'">← رجوع</button>
+  </div>
 </div>
 
 <div class="container">
@@ -152,6 +155,7 @@
 <script src="js/sync.js"></script>
 <script src="js/db.js"></script>
 <script src="js/auto-backup.js"></script>
+<script src="js/export.js"></script>
 <script src="js/inventory.js"></script>
 
 <div style="text-align:center;color:#aaa;font-size:11px;padding:15px 10px;line-height:1.7;margin-top:10px;">

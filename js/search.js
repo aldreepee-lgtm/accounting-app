@@ -184,3 +184,16 @@ function escS(t) {
   d.textContent = t || '';
   return d.innerHTML;
 }
+
+// ===== تصدير نتائج البحث =====
+function exportSearch() {
+  if (!filteredTx || filteredTx.length === 0) {
+    alert('لا توجد نتائج للتصدير');
+    return;
+  }
+  if (typeof showExportMenu === 'function') {
+    showExportMenu(filteredTx, 'نتائج البحث');
+  } else {
+    alert('نظام التصدير غير محمّل');
+  }
+}

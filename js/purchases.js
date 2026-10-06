@@ -200,3 +200,27 @@ function esc(t) {
   d.textContent = t || '';
   return d.innerHTML;
 }
+
+// ===== تصدير المشتريات =====
+function exportPurchases() {
+  if (!allPurchases || allPurchases.length === 0) {
+    alert('لا توجد مشتريات للتصدير');
+    return;
+  }
+
+  const data = allPurchases.map(function(p) {
+    return {
+      date: p.date || '',
+      type: 'مشترى',
+      description: p.productName + ' × ' + p.quantity + ' ' + (p.displayUnit || ''),
+      customerName: p.note || '',
+      amount: p.amount
+    };
+  });
+
+  if (typeof showExportMenu === 'function') {
+    showExportMenu(data, 'سجل المشتريات');
+  } else {
+    alert('نظام التصدير غير محمّل');
+  }
+}
