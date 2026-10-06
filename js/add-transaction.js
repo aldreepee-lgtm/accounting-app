@@ -45,12 +45,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('txForm').addEventListener('submit', handleSave);
 
   // تطبيق النوع من الرابط
-  // DEBUG
-  const dbg = document.createElement('div');
-  dbg.style.cssText = 'position:fixed;top:0;left:0;background:#000;color:#0f0;padding:4px 8px;font-size:10px;z-index:99999;font-family:monospace;direction:ltr;';
-  dbg.textContent = 'URL: ' + (window.location.search || 'none') + ' | type: ' + currentType;
-  document.body.appendChild(dbg);
-
   switchType(currentType);
 
   await refreshView();
@@ -203,8 +197,8 @@ async function handleSave(e) {
     msg.textContent = '✅ تم حفظ الحركة بنجاح';
     msg.className = 'msg-box ok';
     
-    // زر طباعة الإيصال للإيرادات
-    if (currentType === 'income') {
+    // زر طباعة الإيصال لكل الأنواع
+    if (currentType === 'income' || currentType === 'purchase' || currentType === 'expense') {
       const receiptBtn = document.createElement('button');
       receiptBtn.type = 'button';
       receiptBtn.innerHTML = '🖨️ طباعة إيصال للعميل';

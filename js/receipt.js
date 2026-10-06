@@ -61,6 +61,18 @@ function renderReceipt() {
     ? new Date(tx.time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
     : now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
+  // شارة النوع
+  const typeEl = document.getElementById('rTypeBadge');
+  if (typeEl) {
+    if (tx.type === 'purchase') typeEl.textContent = '🧾 فاتورة شراء';
+    else if (tx.type === 'expense') typeEl.textContent = '🧾 سند مصروف';
+    else if (tx.type === 'owner_withdraw') typeEl.textContent = '🧾 سند مسحوبات';
+    else if (tx.type === 'owner_personal') typeEl.textContent = '🧾 سند مصروف شخصي';
+    else if (tx.type === 'worker_salary') typeEl.textContent = '🧾 سند راتب';
+    else if (tx.type === 'income' && tx.incomeType === 'product') typeEl.textContent = '🧾 فاتورة بيع';
+    else typeEl.textContent = '🧾 إيصال دفع';
+  }
+
   stats.innerHTML =
     '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f8f9ff;border-radius:10px;border:1px solid #e6ebff;box-sizing:border-box;overflow:hidden;">' +
       '<span style="font-size:18px;line-height:1;flex-shrink:0;">📅</span>' +
@@ -79,10 +91,9 @@ function renderReceipt() {
       '<span style="font-size:12px;font-weight:800;color:#1e3c72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtmlR(tx.username || '---') + '</span>' +
     '</div>';
 
-  // إجبار التنسيق مباشرة (يتجاوز أي CSS مخزّن)
   stats.style.cssText = 'display:grid !important;grid-template-columns:1fr 1fr !important;gap:8px !important;margin-bottom:14px !important;width:100% !important;box-sizing:border-box !important;';
 
-  // عرض البنود
+  // عرض البنود أو العنصر الواحد حسب النوع
   if (tx.items && tx.items.length > 0) {
     body.innerHTML = tx.items.map(function(item, idx) {
       const lineTotal = parseInt(item.lineTotal) || (item.quantity * item.unitPrice);
@@ -94,6 +105,22 @@ function renderReceipt() {
         '<td class="amt">' + lineTotal.toLocaleString('en-US') + '</td>' +
       '</tr>';
     }).join('');
+  } else if (tx.type === 'expense') {
+    body.innerHTML = '<tr>' +
+      '<td class="desc" style="text-align:right;">' +
+        '<div style="font-weight:700;color:#333;">📌 ' + escapeHtmlR(tx.category || 'مصروف') + '</div>' +
+        '<div style="font-size:11px;color:#888;margin-top:3px;">' + escapeHtmlR(tx.description || '') + '</div>' +
+      '</td>' +
+      '<td class="amt">' + amount.toLocaleString('en-US') + '</td>' +
+    '</tr>';
+  } else if (tx.type === 'worker_salary') {
+    body.innerHTML = '<tr>' +
+      '<td class="desc" style="text-align:right;">' +
+        '<div style="font-weight:700;color:#333;">👷 راتب: ' + escapeHtmlR(tx.workerName || '') + '</div>' +
+        '<div style="font-size:11px;color:#888;margin-top:3px;">الشهر: ' + escapeHtmlR(tx.salaryMonth || '') + '</div>' +
+      '</td>' +
+      '<td class="amt">' + amount.toLocaleString('en-US') + '</td>' +
+    '</tr>';
   } else {
     const desc = tx.description || tx.productName || 'خدمة';
     body.innerHTML = '<tr><td class="desc">' + escapeHtmlR(desc) + '</td><td class="amt">' + amount.toLocaleString('en-US') + '</td></tr>';
