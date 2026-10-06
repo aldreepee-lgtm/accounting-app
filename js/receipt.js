@@ -82,8 +82,22 @@ function renderReceipt() {
   // إجبار التنسيق مباشرة (يتجاوز أي CSS مخزّن)
   stats.style.cssText = 'display:grid !important;grid-template-columns:1fr 1fr !important;gap:8px !important;margin-bottom:14px !important;width:100% !important;box-sizing:border-box !important;';
 
-  const desc = tx.description || tx.productName || 'خدمة';
-  body.innerHTML = '<tr><td class="desc">' + escapeHtmlR(desc) + '</td><td class="amt">' + amount.toLocaleString('en-US') + '</td></tr>';
+  // عرض البنود
+  if (tx.items && tx.items.length > 0) {
+    body.innerHTML = tx.items.map(function(item, idx) {
+      const lineTotal = parseInt(item.lineTotal) || (item.quantity * item.unitPrice);
+      return '<tr>' +
+        '<td class="desc" style="text-align:right;">' +
+          '<div style="font-weight:700;color:#333;">' + (idx+1) + '. ' + escapeHtmlR(item.productName) + '</div>' +
+          '<div style="font-size:11px;color:#888;margin-top:3px;">' + item.quantity + ' × ' + item.unitPrice + ' ر.ي</div>' +
+        '</td>' +
+        '<td class="amt">' + lineTotal.toLocaleString('en-US') + '</td>' +
+      '</tr>';
+    }).join('');
+  } else {
+    const desc = tx.description || tx.productName || 'خدمة';
+    body.innerHTML = '<tr><td class="desc">' + escapeHtmlR(desc) + '</td><td class="amt">' + amount.toLocaleString('en-US') + '</td></tr>';
+  }
 
   total.textContent = amount.toLocaleString('en-US') + ' ر.ي';
 }
