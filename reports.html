@@ -9,8 +9,16 @@
   body { background: #f0f2f5; display: block; padding: 0; min-height: 100vh; }
   .topbar { background: linear-gradient(135deg, #1e3c72, #2a5298); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
   .topbar h1 { font-size: 18px; }
-  .topbar .btn-group { display: flex; gap: 8px; }
-  .topbar button { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit; }
+  .topbar .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .topbar-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-family: inherit; font-weight: 700; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+  .topbar-btn:hover { background: rgba(255,255,255,0.28); transform: translateY(-1px); }
+  .topbar-btn span { font-size: 14px; }
+  .topbar-btn.export { background: linear-gradient(135deg, rgba(76,175,80,0.35), rgba(46,125,50,0.35)); }
+  .topbar-btn.export:hover { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+  .topbar-btn.share { background: linear-gradient(135deg, rgba(37,211,102,0.35), rgba(18,140,126,0.35)); }
+  .topbar-btn.share:hover { background: linear-gradient(135deg, #25d366, #128c7e); }
+  .topbar-btn.print { background: rgba(255,255,255,0.2); }
+  .topbar-btn.back { background: rgba(255,255,255,0.2); }
   .container { max-width: 900px; margin: 0 auto; padding: 15px; }
 
   .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 15px; }

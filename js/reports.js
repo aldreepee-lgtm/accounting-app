@@ -153,6 +153,7 @@ async function runReport() {
     await buildInventoryReport(statsRow, tbody, tableWrap, emptyMsg, tableHead);
   }
 
+  window.__lastFilteredTx = filtered;
   document.getElementById('tableTitle').textContent = titleText;
 }
 
