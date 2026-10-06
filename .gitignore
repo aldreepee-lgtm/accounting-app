@@ -2,3 +2,5 @@ generator.html
 js/generator.js
 *.bak
 *.backup.*
+
+.backup-html/

@@ -196,35 +196,41 @@ function deleteItem(store, key) {
 // ===== عند فتح التطبيق: نزامن الأحدث =====
 async function syncPullOnStart() {
   if (!syncEnabled || !syncUser || syncInProgress) return;
-  
+  syncInProgress = true;
   try {
-    console.log('🔄 فحص التحديثات من السحابة...');
-    
-    for (const col of SYNC_COLLECTIONS) {
+    console.log('\u{1F504} فحص التحديثات من السحابة...');
+    // ملاحظة: مجموعة users يُعالَجها pullUsersFromCloud في sync-users.js
+    const dataCollections = ['settings', 'transactions', 'inventory', 'daily_closings'];
+    for (const col of dataCollections) {
       const snapshot = await firebaseDB
         .collection('offices').doc(syncUser.uid)
         .collection(col).get();
-      
-      snapshot.forEach(async (doc) => {
+
+      for (const doc of snapshot.docs) {
         const cloudItem = doc.data().data;
-        const cloudTime = doc.data().updatedAt?.toMillis?.() || 0;
-        
-        const localItem = await get(col, isNaN(doc.id) ? doc.id : Number(doc.id));
-        const localTime = localItem?.updatedAt 
-          ? new Date(localItem.updatedAt).getTime() 
-          : 0;
-        
-        // إذا السحابة أحدث، نُحدّث المحلي
+        if (!cloudItem) continue;
+        const cloudTime = doc.data().updatedAt && doc.data().updatedAt.toMillis
+          ? doc.data().updatedAt.toMillis() : 0;
+
+        const key = cloudItem.id || cloudItem.key || cloudItem.date || doc.id;
+        const localItem = await get(col, isNaN(key) ? key : Number(key));
+        const localTime = localItem && localItem.updatedAt
+          ? new Date(localItem.updatedAt).getTime() : 0;
+
         if (cloudTime > localTime) {
-          await put(col, cloudItem);
-          console.log('⬇️ حُدّث:', col, doc.id);
+          const merged = localItem
+            ? Object.assign({}, cloudItem, { id: localItem.id })
+            : cloudItem;
+          await put(col, merged);
+          console.log('\u2B07\uFE0F حُدّث:', col, key);
         }
-      });
+      }
     }
-    
-    console.log('✅ اكتمل التحديث');
+    console.log('\u2705 اكتمل التحديث');
   } catch (e) {
-    console.error('❌ خطأ تحديث:', e);
+    console.error('\u274C خطأ تحديث:', e);
+  } finally {
+    syncInProgress = false;
   }
 }
 

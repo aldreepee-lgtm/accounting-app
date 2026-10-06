@@ -1,6 +1,6 @@
 // ===== Service Worker للتخزين المؤقت =====
 
-const CACHE_NAME = 'accounting-v70';
+const CACHE_NAME = 'accounting-v71';
 const ASSETS = [
   './',
   './index.html',
@@ -52,6 +52,7 @@ const ASSETS = [
   './js/firebase-config.js',
   './js/sync.js',
   './js/sync-users.js',
+  './js/lock-watcher.js',
   './js/auto-backup.js',
   './js/branding.js',
   './js/users-ui.js',
