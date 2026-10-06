@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>العملاء والديون</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background:#f0f2f5; display:block; padding:0; min-height:100vh; padding-bottom:80px; }
+  .topbar { background:linear-gradient(135deg,#1e3c72,#2a5298); color:#fff; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+  .topbar h1 { font-size:18px; }
+  .topbar button { background:rgba(255,255,255,0.15); border:none; color:#fff; padding:7px 14px; border-radius:6px; cursor:pointer; font-size:13px; font-family:inherit; }
+  .container { max-width:800px; margin:0 auto; padding:15px; }
+  
+  .stats-box { background:#fff; border-radius:12px; padding:14px; margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+  .stat-item { text-align:center; padding:8px; }
+  .stat-item .lbl { font-size:11px; color:#888; margin-bottom:4px; }
+  .stat-item .val { font-size:16px; font-weight:800; color:#2a5298; }
+  .stat-item.debt .val { color:#c62828; }
+  
+  .filter-bar { background:#fff; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+  .filter-bar input { width:100%; padding:11px 13px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; font-family:inherit; box-sizing:border-box; }
+  .filter-bar input:focus { outline:none; border-color:#2a5298; }
+  
+  .customer-item { background:#fff; border-radius:12px; padding:14px 16px; margin-bottom:10px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-right:4px solid #c62828; }
+  .customer-item.paid { border-right-color:#4caf50; }
+  .customer-item .row1 { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:10px; }
+  .customer-item .name { font-size:15px; font-weight:800; color:#1e3c72; }
+  .customer-item .debt-amount { font-size:16px; font-weight:800; color:#c62828; white-space:nowrap; }
+  .customer-item.paid .debt-amount { color:#2e7d32; }
+  .customer-item .phone { font-size:12px; color:#666; margin-bottom:4px; }
+  .customer-item .meta { font-size:11px; color:#999; line-height:1.7; }
+  .customer-item .actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:10px; }
+  .customer-item .actions button { padding:9px 4px; border:none; border-radius:8px; font-family:inherit; font-size:11px; font-weight:700; cursor:pointer; }
+  .customer-item .actions .pay-btn { background:#e8f5e9; color:#2e7d32; }
+  .customer-item .actions .info-btn { background:#e3f2fd; color:#1565c0; }
+  .customer-item .actions .share-btn { background:#25d366; color:#fff; }
+  .customer-item .actions .share-btn:disabled { background:#ccc; cursor:not-allowed; }
+  
+  .empty-msg { background:#fff; border-radius:12px; padding:40px 20px; text-align:center; color:#aaa; font-size:14px; }
+  
+  .fab { position:fixed; bottom:20px; left:20px; width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#4caf50,#2e7d32); color:#fff; border:none; font-size:26px; font-weight:700; cursor:pointer; box-shadow:0 6px 20px rgba(76,175,80,0.4); z-index:100; display:flex; align-items:center; justify-content:center; }
+  .fab:hover { transform: scale(1.05); }
+  
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; display:none; align-items:center; justify-content:center; padding:15px; overflow-y:auto; }
+  .modal-overlay.show { display:flex; }
+  .modal-box { background:#fff; border-radius:16px; padding:22px 18px; max-width:420px; width:100%; max-height:90vh; overflow-y:auto; }
+  .modal-box h2 { font-size:17px; color:#1e3c72; margin-bottom:14px; }
+  .modal-box .form-group { margin-bottom:12px; }
+  .modal-box .form-group label { display:block; margin-bottom:6px; font-size:13px; font-weight:600; color:#333; }
+  .modal-box .form-group input, .modal-box .form-group textarea { width:100%; padding:11px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; font-family:inherit; box-sizing:border-box; }
+  .modal-box .form-group input:focus { outline:none; border-color:#2a5298; }
+  .modal-box .btn-save { width:100%; padding:14px; background:linear-gradient(135deg,#11998e,#38ef7d); color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; margin-top:8px; }
+  .modal-box .btn-cancel { width:100%; padding:10px; background:#e0e0e0; color:#333; border:none; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; margin-top:6px; }
+  .msg-box { text-align:center; padding:10px; margin-top:10px; border-radius:8px; font-size:13px; font-weight:600; min-height:18px; }
+  .msg-box.ok { background:#e8f5e9; color:#2e7d32; }
+  .msg-box.err { background:#ffebee; color:#c62828; }
+  .history-item { background:#f8f9ff; padding:10px 12px; border-radius:8px; margin-bottom:6px; font-size:12px; line-height:1.7; border-right:3px solid #2a5298; }
+  .history-item.payment { border-right-color:#4caf50; background:#f1f8e9; }
+  .history-item.credit { border-right-color:#c62828; background:#ffebee; }
+  .history-item .amt { font-weight:800; }
+  .history-item.credit .amt { color:#c62828; }
+  .history-item.payment .amt { color:#2e7d32; }
+  
+  .dev-footer { text-align:center; color:#999; font-size:11px; padding:20px 10px; line-height:1.7; }
+  .dev-footer b { color:#2a5298; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>👥 العملاء والديون</h1>
+  <button onclick="location.href='app.html'">← رجوع</button>
+</div>
+
+<div class="container">
+
+  <div class="stats-box">
+    <div class="stat-item">
+      <div class="lbl">عدد العملاء</div>
+      <div class="val" id="statCustomers">0</div>
+    </div>
+    <div class="stat-item debt">
+      <div class="lbl">إجمالي الديون</div>
+      <div class="val" id="statDebt">0</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <input type="text" id="searchInput" placeholder="🔍 ابحث عن عميل...">
+  </div>
+
+  <div id="customersList"></div>
+
+</div>
+
+<button class="fab" onclick="openAddCustomerModal()" title="إضافة عميل جديد">➕</button>
+
+<div class="dev-footer">
+  💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>
+  📞 778983131<br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+<!-- Modal إضافة/تعديل عميل -->
+<div class="modal-overlay" id="customerModal">
+  <div class="modal-box">
+    <h2 id="customerModalTitle">➕ إضافة عميل جديد</h2>
+    <input type="hidden" id="editingCustomerName" value="">
+    <div class="form-group">
+      <label>👤 اسم العميل</label>
+      <input type="text" id="newCustomerName" placeholder="مثال: محمد أحمد">
+    </div>
+    <div class="form-group">
+      <label>📱 رقم الهاتف (مع رمز الدولة)</label>
+      <input type="text" id="newCustomerPhone" placeholder="مثال: 967778983131" dir="ltr" style="text-align:left;">
+    </div>
+    <div id="customerMsg" class="msg-box"></div>
+    <button class="btn-save" onclick="saveCustomer()">💾 حفظ</button>
+    <button class="btn-cancel" onclick="closeCustomerModal()">← إلغاء</button>
+  </div>
+</div>
+
+<!-- Modal الدفع -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal-box">
+    <h2>💰 تسجيل دفعة</h2>
+    <div id="payModalInfo" style="background:#f8f9ff;border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.9;"></div>
+    <div class="form-group">
+      <label>المبلغ المدفوع</label>
+      <input type="number" id="payAmount" min="1" step="1" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label>ملاحظة (اختياري)</label>
+      <input type="text" id="payNote" placeholder="مثال: دفعة نقدية">
+    </div>
+    <div id="payMsg" class="msg-box"></div>
+    <button class="btn-save" onclick="savePayment()">💾 حفظ الدفعة</button>
+    <button class="btn-cancel" onclick="closePayModal()">← إلغاء</button>
+  </div>
+</div>
+
+<!-- Modal التفاصيل -->
+<div class="modal-overlay" id="infoModal">
+  <div class="modal-box">
+    <h2 id="infoModalTitle">📋 كشف حساب</h2>
+    <div id="infoModalBody"></div>
+    <button class="btn-cancel" onclick="closeInfoModal()" style="margin-top:14px;">← إغلاق</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auto-backup.js"></script>
+<script src="js/customers.js"></script>
+<script src="js/branding.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js?v=99').catch(err => {});
+    });
+  }
+</script>
+</body>
+</html>
