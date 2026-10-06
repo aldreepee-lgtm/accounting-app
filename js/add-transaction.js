@@ -407,11 +407,15 @@ async function addSaleItem() {
   const rowId = 'si_' + Date.now() + Math.random().toString(36).slice(2,6);
 
   let optionsHtml = '<option value="">-- اختر منتج --</option>';
+  if (products.length === 0) {
+    optionsHtml += '<option value="" disabled>⚠️ لا توجد منتجات في المخزون</option>';
+  }
   products.forEach(function(p) {
-    if (p.quantity > 0) {
-      const price = parseInt(p.sellPrice) || 0;
-      optionsHtml += '<option value="' + p.id + '" data-price="' + price + '" data-qty="' + p.quantity + '">' + escapeHtmlA(p.name) + ' (متوفر: ' + p.quantity + ')</option>';
-    }
+    const q = parseInt(p.quantity) || 0;
+    const price = parseInt(p.sellPrice) || 0;
+    const label = q > 0 ? escapeHtmlA(p.name) + ' (متوفر: ' + q + ')' : escapeHtmlA(p.name) + ' ⚠️ (غير متوفر)';
+    const disabled = q <= 0 ? ' disabled' : '';
+    optionsHtml += '<option value="' + p.id + '" data-price="' + price + '" data-qty="' + q + '"' + disabled + '>' + label + '</option>';
   });
 
   row.innerHTML =
