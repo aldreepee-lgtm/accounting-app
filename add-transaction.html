@@ -193,9 +193,9 @@ window.onerror = function(msg, src, line, col) {
           <div style="background:#f8f9ff;border:1px solid #e6ebff;border-radius:10px;padding:12px;margin-bottom:12px;">
             <div style="font-size:13px;font-weight:700;color:#2a5298;margin-bottom:8px;">🛒 اختر منتجاً وأضفه للسلة</div>
             <select id="entryProduct" onchange="onEntryProductChange()" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;margin-bottom:6px;box-sizing:border-box;"></select>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
-              <input type="number" id="entryQty" value="1" min="1" step="1" placeholder="الكمية" style="padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;text-align:center;box-sizing:border-box;">
-              <input type="number" id="entryPrice" min="0" step="1" placeholder="السعر" style="padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;text-align:center;box-sizing:border-box;">
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+              <input type="number" id="entryQty" value="1" min="1" step="1" placeholder="الكمية" style="flex:1;min-width:0;padding:10px 6px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;text-align:center;box-sizing:border-box;">
+              <input type="number" id="entryPrice" min="0" step="1" placeholder="السعر" style="flex:1;min-width:0;padding:10px 6px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;text-align:center;box-sizing:border-box;">
             </div>
             <button type="button" onclick="addToCart()" style="width:100%;padding:12px;background:#4caf50;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">➕ أضف إلى السلة</button>
           </div>
