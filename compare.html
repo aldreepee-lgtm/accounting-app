@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مقارنة الفترات</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background:#f0f2f5; display:block; padding:0; min-height:100vh; }
+  .topbar { background:linear-gradient(135deg,#1e3c72,#2a5298); color:#fff; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+  .topbar h1 { font-size:18px; }
+  .topbar button { background:rgba(255,255,255,0.15); border:none; color:#fff; padding:7px 14px; border-radius:6px; cursor:pointer; font-size:13px; font-family:inherit; }
+  .container { max-width:900px; margin:0 auto; padding:15px; }
+  .periods-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .period-box { background:#fff; border-radius:12px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-top:4px solid #2a5298; }
+  .period-box.second { border-top-color:#e91e63; }
+  .period-box h3 { font-size:14px; color:#1e3c72; margin-bottom:10px; }
+  .period-box.second h3 { color:#c2185b; }
+  .period-box label { display:block; font-size:11px; color:#666; margin-bottom:4px; margin-top:6px; }
+  .period-box input[type="date"] { width:100%; padding:9px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:inherit; box-sizing:border-box; }
+  .period-box input:focus { outline:none; border-color:#2a5298; }
+  .btn-compare { width:100%; padding:14px; background:linear-gradient(135deg,#11998e,#38ef7d); color:#fff; border:none; border-radius:10px; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; margin-bottom:12px; }
+  .results-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+  .result-card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,0.05); text-align:center; }
+  .result-card .lbl { font-size:11px; color:#888; margin-bottom:6px; }
+  .result-card .val { font-size:18px; font-weight:800; color:#333; }
+  .result-card.p1 .val { color:#1565c0; }
+  .result-card.p2 .val { color:#c2185b; }
+  .result-card .diff { font-size:11px; margin-top:6px; font-weight:700; }
+  .diff.up { color:#2e7d32; }
+  .diff.down { color:#c62828; }
+  .diff.same { color:#999; }
+  .chart-bar { margin:8px 0; }
+  .chart-bar .label { font-size:12px; color:#555; margin-bottom:6px; font-weight:700; }
+  .bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .bar-row .name { font-size:11px; color:#666; min-width:80px; }
+  .bar-row .bar { height:22px; border-radius:6px; display:flex; align-items:center; padding:0 8px; color:#fff; font-size:11px; font-weight:700; min-width:40px; transition:width 0.5s; }
+  .bar-row .bar.p1 { background:linear-gradient(135deg,#2a5298,#1e3c72); }
+  .bar-row .bar.p2 { background:linear-gradient(135deg,#e91e63,#c2185b); }
+  .summary-card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:12px; }
+  .summary-title { font-size:14px; font-weight:800; color:#1e3c72; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid #f0f0f0; }
+  .summary-row { display:flex; justify-content:space-between; padding:8px 0; font-size:13px; }
+  .summary-row.total { border-top:2px solid #f0f0f0; margin-top:6px; padding-top:12px; font-weight:800; font-size:15px; }
+  .empty-msg { text-align:center; color:#aaa; padding:30px; font-size:13px; background:#fff; border-radius:12px; }
+  .dev-footer { text-align:center; color:#999; font-size:11px; padding:20px 10px; line-height:1.7; }
+  .dev-footer b { color:#2a5298; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📊 مقارنة الفترات</h1>
+  <button onclick="location.href='app.html'">← رجوع</button>
+</div>
+
+<div class="container">
+
+  <div class="periods-grid">
+    <div class="period-box">
+      <h3>📅 الفترة الأولى</h3>
+      <label>من</label>
+      <input type="date" id="from1">
+      <label>إلى</label>
+      <input type="date" id="to1">
+    </div>
+    <div class="period-box second">
+      <h3>📅 الفترة الثانية</h3>
+      <label>من</label>
+      <input type="date" id="from2">
+      <label>إلى</label>
+      <input type="date" id="to2">
+    </div>
+  </div>
+
+  <button class="btn-compare" onclick="runCompare()">🔄 قارن الآن</button>
+
+  <div id="resultsArea"></div>
+
+</div>
+
+<div class="dev-footer">
+  💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>
+  📞 778983131<br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auto-backup.js"></script>
+<script src="js/compare.js"></script>
+<script src="js/branding.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js?v=99').catch(err => {});
+    });
+  }
+</script>
+</body>
+</html>
