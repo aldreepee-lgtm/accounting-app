@@ -70,17 +70,6 @@ function autoPurchaseAmount() {
   }
 }
 
-async function loadProductsDropdown() {
-  const products = await getAll('inventory');
-  const sel = document.getElementById('productSelect');
-  sel.innerHTML = '<option value="">-- اختر منتج --</option>';
-  products.forEach(p => {
-    if (p.quantity > 0) {
-      const opt = document.createElement('option');
-      opt.value = p.id;
-      opt.textContent = `${p.name} (متوفر: ${p.quantity})`;
-      sel.appendChild(opt);
-    }
   });
 }
 
@@ -222,7 +211,6 @@ async function handleSave(e) {
     document.getElementById('quantity').value = 1;
     document.getElementById('sellPrice').value = '';
     document.getElementById('productCategory').value = '';
-    document.getElementById('productSelectWrap').style.display = 'none';
 
     await refreshView();
     setTimeout(() => { msg.textContent = ''; msg.className = 'msg-box'; }, 3000);
