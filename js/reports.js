@@ -544,3 +544,6 @@ function printStatement() {
 
   window.open(url, '_blank');
 }
+
+function exportReport() {
+}
