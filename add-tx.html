@@ -125,9 +125,9 @@
   .empty-msg { text-align: center; color: #aaa; padding: 30px; font-size: 14px; }
   .unit-tpl { padding:8px 12px; background:#f0f2f5; border:2px solid #e0e0e0; border-radius:20px; font-family:inherit; font-size:12px; font-weight:700; color:#555; cursor:pointer; transition:all 0.2s; }
   .unit-tpl.active { background:#2a5298; color:#fff; border-color:#2a5298; }
-  .unit-def-row { display:grid; grid-template-columns:1fr 60px 1fr 30px; gap:6px; align-items:center; margin-bottom:6px; }
-  .unit-def-row input { padding:8px; border:2px solid #e0e0e0; border-radius:8px; font-size:12px; font-family:inherit; text-align:center; }
-  .unit-def-row .del { background:#ffebee; color:#c62828; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px; }
+  .unit-def-row { display:grid; grid-template-columns:1fr 22px 70px 28px; gap:6px; align-items:center; margin-bottom:6px; direction:rtl; }
+  .unit-def-row input { width:100%; min-width:0; padding:8px 6px; border:2px solid #e0e0e0; border-radius:8px; font-size:12px; font-family:inherit; text-align:center; box-sizing:border-box; }
+  .unit-def-row .del { background:#ffebee; color:#c62828; border:none; width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:14px; padding:0; }
 </style>
 
 <!-- PWA -->
@@ -174,9 +174,14 @@
             <option value="product">بيع منتج من المخزون</option>
           </select>
         </div>
-        <div class="form-group" id="productSelectWrap" style="display:none;">
-          <label>المنتج</label>
-          <select id="productSelect"><option value="">-- اختر منتج --</option></select>
+        <div id="productItemsArea" style="display:none;">
+          <div style="font-size:13px;font-weight:700;color:#2a5298;margin-bottom:8px;">📋 بنود الفاتورة</div>
+          <div id="itemsList"></div>
+          <button type="button" onclick="addSaleItem()" style="width:100%;padding:10px;background:#e3f2fd;color:#1565c0;border:2px dashed #90caf9;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;">➕ إضافة بند جديد</button>
+          <div style="background:#e8f5e9;border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-size:13px;font-weight:600;color:#2e7d32;">💰 الإجمالي:</span>
+            <span id="itemsTotal" style="font-size:16px;font-weight:800;color:#2e7d32;">0 ر.ي</span>
+          </div>
         </div>
         <div class="form-group">
           <label>الوصف</label>
