@@ -547,4 +547,18 @@ function printStatement() {
 }
 
 function exportReport() {
+  alert('DEBUG 1: exportReport called');
+  const all = window.__lastFilteredTx || [];
+  alert('DEBUG 2: عدد الحركات = ' + all.length);
+  if (all.length === 0) {
+    alert('لا توجد بيانات للتصدير');
+    return;
+  }
+  const label = document.getElementById('tableTitle').textContent || 'تقرير';
+  alert('DEBUG 3: type of showExportMenu = ' + typeof showExportMenu);
+  if (typeof showExportMenu === 'function') {
+    showExportMenu(all, label);
+  } else {
+    alert('⚠️ نظام التصدير غير محمّل');
+  }
 }
