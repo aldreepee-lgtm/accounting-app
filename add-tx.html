@@ -175,14 +175,31 @@
           </select>
         </div>
         <div id="productItemsArea" style="display:none;">
-          <div style="font-size:13px;font-weight:700;color:#2a5298;margin-bottom:8px;">📋 بنود الفاتورة</div>
-          <div id="itemsList"></div>
-          <button type="button" onclick="addSaleItem()" style="width:100%;padding:10px;background:#e3f2fd;color:#1565c0;border:2px dashed #90caf9;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;">➕ إضافة بند جديد</button>
-          <div style="background:#e8f5e9;border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <span style="font-size:13px;font-weight:600;color:#2e7d32;">💰 الإجمالي:</span>
-            <span id="itemsTotal" style="font-size:16px;font-weight:800;color:#2e7d32;">0 ر.ي</span>
+
+          <div style="background:#f8f9ff;border:1px solid #e6ebff;border-radius:10px;padding:12px;margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;color:#2a5298;margin-bottom:8px;">🛒 اختر منتجاً وأضفه للسلة</div>
+            <select id="entryProduct" onchange="onEntryProductChange()" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;margin-bottom:6px;box-sizing:border-box;"></select>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+              <input type="number" id="entryQty" value="1" min="1" step="1" placeholder="الكمية" style="padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;text-align:center;box-sizing:border-box;">
+              <input type="number" id="entryPrice" min="0" step="1" placeholder="السعر" style="padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;text-align:center;box-sizing:border-box;">
+            </div>
+            <button type="button" onclick="addToCart()" style="width:100%;padding:12px;background:#4caf50;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">➕ أضف إلى السلة</button>
           </div>
+
+          <div style="background:#fff;border:1px solid #e6ebff;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:13px;font-weight:700;color:#2a5298;">📋 السلة</span>
+              <span id="cartCount" style="background:#e3f2fd;color:#1565c0;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">0 صنف</span>
+            </div>
+            <div id="cartList" style="max-height:220px;overflow-y:auto;"></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-top:2px solid #f0f0f0;margin-top:8px;">
+              <span style="font-size:14px;font-weight:700;color:#333;">💰 الإجمالي:</span>
+              <span id="cartTotal" style="font-size:18px;font-weight:800;color:#2e7d32;">0 ر.ي</span>
+            </div>
+          </div>
+
         </div>
+
         <div class="form-group">
           <label>الوصف</label>
           <input type="text" id="incomeDesc" placeholder="مثال: طباعة 10 صفحات">
@@ -305,7 +322,8 @@
         </div>
       </div>
 
-      <button type="submit" class="btn-save">💾 حفظ الحركة</button>
+      <button type="submit" class="btn-save">💾 حفظ فقط</button>
+      <button type="button" onclick="saveAndPrint()" class="btn-save" style="background:linear-gradient(135deg,#673ab7,#512da8);margin-top:6px;">🖨️ حفظ وطباعة</button>
       <div id="formMsg" class="msg-box"></div>
 
     </form>
