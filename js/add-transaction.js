@@ -1,3 +1,11 @@
+// ===== كشف الأخطاء =====
+window.onerror = function(msg, src, line, col, err) {
+  setTimeout(function() {
+    alert('❌ خطأ في الصفحة:\n\n' + msg + '\n\nالسطر: ' + line + '\nالعمود: ' + col);
+  }, 100);
+  return false;
+};
+
 // ===== منطق إضافة الحركة =====
 
 let currentUser = null;
