@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>البحث الشامل</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background:#f0f2f5; display:block; padding:0; min-height:100vh; }
+  .topbar { background:linear-gradient(135deg,#1e3c72,#2a5298); color:#fff; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+  .topbar h1 { font-size:18px; }
+  .topbar button { background:rgba(255,255,255,0.15); border:none; color:#fff; padding:7px 14px; border-radius:6px; cursor:pointer; font-size:13px; font-family:inherit; }
+  .container { max-width:800px; margin:0 auto; padding:15px; }
+  .filter-card { background:#fff; border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+  .filter-card .form-group { margin-bottom:10px; }
+  .filter-card label { display:block; margin-bottom:5px; font-size:12px; font-weight:600; color:#333; }
+  .filter-card input, .filter-card select { width:100%; padding:10px 12px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:inherit; box-sizing:border-box; background:#fff; }
+  .filter-card input:focus, .filter-card select:focus { outline:none; border-color:#2a5298; }
+  .filter-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .filter-actions { display:flex; gap:8px; margin-top:6px; }
+  .filter-actions button { flex:1; padding:11px; border:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+  .btn-search { background:linear-gradient(135deg,#2a5298,#1e3c72); color:#fff; }
+  .btn-reset { background:#f0f2f5; color:#555; }
+  .stats-bar { background:#fff; border-radius:12px; padding:12px; margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+  .stat-item { text-align:center; padding:6px; }
+  .stat-item .lbl { font-size:10px; color:#888; margin-bottom:3px; }
+  .stat-item .val { font-size:14px; font-weight:800; }
+  .stat-item.count .val { color:#6a1b9a; }
+  .stat-item.income .val { color:#2e7d32; }
+  .stat-item.expense .val { color:#c62828; }
+  .tx-item { background:#fff; border-radius:10px; padding:12px 14px; margin-bottom:8px; box-shadow:0 2px 6px rgba(0,0,0,0.04); border-right:4px solid #ccc; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .tx-item.income { border-right-color:#4caf50; }
+  .tx-item.expense { border-right-color:#f44336; }
+  .tx-item.purchase { border-right-color:#ff9800; }
+  .tx-item.owner_withdraw { border-right-color:#9c27b0; }
+  .tx-item.owner_personal { border-right-color:#795548; }
+  .tx-item.worker_salary { border-right-color:#ff5722; }
+  .tx-item.payment { border-right-color:#00bcd4; background:#e0f7fa; }
+  .tx-info { flex:1; min-width:0; }
+  .tx-type { font-size:11px; color:#888; margin-bottom:3px; }
+  .tx-desc { font-size:13px; color:#333; font-weight:700; margin-bottom:3px; }
+  .tx-meta { font-size:11px; color:#999; }
+  .tx-amount { font-size:15px; font-weight:800; white-space:nowrap; }
+  .tx-item.income .tx-amount { color:#2e7d32; }
+  .tx-item:not(.income) .tx-amount { color:#c62828; }
+  .tx-item.payment .tx-amount { color:#00bcd4; }
+  .del-btn { background:#ffebee; color:#c62828; border:none; width:32px; height:32px; border-radius:8px; font-size:15px; cursor:pointer; flex-shrink:0; }
+  .empty-msg { background:#fff; border-radius:12px; padding:40px 20px; text-align:center; color:#aaa; font-size:14px; }
+  .dev-footer { text-align:center; color:#999; font-size:11px; padding:20px 10px; line-height:1.7; }
+  .dev-footer b { color:#2a5298; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🔍 البحث الشامل</h1>
+  <button onclick="location.href='app.html'">← رجوع</button>
+</div>
+
+<div class="container">
+
+  <div class="filter-card">
+    <div class="form-group">
+      <label>🔍 بحث بالكلمة</label>
+      <input type="text" id="searchText" placeholder="اسم منتج، عميل، وصف..." oninput="applyFilters()">
+    </div>
+    <div class="filter-row">
+      <div class="form-group">
+        <label>📅 من تاريخ</label>
+        <input type="date" id="dateFrom" onchange="applyFilters()">
+      </div>
+      <div class="form-group">
+        <label>📅 إلى تاريخ</label>
+        <input type="date" id="dateTo" onchange="applyFilters()">
+      </div>
+    </div>
+    <div class="filter-row">
+      <div class="form-group">
+        <label>🏷️ النوع</label>
+        <select id="typeFilter" onchange="applyFilters()">
+          <option value="">كل الأنواع</option>
+          <option value="income">إيراد</option>
+          <option value="expense">مصروف مكتب</option>
+          <option value="purchase">مشتريات</option>
+          <option value="payment">دفعة عميل</option>
+          <option value="owner_withdraw">مسحوبات المالك</option>
+          <option value="owner_personal">مصروفات شخصية</option>
+          <option value="worker_salary">راتب عامل</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>👤 العميل</label>
+        <select id="customerFilter" onchange="applyFilters()">
+          <option value="">كل العملاء</option>
+        </select>
+      </div>
+    </div>
+    <div class="filter-actions">
+      <button class="btn-search" onclick="applyFilters()">🔍 بحث</button>
+      <button class="btn-reset" onclick="resetFilters()">🔄 إعادة ضبط</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item count"><div class="lbl">عدد النتائج</div><div class="val" id="statCount">0</div></div>
+    <div class="stat-item income"><div class="lbl">إيرادات</div><div class="val" id="statIncome">0</div></div>
+    <div class="stat-item expense"><div class="lbl">مصروفات</div><div class="val" id="statExpense">0</div></div>
+  </div>
+
+  <div id="resultsList"></div>
+
+</div>
+
+<div class="dev-footer">
+  💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>
+  📞 778983131<br>
+  © 2026 — جميع الحقوق محفوظة
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auto-backup.js"></script>
+<script src="js/search.js"></script>
+<script src="js/branding.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js?v=99').catch(err => {});
+    });
+  }
+</script>
+</body>
+</html>
