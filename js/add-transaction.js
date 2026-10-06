@@ -1,11 +1,3 @@
-// ===== كشف الأخطاء =====
-window.onerror = function(msg, src, line, col, err) {
-  setTimeout(function() {
-    alert('❌ خطأ في الصفحة:\n\n' + msg + '\n\nالسطر: ' + line + '\nالعمود: ' + col);
-  }, 100);
-  return false;
-};
-
 // ===== منطق إضافة الحركة =====
 
 let currentUser = null;
@@ -78,16 +70,11 @@ function autoPurchaseAmount() {
   }
 }
 
-  });
-}
 
 async function handleSave(e) {
   e.preventDefault();
-  alert('DEBUG: handleSave called');
   const msg = document.getElementById('formMsg');
-  if (!msg) { alert('DEBUG: formMsg missing!'); return; }
   msg.textContent = ''; msg.className = 'msg-box';
-  alert('DEBUG: currentUser = ' + (currentUser ? currentUser.username : 'NULL'));
 
   const amount = parseInt(document.getElementById('amount').value) || 0;
   if (amount <= 0 && currentType !== 'purchase') {
