@@ -149,21 +149,40 @@ async function syncDownloadAll() {
         .collection('offices').doc(syncUser.uid)
         .collection(col).get();
       
-      // مسح الجدول المحلي أولاً
+      // مسح الجدول المحلي
       await clearStore(col);
       
-      // إضافة البيانات من السحابة
-      snapshot.forEach(doc => {
+      // إضافة البيانات واحداً واحداً
+      for (const doc of snapshot.docs) {
         const item = doc.data().data;
-        if (item) put(col, item);
-      });
-      
-      console.log(`📥 ${col}: ${snapshot.size} مستند`);
+        if (!item) continue;
+        
+        try {
+          if (col === 'users' && item.username) {
+            const existing = await getAll('users');
+            const dup = existing.find(u => u.username === item.username && u.id !== item.id);
+            if (dup) await deleteItem('users', dup.id);
+          }
+          await put(col, item);
+        } catch(err) {
+          console.warn('تخطي مستند:', col, item.id || item.username, err.message);
+        }
+      }
+      console.log('📥 ' + col + ': ' + snapshot.size + ' مستند');
     }
     console.log('✅ اكتمل تحميل كل البيانات');
   } finally {
     syncInProgress = false;
   }
+}
+
+function deleteItem(store, key) {
+  return new Promise(function(resolve, reject) {
+    const t = db.transaction(store, 'readwrite');
+    const req = t.objectStore(store).delete(key);
+    req.onsuccess = function() { resolve(); };
+    req.onerror = function() { reject(req.error); };
+  });
 }
 
 // ===== عند فتح التطبيق: نزامن الأحدث =====
