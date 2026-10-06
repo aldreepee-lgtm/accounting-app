@@ -224,7 +224,13 @@ window.onerror = function(msg, src, line, col) {
 
         <div class="form-group" id="customerNameWrap" style="display:none;">
           <label>👤 اسم العميل <span style="color:#d32f2f">*</span></label>
-          <input type="text" id="customerName" placeholder="مثال: محمد أحمد" autocomplete="off">
+          <div style="display:flex;gap:6px;">
+            <select id="customerName" style="flex:1;padding:11px 13px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;font-family:inherit;background:#fff;box-sizing:border-box;">
+              <option value="">-- اختر عميلاً --</option>
+            </select>
+            <button type="button" onclick="openQuickAddCustomer()" style="padding:0 14px;background:#4caf50;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:20px;font-weight:700;cursor:pointer;flex-shrink:0;">+</button>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:4px;">اضغط ➕ لإضافة عميل جديد</div>
         </div>
 
         <div class="form-group">
@@ -407,5 +413,25 @@ window.onerror = function(msg, src, line, col) {
   }
 </script>
 <script src="js/branding.js"></script>
+<!-- مودال إضافة عميل سريع -->
+<div id="quickCustomerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;align-items:center;justify-content:center;padding:15px;">
+  <div style="background:#fff;border-radius:16px;padding:22px 18px;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="font-size:17px;color:#1e3c72;">➕ إضافة عميل جديد</h2>
+      <button type="button" onclick="closeQuickAddCustomer()" style="background:#ffebee;color:#c62828;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#333;">👤 اسم العميل</label>
+      <input type="text" id="quickCustomerName" placeholder="مثال: محمد أحمد" style="width:100%;padding:11px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#333;">📱 رقم الهاتف</label>
+      <input type="text" id="quickCustomerPhone" placeholder="967778983131" dir="ltr" style="width:100%;padding:11px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;text-align:left;">
+    </div>
+    <div id="quickCustomerMsg" style="text-align:center;font-size:13px;font-weight:600;min-height:20px;margin-bottom:10px;"></div>
+    <button type="button" onclick="saveQuickCustomer()" style="width:100%;padding:14px;background:linear-gradient(135deg,#11998e,#38ef7d);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">💾 حفظ وإضافته للقائمة</button>
+  </div>
+</div>
+
 </body>
 </html>

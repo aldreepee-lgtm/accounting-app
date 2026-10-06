@@ -578,9 +578,103 @@ function onPaymentMethodChange() {
   if (!sel || !wrap) return;
   if (sel.value === 'credit') {
     wrap.style.display = 'block';
+    // حمّل قائمة العملاء
+    if (typeof loadCustomersDropdown === 'function') {
+      loadCustomersDropdown();
+    }
   } else {
     wrap.style.display = 'none';
     const cn = document.getElementById('customerName');
     if (cn) cn.value = '';
   }
+}
+
+// ===== العملاء =====
+async function loadCustomersDropdown() {
+  const sel = document.getElementById('customerName');
+  if (!sel) return;
+  const current = sel.value;
+  const savedData = await get('settings', 'customersData');
+  const customers = (savedData && savedData.value) ? savedData.value : {};
+  const tx = await getAll('transactions');
+  tx.forEach(function(t) {
+    if (t.customerName && !customers[t.customerName]) {
+      customers[t.customerName] = '';
+    }
+  });
+  const names = Object.keys(customers).sort();
+  let html = '<option value="">-- اختر عميلاً --</option>';
+  if (names.length === 0) {
+    html += '<option value="" disabled>لا يوجد عملاء — اضغط + للإضافة</option>';
+  }
+  names.forEach(function(n) {
+    const phone = customers[n] || '';
+    const label = phone ? n + ' — ' + phone : n;
+    html += '<option value="' + escHtmlA(n) + '">' + escHtmlA(label) + '</option>';
+  });
+  sel.innerHTML = html;
+  if (current) sel.value = current;
+}
+
+function openQuickAddCustomer() {
+  const modal = document.getElementById('quickCustomerModal');
+  const nameEl = document.getElementById('quickCustomerName');
+  const phoneEl = document.getElementById('quickCustomerPhone');
+  const msgEl = document.getElementById('quickCustomerMsg');
+  if (!modal) return;
+  nameEl.value = '';
+  phoneEl.value = '';
+  msgEl.textContent = '';
+  modal.style.display = 'flex';
+  setTimeout(function() { nameEl.focus(); }, 200);
+}
+
+function closeQuickAddCustomer() {
+  const modal = document.getElementById('quickCustomerModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function saveQuickCustomer() {
+  const nameEl = document.getElementById('quickCustomerName');
+  const phoneEl = document.getElementById('quickCustomerPhone');
+  const msgEl = document.getElementById('quickCustomerMsg');
+  const name = nameEl.value.trim();
+  const phone = phoneEl.value.trim();
+  if (!name) {
+    msgEl.style.color = '#c62828';
+    msgEl.textContent = 'أدخل اسم العميل';
+    return;
+  }
+  if (phone) {
+    const digits = phone.replace(/[^0-9]/g, '');
+    if (digits.length < 9) {
+      msgEl.style.color = '#c62828';
+      msgEl.textContent = 'رقم الهاتف يجب أن يكون 9 أرقام على الأقل';
+      return;
+    }
+  }
+  try {
+    const savedData = await get('settings', 'customersData');
+    const customers = (savedData && savedData.value) ? savedData.value : {};
+    customers[name] = phone;
+    await put('settings', { key: 'customersData', value: customers });
+    msgEl.style.color = '#2e7d32';
+    msgEl.textContent = 'تم الحفظ';
+    setTimeout(async function() {
+      closeQuickAddCustomer();
+      await loadCustomersDropdown();
+      const sel = document.getElementById('customerName');
+      if (sel) sel.value = name;
+    }, 600);
+  } catch(e) {
+    console.error(e);
+    msgEl.style.color = '#c62828';
+    msgEl.textContent = 'خطأ: ' + e.message;
+  }
+}
+
+function escHtmlA(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML;
 }
