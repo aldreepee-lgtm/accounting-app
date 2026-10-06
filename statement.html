@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كشف حساب</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, sans-serif; }
+  body { background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%); min-height:100vh; padding:60px 15px 30px; display:flex; flex-direction:column; align-items:center; }
+  .back-btn { position:fixed; top:15px; right:15px; width:45px; height:45px; border-radius:50%; background:#fff; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center; z-index:100; }
+  .back-btn svg { width:22px; height:22px; stroke:#2a5298; stroke-width:3; fill:none; }
+  .page-title { color:#fff; font-size:18px; font-weight:700; margin-bottom:20px; text-shadow:0 2px 4px rgba(0,0,0,0.3); }
+  .statement-box { background:#fff; width:100%; max-width:520px; border-radius:20px; padding:25px 22px; box-shadow:0 20px 50px rgba(0,0,0,0.3); }
+  .stmt-header { text-align:center; padding-bottom:14px; margin-bottom:14px; border-bottom:3px solid #2a5298; }
+  .stmt-header .office-name { font-size:20px; font-weight:800; color:#1e3c72; margin-bottom:4px; }
+  .stmt-header .office-contact { font-size:11px; color:#666; line-height:1.7; }
+  .stmt-header .report-title { display:inline-block; background:linear-gradient(135deg,#2a5298,#1e3c72); color:#fff; padding:6px 18px; border-radius:20px; font-size:13px; font-weight:800; margin-top:10px; }
+  .customer-info { background:#f8f9ff; border-radius:12px; padding:12px 14px; margin-bottom:14px; font-size:13px; line-height:1.9; border:1px solid #e6ebff; }
+  .customer-info .name { font-size:16px; font-weight:800; color:#1e3c72; margin-bottom:4px; }
+  .customer-info .phone { color:#555; }
+  .stats-line { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+  .stat-box { background:#f8f9ff; border-radius:10px; padding:10px; text-align:center; border:1px solid #e6ebff; }
+  .stat-box .lbl { font-size:10px; color:#888; margin-bottom:3px; }
+  .stat-box .val { font-size:14px; font-weight:800; color:#2a5298; }
+  .stat-box.credit .val { color:#c62828; }
+  .stat-box.paid .val { color:#2e7d32; }
+  .stat-box.balance { background:linear-gradient(135deg,#11998e,#38ef7d); border:none; }
+  .stat-box.balance .lbl { color:rgba(255,255,255,0.9); }
+  .stat-box.balance .val { color:#fff; font-size:16px; }
+  .section-title { font-size:14px; font-weight:800; color:#1e3c72; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid #f0f0f0; }
+  .tx-list { max-height:400px; overflow-y:auto; margin-bottom:14px; }
+  .tx-item { background:#fff; border-radius:10px; padding:10px 12px; margin-bottom:8px; border-right:4px solid #c62828; box-shadow:0 2px 6px rgba(0,0,0,0.04); }
+  .tx-item.payment { border-right-color:#4caf50; background:#f1f8e9; }
+  .tx-item.credit { border-right-color:#c62828; background:#ffebee; }
+  .tx-item .row1 { display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; }
+  .tx-item .type { font-weight:800; }
+  .tx-item.credit .type { color:#c62828; }
+  .tx-item.payment .type { color:#2e7d32; }
+  .tx-item .date { color:#888; }
+  .tx-item .desc { font-size:12px; color:#555; margin-bottom:4px; }
+  .tx-item .amount { font-size:14px; font-weight:800; text-align:left; }
+  .tx-item.credit .amount { color:#c62828; }
+  .tx-item.payment .amount { color:#2e7d32; }
+  .empty-state { text-align:center; color:#aaa; padding:25px; font-size:13px; }
+  .stmt-footer { text-align:center; padding-top:14px; margin-top:14px; border-top:2px dashed #d0d0d0; font-size:11px; color:#888; line-height:1.9; }
+  .stmt-footer b { color:#2a5298; }
+  .stmt-footer .thanks { display:inline-block; margin-top:6px; color:#2e7d32; font-weight:800; font-size:12px; }
+  .actions { width:100%; max-width:520px; margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .actions button { padding:14px 10px; border:none; border-radius:12px; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; color:#fff; }
+  .actions .full { grid-column:1 / -1; }
+  .btn-thermal { background:linear-gradient(135deg,#1e3c72,#2a5298); }
+  .btn-a4 { background:linear-gradient(135deg,#673ab7,#512da8); }
+  .btn-share { background:linear-gradient(135deg,#25d366,#128c7e); }
+  @media print {
+    body { background:#fff; padding:0; }
+    .back-btn, .page-title, .actions { display:none !important; }
+    .statement-box { box-shadow:none; border-radius:0; max-width:100%; padding:5mm; }
+  }
+  body.print-thermal .statement-box { max-width:80mm; padding:4mm; font-size:11px; }
+</style>
+</head>
+<body>
+
+<button class="back-btn" onclick="window.history.back()">
+  <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+
+<div class="page-title">📋 كشف حساب</div>
+
+<div class="statement-box" id="statementBox">
+  <div class="stmt-header">
+    <div class="office-name" id="stmtOfficeName">اسم المكتب</div>
+    <div class="office-contact" id="stmtOfficeContact"></div>
+    <div class="report-title">كشف حساب</div>
+  </div>
+  <div class="customer-info" id="stmtCustomerInfo"></div>
+  <div class="stats-line" id="stmtStats"></div>
+  <div class="section-title">📜 سجل الحركات</div>
+  <div class="tx-list" id="stmtTxList"></div>
+  <div class="stmt-footer">
+    💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>
+    📞 778983131<br>
+    <span class="thanks">✨ شكراً لتعاملكم معنا ✨</span>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn-thermal" onclick="printThermal()">🖨️ طباعة حرارية</button>
+  <button class="btn-a4" onclick="printA4()">📄 طباعة A4</button>
+  <button class="btn-share full" onclick="shareAsImage()">📤 مشاركة كصورة</button>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/statement.js"></script>
+</body>
+</html>
