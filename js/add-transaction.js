@@ -4,6 +4,16 @@ let currentUser = null;
 let currentType = 'income';
 let todayStr = '';
 
+// قراءة النوع من الرابط فوراً (قبل DOMContentLoaded)
+(function() {
+  try {
+    const p = new URLSearchParams(window.location.search).get('type');
+    if (p && ['income', 'expense', 'purchase', 'owner_withdraw', 'owner_personal', 'worker_salary'].indexOf(p) !== -1) {
+      currentType = p;
+    }
+  } catch(e) {}
+})();
+
 document.addEventListener('DOMContentLoaded', async () => {
   await openDB();
 
@@ -34,10 +44,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('txForm').addEventListener('submit', handleSave);
 
-  // قراءة نوع الحركة من الرابط
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialType = urlParams.get('type');
-  if (initialType) switchType(initialType);
+  // تطبيق النوع من الرابط
+  switchType(currentType);
 
   await refreshView();
 });
