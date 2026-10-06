@@ -1,11 +1,11 @@
-// ===== حارس القفل والصلاحيات (Lock Watcher) =====
-// فحص دوري كل 20 ثانية لقفل المستخدم + تحديث الصلاحيات
-// يعمل فقط للمستخدمين غير المالك
+// ===== حارس القفل (نسخة مُصلَحة - v2) =====
+// فحص دوري كل 20 ثانية لقفل المستخدم فقط
+// بدون سحب سحابي (لتجنب الحلقة) وبدون reload
 
 (function() {
   'use strict';
 
-  const CHECK_INTERVAL = 20000; // 20 ثانية
+  const CHECK_INTERVAL = 20000;
   let watcherTimer = null;
   let watcherRunning = false;
 
@@ -17,7 +17,7 @@
   }
 
   async function kickUser(reason) {
-    if (watcherRunning) return; // منع التكرار
+    if (watcherRunning) return;
     watcherRunning = true;
     if (watcherTimer) { clearInterval(watcherTimer); watcherTimer = null; }
     try { localStorage.removeItem('currentUser'); } catch(e) {}
@@ -31,33 +31,13 @@
     window.location.href = 'index.html';
   }
 
-  async function applyPermissionsIfChanged(user, fresh) {
-    if (!fresh || !fresh.permissions) return false;
-    const oldPerms = JSON.stringify(user.permissions || {});
-    const newPerms = JSON.stringify(fresh.permissions || {});
-    if (oldPerms === newPerms) return false;
-
-    // تحديث localStorage
-    const updated = Object.assign({}, user, {
-      permissions: fresh.permissions,
-      locked: fresh.locked,
-      mustChange: fresh.mustChange
-    });
-    localStorage.setItem('currentUser', JSON.stringify(updated));
-    console.log('\uD83D\uDD04 تم تحديث الصلاحيات — إعادة تحميل الواجهة');
-    // إعادة تحميل الواجهة لتطبيق الصلاحيات (بدون إعادة تحميل كاملة)
-    setTimeout(function() { window.location.reload(); }, 500);
-    return true;
-  }
-
   async function checkOnce() {
     if (watcherRunning) return;
-
     const user = getCurrentUser();
-    if (!user) return; // لا مستخدم مسجل
-    if (user.role === 'owner') return; // المالك لا يُفحص
+    if (!user) return;
+    if (user.role === 'owner') return;
 
-    // تحقق سريع من القفل المحلي أولاً
+    // فحص القفل المحلي فقط (بدون سحب سحابي)
     try {
       const local = await get('users', user.id);
       if (local && local.locked === true) {
@@ -65,25 +45,6 @@
         return;
       }
     } catch(e) {}
-
-    // فحص السحابة
-    if (typeof pullUsersFromCloud !== 'function') return;
-
-    try {
-      await pullUsersFromCloud();
-      const fresh = await get('users', user.id);
-      if (!fresh) return;
-
-      if (fresh.locked === true) {
-        await kickUser('\uD83D\uDD12 تم قفل حسابك من قبل المدير');
-        return;
-      }
-
-      await applyPermissionsIfChanged(user, fresh);
-    } catch(e) {
-      // فشل صامت — لا نزعج المستخدم
-      console.warn('Lock watcher check failed:', e);
-    }
   }
 
   function startWatcher() {
@@ -93,14 +54,11 @@
       console.log('\u2139\uFE0F حارس القفل: لا يعمل للمالك');
       return;
     }
-    console.log('\uD83D\uDD25 حارس القفل نشط — كل 20 ثانية');
+    console.log('\uD83D\uDD25 حارس القفل نشط');
 
-    // أول فحص بعد 5 ثوان من الفتح
     setTimeout(checkOnce, 5000);
-
     watcherTimer = setInterval(checkOnce, CHECK_INTERVAL);
 
-    // إيقاف عند إخفاء الصفحة، استئناف عند العودة
     document.addEventListener('visibilitychange', function() {
       if (document.hidden) {
         if (watcherTimer) { clearInterval(watcherTimer); watcherTimer = null; }
@@ -113,7 +71,6 @@
     });
   }
 
-  // التشغيل بعد جهوزية الصفحة
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
       setTimeout(startWatcher, 2000);
@@ -122,7 +79,6 @@
     setTimeout(startWatcher, 2000);
   }
 
-  // كشف خارجي للاستخدام اليدوي
   window.checkUserLockedNow = checkOnce;
   window.kickCurrentUser = kickUser;
 })();
