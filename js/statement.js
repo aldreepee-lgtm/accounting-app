@@ -191,7 +191,7 @@ function renderStatement() {
     const d = statementData;
     info.innerHTML =
       '<div class="name">👤 ' + esc( d.name) + '</div>' +
-      (d.phone ? '<div class="phone">📱 ' + esc(d.phone) + '</div>' : '');
+      (d.phone ? '<div class="phone">📱 <span dir="ltr">' + esc(d.phone) + '</span></div>' : '');
 
     stats.innerHTML =
       '<div class="stat-box credit"><div class="lbl">إجمالي الدين</div><div class="val">' + d.totalCredit.toLocaleString('en-US') + '</div></div>' +
@@ -199,7 +199,7 @@ function renderStatement() {
       '<div class="stat-box balance" style="grid-column:1/-1;"><div class="lbl">المتبقي</div><div class="val">' + d.balance.toLocaleString('en-US') + ' ر.ي</div></div>';
   } else if (statementData.type === 'day') {
     const d = statementData;
-    info.innerHTML = '<div class="name">📅 كشف يوم: ' + esc(d.date) + '</div>';
+    info.innerHTML = '<div class="name">📅 كشف يوم: <span dir="ltr">' + esc(d.date) + '</span></div>';
 
     stats.innerHTML =
       '<div class="stat-box paid"><div class="lbl">الإيرادات</div><div class="val">' + d.totalIncome.toLocaleString('en-US') + '</div></div>' +
@@ -207,7 +207,7 @@ function renderStatement() {
       '<div class="stat-box balance" style="grid-column:1/-1;"><div class="lbl">الصافي</div><div class="val">' + d.balance.toLocaleString('en-US') + ' ر.ي</div></div>';
   } else if (statementData.type === 'month') {
     const d = statementData;
-    info.innerHTML = '<div class="name">📆 كشف شهر: ' + esc(d.month) + '</div>';
+    info.innerHTML = '<div class="name">📆 كشف شهر: <span dir="ltr">' + esc(d.month) + '</span></div>';
 
     stats.innerHTML =
       '<div class="stat-box paid"><div class="lbl">الإيرادات</div><div class="val">' + d.totalIncome.toLocaleString('en-US') + '</div></div>' +
@@ -230,7 +230,7 @@ function renderStatement() {
     return '<div class="tx-item ' + t.type + '">' +
       '<div class="row1">' +
         '<span class="type">' + label + '</span>' +
-        '<span class="date">' + t.date + (time ? ' · ' + time : '') + '</span>' +
+        '<span class="date"><span dir="ltr">' + t.date + '</span>' + (time ? ' · ' + time : '') + '</span>' +
       '</div>' +
       '<div class="desc">' + esc(t.description) + '</div>' +
       '<div class="amount">' + sign + ' ' + t.amount.toLocaleString('en-US') + ' ر.ي</div>' +
