@@ -148,8 +148,13 @@ async function handleSave(e) {
       const sellPrice = parseInt(document.getElementById('sellPrice').value) || 0;
       const category = document.getElementById('productCategory').value.trim();
       const units = typeof getCurrentUnits === 'function' ? getCurrentUnits() : { base: 'قطعة', units: [] };
-      const purchaseUnitFactor = parseInt(document.getElementById('purchaseUnit').value) || 1;
-      const purchaseUnitName = document.getElementById('purchaseUnit').options[document.getElementById('purchaseUnit').selectedIndex].textContent.split(' (')[0];
+      let purchaseUnitFactor = 1;
+      let purchaseUnitName = 'قطعة';
+      const puEl = document.getElementById('purchaseUnit');
+      if (puEl && puEl.options && puEl.options.length > 0 && puEl.selectedIndex >= 0) {
+        purchaseUnitFactor = parseInt(puEl.value) || 1;
+        purchaseUnitName = puEl.options[puEl.selectedIndex].textContent.split(' (')[0] || 'قطعة';
+      }
       tx.productName = pname;
       tx.quantity = qty * purchaseUnitFactor;
       tx.displayQty = qty;
