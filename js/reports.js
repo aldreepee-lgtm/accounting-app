@@ -524,3 +524,23 @@ async function shareAsImageR() {
     alert('⚠️ فشل: ' + e.message);
   }
 }
+
+// ===== كشف مطبوع =====
+function printStatement() {
+  let url = 'statement.html?type=';
+
+  if (currentTab === 'daily') {
+    const date = document.getElementById('dateInput').value;
+    if (!date) { alert('اختر التاريخ أولاً'); return; }
+    url += 'day&date=' + encodeURIComponent(date);
+  } else if (currentTab === 'monthly') {
+    const month = document.getElementById('dateInput').value;
+    if (!month) { alert('اختر الشهر أولاً'); return; }
+    url += 'month&month=' + encodeURIComponent(month);
+  } else {
+    alert('الكشف المطبوع متاح فقط في التقرير اليومي والشهري');
+    return;
+  }
+
+  window.open(url, '_blank');
+}
