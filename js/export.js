@@ -125,64 +125,104 @@ function doExportPDF() {
     return;
   }
 
-  try {
-    const typeLabels = {
-      income: 'إيراد', expense: 'مصروف', purchase: 'مشترى',
-      owner_withdraw: 'مسحوبات', owner_personal: 'شخصي',
-      worker_salary: 'راتب', payment: 'دفعة'
-    };
-
-    let tableRows = '';
-    exportData.forEach(function(t) {
-      const amt = parseInt(t.amount) || 0;
-      const isIncome = t.type === 'income' || t.type === 'payment';
-      tableRows += '<tr>' +
-        '<td style="text-align:center;">' + (t.date || '') + '</td>' +
-        '<td style="text-align:center;">' + (typeLabels[t.type] || t.type) + '</td>' +
-        '<td>' + escH(t.description || t.productName || '') + '</td>' +
-        '<td>' + escH(t.customerName || '-') + '</td>' +
-        '<td style="text-align:left;font-weight:700;color:' + (isIncome ? '#2e7d32' : '#c62828') + ';">' + (isIncome ? '+' : '−') + amt.toLocaleString('en-US') + '</td>' +
-      '</tr>';
-    });
-
-    const html = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">' +
-      '<title>' + escH(exportFilename) + '</title>' +
-      '<style>' +
-        'body{font-family:Tahoma,sans-serif;padding:20px;direction:rtl;}' +
-        'h1{color:#1e3c72;text-align:center;font-size:20px;margin-bottom:6px;}' +
-        'p.sub{text-align:center;color:#888;font-size:12px;margin-bottom:20px;}' +
-        'table{width:100%;border-collapse:collapse;margin-top:15px;}' +
-        'th{background:#2a5298;color:#fff;padding:10px;font-size:12px;text-align:right;}' +
-        'td{padding:8px 10px;border-bottom:1px solid #eee;font-size:12px;}' +
-        'tr:nth-child(even) td{background:#f9f9f9;}' +
-        '.footer{text-align:center;color:#888;font-size:11px;margin-top:20px;padding-top:14px;border-top:2px dashed #ccc;}' +
-      '</style></head><body>' +
-      '<h1>' + escH(exportFilename) + '</h1>' +
-      '<p class="sub">التاريخ: ' + getDateStr() + ' · عدد السجلات: ' + exportData.length + '</p>' +
-      '<table><thead><tr>' +
-        '<th style="text-align:center;">التاريخ</th>' +
-        '<th style="text-align:center;">النوع</th>' +
-        '<th>الوصف</th>' +
-        '<th>العميل</th>' +
-        '<th style="text-align:left;">المبلغ</th>' +
-      '</tr></thead><tbody>' + tableRows + '</tbody></table>' +
-      '<div class="footer">💻 برمجة وتطوير: م/ ربيع الحريبي · 📞 778983131<br>© 2026 — جميع الحقوق محفوظة</div>' +
-      '<script>setTimeout(function(){window.print();},500);<\/script>' +
-      '</body></html>';
-
-    const w = window.open('', '_blank');
-    if (!w) {
-      alert('⚠️ الرجاء السماح بالنوافذ المنبثقة من إعدادات Chrome');
-      return;
-    }
-    w.document.write(html);
-    w.document.close();
-
-    closeExportMenu();
-  } catch(e) {
-    console.error(e);
-    alert('❌ خطأ: ' + e.message);
+  const w = window.open('', '_blank');
+  if (!w) {
+    alert('⚠️ الرجاء السماح بالنوافذ المنبثقة من إعدادات Chrome');
+    return;
   }
+
+  w.document.write('<html><body style="font-family:Tahoma;text-align:center;padding:50px;color:#666;">جاري التحضير...</body></html>');
+
+  (async function() {
+    try {
+      const officeName = await get('settings', 'officeName');
+      const officePhone = await get('settings', 'officePhone');
+      const officeAddress = await get('settings', 'officeAddress');
+      const officeLogo = await get('settings', 'officeLogo');
+
+      const nameVal = (officeName && officeName.value) ? officeName.value : 'اسم المكتب';
+      const phoneVal = (officePhone && officePhone.value) ? officePhone.value : '';
+      const addrVal = (officeAddress && officeAddress.value) ? officeAddress.value : '';
+      const logoVal = (officeLogo && officeLogo.value) ? officeLogo.value : 'icon.svg';
+
+      const typeLabels = {
+        income: 'إيراد', expense: 'مصروف', purchase: 'مشترى',
+        owner_withdraw: 'مسحوبات', owner_personal: 'شخصي',
+        worker_salary: 'راتب', payment: 'دفعة'
+      };
+
+      let tableRows = '';
+      exportData.forEach(function(t) {
+        const amt = parseInt(t.amount) || 0;
+        const isIncome = t.type === 'income' || t.type === 'payment';
+        tableRows += '<tr>' +
+          '<td style="text-align:center;">' + (t.date || '') + '</td>' +
+          '<td style="text-align:center;">' + (typeLabels[t.type] || t.type) + '</td>' +
+          '<td>' + escH(t.description || t.productName || '') + '</td>' +
+          '<td>' + escH(t.customerName || '-') + '</td>' +
+          '<td style="text-align:left;font-weight:700;color:' + (isIncome ? '#2e7d32' : '#c62828') + ';">' + (isIncome ? '+' : '−') + amt.toLocaleString('en-US') + '</td>' +
+        '</tr>';
+      });
+
+      const headerHtml =
+        '<div class="report-header">' +
+          '<div class="header-logo">' +
+            '<img src="' + logoVal + '" alt="logo" onerror="this.style.display=\'none\'">' +
+          '</div>' +
+          '<div class="header-name">' + escH(nameVal) + '</div>' +
+          '<div class="header-contact">' +
+            (addrVal ? '<div>📍 ' + escH(addrVal) + '</div>' : '') +
+            (phoneVal ? '<div>📞 ' + escH(phoneVal) + '</div>' : '') +
+          '</div>' +
+        '</div>';
+
+      const html = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">' +
+        '<title>' + escH(exportFilename) + '</title>' +
+        '<style>' +
+          'body{font-family:Tahoma,sans-serif;padding:15px;direction:rtl;color:#333;}' +
+          '.report-header{display:grid;grid-template-columns:60px 1fr 140px;align-items:center;gap:10px;padding-bottom:12px;margin-bottom:16px;border-bottom:3px solid #2a5298;direction:rtl;}' +
+          '.header-logo img{width:52px;height:52px;object-fit:contain;border-radius:8px;border:1px solid #eee;background:#fff;padding:2px;display:block;}' +
+          '.header-logo .placeholder{width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:28px;background:#f0f2f5;border-radius:8px;}' +
+          '.header-name{font-size:17px;font-weight:800;color:#1e3c72;text-align:center;}' +
+          '.header-contact{font-size:11px;color:#444;text-align:right;line-height:1.6;}' +
+          '.report-title{text-align:center;background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:800;display:inline-block;margin:0 auto 14px;}' +
+          '.report-info{text-align:center;color:#888;font-size:12px;margin-bottom:16px;}' +
+          'table{width:100%;border-collapse:collapse;margin-top:10px;}' +
+          'th{background:#2a5298;color:#fff;padding:10px;font-size:12px;text-align:right;}' +
+          'td{padding:8px 10px;border-bottom:1px solid #eee;font-size:12px;}' +
+          'tr:nth-child(even) td{background:#f9f9f9;}' +
+          '.footer{text-align:center;color:#888;font-size:11px;margin-top:20px;padding-top:14px;border-top:2px dashed #ccc;line-height:1.8;}' +
+          '.footer b{color:#2a5298;}' +
+          '@media print{body{padding:10mm;} .report-header{page-break-inside:avoid;}}' +
+        '</style></head><body>' +
+        headerHtml +
+        '<div style="text-align:center;"><span class="report-title">' + escH(exportFilename) + '</span></div>' +
+        '<div class="report-info">التاريخ: ' + getDateStr() + ' · عدد السجلات: ' + exportData.length + '</div>' +
+        '<table><thead><tr>' +
+          '<th style="text-align:center;">التاريخ</th>' +
+          '<th style="text-align:center;">النوع</th>' +
+          '<th>الوصف</th>' +
+          '<th>العميل</th>' +
+          '<th style="text-align:left;">المبلغ</th>' +
+        '</tr></thead><tbody>' + tableRows + '</tbody></table>' +
+        '<div class="footer">' +
+          '💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>' +
+          '📞 778983131<br>' +
+          '© 2026 — جميع الحقوق محفوظة' +
+        '</div>' +
+        '<script>setTimeout(function(){window.print();},600);<\/script>' +
+        '</body></html>';
+
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+
+      closeExportMenu();
+    } catch(e) {
+      console.error(e);
+      alert('❌ خطأ: ' + e.message);
+    }
+  })();
 }
 
 // ===== مساعدات =====
