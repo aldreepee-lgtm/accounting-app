@@ -152,15 +152,23 @@ async function syncDownloadAll() {
       // مسح الجدول المحلي
       await clearStore(col);
       
-      // إضافة البيانات واحداً واحداً
+      // إضافة البيانات واحداً واحداً (مع إزالة المكرر داخل السحابة)
+      const seenKeys = {};
       for (const doc of snapshot.docs) {
         const item = doc.data().data;
         if (!item) continue;
         
         try {
           if (col === 'users' && item.username) {
+            // تجاهل إذا رأينا هذا الاسم في نفس الدفعة
+            if (seenKeys[item.username]) {
+              console.warn('تخطي مكرر من السحابة:', item.username);
+              continue;
+            }
+            seenKeys[item.username] = true;
+            // احذف أي مستخدم محلي بنفس الاسم
             const existing = await getAll('users');
-            const dup = existing.find(u => u.username === item.username && u.id !== item.id);
+            const dup = existing.find(u => u.username === item.username);
             if (dup) await deleteItem('users', dup.id);
           }
           await put(col, item);
