@@ -75,8 +75,11 @@ function autoPurchaseAmount() {
 
 async function handleSave(e) {
   e.preventDefault();
+  alert('DEBUG: handleSave called');
   const msg = document.getElementById('formMsg');
+  if (!msg) { alert('DEBUG: formMsg missing!'); return; }
   msg.textContent = ''; msg.className = 'msg-box';
+  alert('DEBUG: currentUser = ' + (currentUser ? currentUser.username : 'NULL'));
 
   const amount = parseInt(document.getElementById('amount').value) || 0;
   if (amount <= 0 && currentType !== 'purchase') {
