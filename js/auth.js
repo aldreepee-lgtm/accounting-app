@@ -41,6 +41,18 @@ async function handleLogin(e) {
     return;
   }
 
+  // 🔒 فحص القفل من السحابة أولاً
+  try {
+    if (typeof syncUsersFromCloud === 'function') {
+      const cloudUser = await syncUsersFromCloud();
+      if (cloudUser) {
+        user.locked = cloudUser.locked;
+        user.permissions = cloudUser.permissions;
+        user.mustChange = cloudUser.mustChange;
+      }
+    }
+  } catch(e) { console.warn('Cloud check failed:', e); }
+
   // 🔒 فحص القفل
   if (user.locked === true) {
     errorEl.style.color = '#c62828';

@@ -1,6 +1,6 @@
 // ===== Service Worker للتخزين المؤقت =====
 
-const CACHE_NAME = 'accounting-v67';
+const CACHE_NAME = 'accounting-v68';
 const ASSETS = [
   './',
   './index.html',
@@ -8,18 +8,18 @@ const ASSETS = [
   './license.html',
   './setup.html',
   './change-credentials.html',
-  './add-transaction.html',
   './add-tx.html',
-  './purchases.html',
-  './customers.html',
-  './statement.html',
-  './search.html',
-  './compare.html',
+  './add-transaction.html',
   './close-day.html',
   './inventory.html',
   './reports.html',
   './backup.html',
   './settings.html',
+  './purchases.html',
+  './customers.html',
+  './search.html',
+  './statement.html',
+  './compare.html',
   './manifest.json',
   './icon.svg',
   './icon-72.png',
@@ -41,7 +41,21 @@ const ASSETS = [
   './js/reports.js',
   './js/backup.js',
   './js/settings.js',
-  './js/change-credentials.js'
+  './js/change-credentials.js',
+  './js/purchases.js',
+  './js/customers.js',
+  './js/search.js',
+  './js/statement.js',
+  './js/compare.js',
+  './js/export.js',
+  './js/units.js',
+  './js/firebase-config.js',
+  './js/sync.js',
+  './js/sync-users.js',
+  './js/auto-backup.js',
+  './js/branding.js',
+  './js/users-ui.js',
+  './js/sync-ui.js'
 ];
 
 self.addEventListener('install', (event) => {
