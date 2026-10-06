@@ -139,6 +139,23 @@ async function handleSave(e) {
       } else {
         tx.description = document.getElementById('incomeDesc').value.trim() || 'إيراد';
       }
+      
+      // طريقة الدفع (نقدي / على الحساب)
+      const payMethod = document.getElementById('paymentMethod') ? document.getElementById('paymentMethod').value : 'cash';
+      tx.paymentMethod = payMethod;
+      if (payMethod === 'credit') {
+        const custName = document.getElementById('customerName') ? document.getElementById('customerName').value.trim() : '';
+        if (!custName) {
+          msg.textContent = 'أدخل اسم العميل للدين';
+          msg.className = 'msg-box err';
+          return;
+        }
+        tx.customerName = custName;
+        tx.isCredit = true;
+        tx.creditAmount = tx.amount || amount;
+        tx.paidAmount = 0;
+        tx.paymentStatus = 'unpaid';
+      }
     } else if (currentType === 'expense') {
       tx.category = document.getElementById('expenseCategory').value;
       tx.description = tx.category + (document.getElementById('expenseNote').value.trim() ? ' - ' + document.getElementById('expenseNote').value.trim() : '');
@@ -552,4 +569,18 @@ async function saveAndPrint() {
       alert('⚠️ تأخر الحفظ، حاول مرة أخرى');
     }
   }, 200);
+}
+
+// ===== طريقة الدفع =====
+function onPaymentMethodChange() {
+  const sel = document.getElementById('paymentMethod');
+  const wrap = document.getElementById('customerNameWrap');
+  if (!sel || !wrap) return;
+  if (sel.value === 'credit') {
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+    const cn = document.getElementById('customerName');
+    if (cn) cn.value = '';
+  }
 }
