@@ -21,18 +21,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // عرض بنود الفاتورة عند اختيار بيع منتج
-  document.getElementById('incomeType').addEventListener('change', async (e) => {
-    const area = document.getElementById('productItemsArea');
-    if (e.target.value === 'product') {
-      area.style.display = 'block';
-      const list = document.getElementById('itemsList');
-      if (list.children.length === 0) {
-        await addSaleItem();
-      }
-    } else {
-      area.style.display = 'none';
-    }
+  const incomeTypeEl = document.getElementById('incomeType');
+  incomeTypeEl.addEventListener('change', async (e) => {
+    await toggleProductItemsArea(e.target.value);
   });
+  // تطبيق مباشر على القيمة الحالية
+  await toggleProductItemsArea(incomeTypeEl.value);
 
   // حساب المبلغ الإجمالي في المشتريات
   document.getElementById('quantity').addEventListener('input', autoPurchaseAmount);
@@ -401,6 +395,21 @@ function deleteItem(store, key) {
 }
 
 // ===== بنود البيع =====
+
+async function toggleProductItemsArea(value) {
+  const area = document.getElementById('productItemsArea');
+  if (!area) return;
+  if (value === 'product') {
+    area.style.display = 'block';
+    const list = document.getElementById('itemsList');
+    if (list && list.children.length === 0) {
+      await addSaleItem();
+    }
+  } else {
+    area.style.display = 'none';
+  }
+}
+
 async function addSaleItem() {
   const list = document.getElementById('itemsList');
   const products = await getAll('inventory');
