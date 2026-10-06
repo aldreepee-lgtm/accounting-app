@@ -137,7 +137,7 @@ function renderCustomers(list) {
       '</div>' +
       '<div class="actions">' +
         '<button class="pay-btn" onclick="openPayModal(\'' + escJs(c.name) + '\')">💰 دفعة</button>' +
-        '<button class="info-btn" onclick="openInfoModal(\'' + escJs(c.name) + '\')">📋 كشف</button>' +
+        '<button class="info-btn" onclick="openStatement(\'' + escJs(c.name) + '\')">📋 كشف</button>' +
         '<button class="share-btn" onclick="shareViaWhatsApp(\'' + escJs(c.name) + '\')"' + shareDisabled + '>💬 واتساب</button>' +
       '</div>' +
     '</div>';
@@ -426,4 +426,10 @@ function closeInfoModal() {
 function editCustomerFromInfo(customerName) {
   closeInfoModal();
   setTimeout(function() { openAddCustomerModal(customerName); }, 300);
+}
+
+// ===== فتح كشف الحساب =====
+function openStatement(customerName) {
+  const url = 'statement.html?type=customer&name=' + encodeURIComponent(customerName);
+  window.open(url, '_blank');
 }
