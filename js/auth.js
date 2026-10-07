@@ -56,6 +56,20 @@ async function handleLogin(e) {
   // 🚨 فحص الحذف من السحابة (للعمال فقط)
   if (user.role !== 'owner' && typeof checkUserExistsInCloud === 'function') {
     try {
+      if (typeof initFirebase === 'function' && initFirebase()) {
+        if (!firebaseAuth.currentUser) {
+          const _be = await get('settings', 'syncBackupEmail');
+          const _bp = await get('settings', 'syncBackupPass');
+          if (_be && _be.value && _bp && _bp.value) {
+            try {
+              await firebaseAuth.signInWithEmailAndPassword(_be.value, _bp.value);
+              console.log('إعادة الربط التلقائي: OK');
+            } catch(se) { console.warn('إعادة الربط التلقائي فشلت:', se); }
+          }
+        }
+      }
+    } catch(_re) {}
+    try {
       const exists = await checkUserExistsInCloud(username);
       if (exists === false) {
         errorEl.style.color = '#c62828';
