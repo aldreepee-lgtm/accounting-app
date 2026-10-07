@@ -43,7 +43,6 @@
         u.mustChange = fresh.mustChange;
         localStorage.setItem('currentUser', JSON.stringify(u));
         console.log('PERM: تم تحديث الصلاحيات محلياً');
-        showRefreshButton();
       }
     } catch(e) {
       console.warn('lock-watcher:', e);
@@ -71,15 +70,5 @@
   }
 
   window.checkUserLockedNow = check;
-
-  function showRefreshButton() {
-    if (document.getElementById('permRefreshBtn')) return;
-    var b = document.createElement('button');
-    b.id = 'permRefreshBtn';
-    b.textContent = 'تحديث الواجهة';
-    b.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e3c72;color:#fff;border:none;padding:10px 22px;border-radius:25px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;z-index:999999;box-shadow:0 4px 15px rgba(30,60,114,0.4);';
-    b.onclick = function() { location.reload(); };
-    document.body.appendChild(b);
-  }
 
 })();
