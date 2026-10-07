@@ -58,8 +58,9 @@ function add(store, data) {
     const req = tx.objectStore(store).add(data);
     req.onsuccess = async () => {
       const id = req.result;
-      // مزامنة تلقائية
-      if (typeof syncAfterSave === 'function') {
+      // مزامنة تلقائية — إلا أثناء السحب من السحابة
+      var inProgress = (typeof syncInProgress !== 'undefined') ? syncInProgress : false;
+      if (typeof syncAfterSave === 'function' && !inProgress) {
         try {
           const saved = { ...data, id };
           await syncAfterSave(store, saved);
@@ -77,8 +78,9 @@ function put(store, data) {
     const req = tx.objectStore(store).put(data);
     req.onsuccess = async () => {
       const result = req.result;
-      // مزامنة تلقائية
-      if (typeof syncAfterSave === 'function') {
+      // مزامنة تلقائية — إلا أثناء السحب من السحابة
+      var inProgress = (typeof syncInProgress !== 'undefined') ? syncInProgress : false;
+      if (typeof syncAfterSave === 'function' && !inProgress) {
         try {
           const saved = { ...data, id: result };
           await syncAfterSave(store, saved);
