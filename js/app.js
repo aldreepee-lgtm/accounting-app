@@ -14,6 +14,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (user.role === 'owner') document.body.classList.add('is-owner');
 
+  // 🔃 زر التحديث للعامل فقط
+  if (user.role !== 'owner') {
+    var rb = document.getElementById('refreshBtn');
+    if (rb) rb.style.display = 'inline-block';
+  }
+
   const badge = document.getElementById('userBadge');
   badge.textContent = user.role === 'owner' ? '👤 المالك' : '👷 العامل';
 
@@ -225,8 +231,6 @@ function applyPermissionsUI(user) {
 }
 
 // شغّله على الفور + كل 3 ثواني (لمواكبة السحب)
-setTimeout(applyPermissionsUI, 1500);
-setInterval(applyPermissionsUI, 3000);
 
 window.applyPermissionsUI = applyPermissionsUI;
 window.permIsTrue = permIsTrue;
