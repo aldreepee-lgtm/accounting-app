@@ -29,6 +29,14 @@ async function renderUsersList() {
     return;
   }
 
+  // 🔄 اسحب المستخدمين من السحابة أولاً (ليظهر العمال الجدد)
+  if (typeof pullUsersFromCloud === 'function') {
+    try {
+      box.innerHTML = '<div style="text-align:center;padding:15px;color:#666;">⏳ جاري تحديث القائمة...</div>';
+      await pullUsersFromCloud();
+    } catch(e) { console.warn('pull users failed:', e); }
+  }
+
   const users = await getAll('users');
   users.sort((a, b) => {
     if (a.role === 'owner' && b.role !== 'owner') return -1;
@@ -67,10 +75,11 @@ async function renderUsersList() {
       actionBtn = '<span style="color:#999;font-size:12px;padding:6px 10px;">—</span>';
     } else {
       var lockBtn = locked
-        ? '<button onclick="toggleLock(' + u.id + ', false)" style="background:#e8f5e9;color:#2e7d32;border:none;padding:7px 11px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">🔓</button>'
-        : '<button onclick="toggleLock(' + u.id + ', true)" style="background:#ffebee;color:#c62828;border:none;padding:7px 11px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">🔒</button>';
-      var permBtn = '<button onclick="openPermissions(' + u.id + ')" style="background:#e3f2fd;color:#1565c0;border:none;padding:7px 11px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-right:5px;">🔑</button>';
-      actionBtn = '<div style="display:flex;gap:5px;">' + permBtn + lockBtn + '</div>';
+        ? '<button onclick="toggleLock(' + u.id + ', false)" title="فتح" style="background:#e8f5e9;color:#2e7d32;border:none;padding:8px 11px;border-radius:8px;font-size:14px;cursor:pointer;">🔓</button>'
+        : '<button onclick="toggleLock(' + u.id + ', true)" title="قفل" style="background:#ffebee;color:#c62828;border:none;padding:8px 11px;border-radius:8px;font-size:14px;cursor:pointer;">🔒</button>';
+      var permBtn = '<button onclick="openPermissions(' + u.id + ')" title="الصلاحيات" style="background:#e3f2fd;color:#1565c0;border:none;padding:8px 11px;border-radius:8px;font-size:14px;cursor:pointer;">📋</button>';
+      var delBtn = '<button onclick="deleteUser(' + u.id + ')" title="حذف" style="background:#fce4ec;color:#c2185b;border:none;padding:8px 11px;border-radius:8px;font-size:14px;cursor:pointer;">🗑️</button>';
+      actionBtn = '<div style="display:flex;gap:5px;">' + permBtn + lockBtn + delBtn + '</div>';
     }
 
     html += `
@@ -221,3 +230,29 @@ async function savePermissions(userId) {
     alert('خطأ: ' + e.message);
   }
 }
+
+
+// ===== حذف مستخدم =====
+async function deleteUser(userId) {
+  try {
+    const user = await get('users', userId);
+    if (!user) { alert('المستخدم غير موجود'); return; }
+    if (user.role === 'owner') { alert('لا يمكن حذف المالك'); return; }
+
+    if (!confirm('\uD83D\uDDD1\uFE0F هل تريد حذف المستخدم "' + user.username + '" نهائياً؟\n\nلا يمكن التراجع.')) return;
+
+    await deleteItem('users', userId);
+
+    if (typeof syncAfterDelete === 'function') {
+      try { await syncAfterDelete('users', userId); } catch(e) { console.warn('sync delete failed:', e); }
+    }
+
+    alert('\uD83D\uDDD1\uFE0F تم حذف المستخدم');
+    await renderUsersList();
+  } catch(e) {
+    console.error(e);
+    alert('خطأ: ' + e.message);
+  }
+}
+
+window.deleteUser = deleteUser;

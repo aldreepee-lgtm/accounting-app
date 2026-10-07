@@ -38,10 +38,7 @@ async function handleCreate(e) {
   }
 
   try {
-    // 1) احذف جميع المستخدمين الحاليين (الذين جاءوا من السحابة)
-    await clearAllUsers();
-
-    // 2) أنشئ مستخدم العامل الجديد
+    // 1) أنشئ مستخدم العامل الجديد (بدون حذف الآخرين)
     const newUser = {
       username: username,
       password: password,
@@ -64,8 +61,28 @@ async function handleCreate(e) {
       createdAt: new Date().toISOString()
     };
 
+    // تحقق من عدم التكرار
+    const existingUsers = await getAll('users');
+    if (existingUsers.find(u => u.username === username)) {
+      err.textContent = 'اسم المستخدم موجود مسبقاً';
+      return;
+    }
+
     // نستخدم add مباشرة (بدون sync للتفادي)
     await addDirect('users', newUser);
+
+    // 🔄 رفع فوري للسحابة (يظهر عند المالك)
+    try {
+      if (typeof syncInit === 'function') await syncInit();
+      if (typeof syncUploadDoc === 'function') {
+        const users = await getAll('users');
+        const created = users.find(u => u.username === username);
+        if (created) {
+          await syncUploadDoc('users', created.id, created);
+          console.log('✅ العامل مرفوع للسحابة:', username);
+        }
+      }
+    } catch(se) { console.warn('Sync upload failed:', se); }
 
     // 3) احفظ جلسة المستخدم
     const users = await getAll('users');
