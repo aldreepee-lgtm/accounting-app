@@ -360,6 +360,13 @@ async function savePermissions(userId) {
 }
 
 // ===== deleteUser v3 — مباشر إلى Firestore =====
+
+
+window.savePermissions = savePermissions;
+window.deleteUser = deleteUser;
+
+
+// ===== deleteUser v4 — يحذف بكل docId يطابق username =====
 async function deleteUser(userId) {
   try {
     const user = await get('users', userId);
@@ -368,35 +375,102 @@ async function deleteUser(userId) {
 
     if (!confirm('🗑️ حذف المستخدم "' + user.username + '" نهائياً؟')) return;
 
-    // 1) حذف من Firestore مباشرة
-    let cloudDeleted = false;
+    let cloudDeleted = 0;
     let cloudError = '';
+
     try {
       if (typeof initFirebase === 'function') initFirebase();
       const fb = firebaseAuth && firebaseAuth.currentUser;
       if (!fb) {
         cloudError = 'لا يوجد اتصال سحابي على هذا الجهاز';
       } else {
-        await firebaseDB.collection('offices').doc(fb.uid)
-          .collection('users').doc(String(userId)).delete();
-        cloudDeleted = true;
-        console.log('OK: محذوف من السحابة', userId);
+        // 1) احذف بكل docId يطابق username في السحابة
+        const snap = await firebaseDB.collection('offices').doc(fb.uid)
+          .collection('users').get();
+        for (const d of snap.docs) {
+          const du = d.data().data;
+          if (du && du.username === user.username) {
+            await firebaseDB.collection('offices').doc(fb.uid)
+              .collection('users').doc(d.id).delete();
+            cloudDeleted++;
+            console.log('OK: حُذف من السحابة docId=' + d.id);
+          }
+        }
+        // 2) احذف أيضاً بالـ localId (احتياطاً)
+        try {
+          await firebaseDB.collection('offices').doc(fb.uid)
+            .collection('users').doc(String(userId)).delete();
+        } catch(e) {}
       }
     } catch(se) {
       cloudError = se.message || String(se);
       console.error('Firestore delete failed:', se);
     }
 
-    // 2) حذف محلي
+    // حذف محلي
     await deleteItem('users', userId);
 
-    // 3) تقرير
-    if (cloudDeleted) {
-      alert('🗑️ تم حذف "' + user.username + '" من الجهاز والسحابة ✅');
+    if (cloudDeleted > 0) {
+      alert('🗑️ تم حذف "' + user.username + '" (' + cloudDeleted + ' نسخة من السحابة) ✅');
+    } else if (cloudError) {
+      alert('⚠️ حُذف محلياً فقط\n\n' + cloudError);
     } else {
-      alert('⚠️ حُذف محلياً لكن السحابة فشلت:\n\n' + cloudError);
+      alert('⚠️ حُذف محلياً — لم يُعثر على المستخدم في السحابة');
     }
 
+    await renderUsersList();
+  } catch(e) {
+    console.error(e);
+    alert('خطأ: ' + e.message);
+  }
+}
+
+// ===== savePermissions v4 — يكتب على docId الصحيح =====
+async function savePermissions(userId) {
+  try {
+    const user = await get('users', userId);
+    if (!user) { alert('المستخدم غير موجود'); return; }
+
+    const perms = {};
+    for (const key in PERM_LABELS) {
+      const el = document.getElementById('perm_' + key);
+      perms[key] = el ? el.checked : false;
+    }
+    user.permissions = perms;
+    user.updatedAt = new Date().toISOString();
+
+    // حفظ محلي
+    if (typeof putLocal === 'function') { await putLocal('users', user); }
+    else { await put('users', user); }
+
+    // رفع سحابي — ابحث عن docId الصحيح
+    try {
+      if (typeof initFirebase === 'function') initFirebase();
+      const fb = firebaseAuth && firebaseAuth.currentUser;
+      if (!fb) {
+        alert('⚠️ المزامنة غير مفعّلة على هذا الجهاز');
+      } else {
+        const snap = await firebaseDB.collection('offices').doc(fb.uid)
+          .collection('users').get();
+        let targetId = String(userId);
+        for (const d of snap.docs) {
+          const du = d.data().data;
+          if (du && du.username === user.username) {
+            targetId = d.id;
+            break;
+          }
+        }
+        await firebaseDB.collection('offices').doc(fb.uid)
+          .collection('users').doc(targetId)
+          .set({ data: user, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        console.log('OK: صلاحيات مرفوعة docId=' + targetId);
+      }
+    } catch(se) {
+      console.error('Firestore write failed:', se);
+      alert('⚠️ حُفظ محلياً، لكن فشل الرفع: ' + (se.message||se));
+    }
+
+    closePermissions();
     await renderUsersList();
   } catch(e) {
     console.error(e);
