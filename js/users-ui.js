@@ -81,7 +81,7 @@ async function renderUsersList() {
       var lockBtn = locked
         ? '<button onclick="toggleLock(' + u.id + ', false)" title="فتح" style="background:#e8f5e9;color:#2e7d32;border:none;padding:8px 11px;border-radius:8px;font-size:14px;cursor:pointer;">🔓</button>'
         : '<button onclick="toggleLock(' + u.id + ', true)" title="قفل" style="background:#ffebee;color:#c62828;border:none;padding:8px 11px;border-radius:8px;font-size:14px;cursor:pointer;">🔒</button>';
-      var permBtn = '<button onclick="openPermissions(' + u.id + ')" title="الصلاحيات" style="background:#e3f2fd;color:#1565c0;border:none;padding:8px 11px;border-radius:8px;font-size:14px;cursor:pointer;">📋</button>';
+      var permBtn = '<button onclick="openPerms(' + u.id + ')" title="الصلاحيات" style="background:#e3f2fd;color:#1565c0;border:none;padding:8px 11px;border-radius:8px;font-size:14px;cursor:pointer;">📋</button>';
       var delBtn = '<button onclick="deleteUser(' + u.id + ')" title="حذف" style="background:#fce4ec;color:#c2185b;border:none;padding:8px 11px;border-radius:8px;font-size:14px;cursor:pointer;">🗑️</button>';
       actionBtn = '<div style="display:flex;gap:5px;">' + permBtn + lockBtn + delBtn + '</div>';
     }
