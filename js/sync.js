@@ -234,16 +234,41 @@ async function syncPullOnStart() {
   }
 }
 
+// ===== تأكيد جهوزية المزامنة (يُصلح المشكلة الجذرية) =====
+async function ensureSyncReady() {
+  if (typeof initFirebase !== 'function') return false;
+  if (!initFirebase()) return false;
+
+  // اقرأ syncEnabled من الإعدادات إن لم تكن مُهيأة
+  if (!syncEnabled) {
+    try {
+      var s = await get('settings', 'syncEnabled');
+      if (s && s.value === true) syncEnabled = true;
+    } catch(e) {}
+  }
+  if (!syncEnabled) return false;
+
+  // اقرأ syncUser من Firebase Auth
+  if (!syncUser && typeof firebaseAuth !== 'undefined' && firebaseAuth && firebaseAuth.currentUser) {
+    syncUser = firebaseAuth.currentUser;
+  }
+  if (!syncUser) return false;
+
+  return true;
+}
+
 // ===== تُستدعى بعد كل حفظ =====
 async function syncAfterSave(collection, item) {
-  if (!syncEnabled || !syncUser) return;
-  const id = item.id || item.key || item.date;
+  var ready = await ensureSyncReady();
+  if (!ready) return;
+  var id = item.id || item.key || item.date;
   if (id) await syncUploadDoc(collection, id, item);
 }
 
 // ===== تُستدعى بعد كل حذف =====
 async function syncAfterDelete(collection, id) {
-  if (!syncEnabled || !syncUser) return;
+  var ready = await ensureSyncReady();
+  if (!ready) return;
   await syncDeleteDoc(collection, id);
 }
 
