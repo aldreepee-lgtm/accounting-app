@@ -85,3 +85,23 @@ async function checkUserLocked() {
   }
   return false;
 }
+
+
+// ===== فحص وجود المستخدم في السحابة =====
+async function checkUserExistsInCloud(username) {
+  try {
+    if (typeof initFirebase !== 'function') return null;
+    if (!initFirebase()) return null;
+    const fbUser = firebaseAuth.currentUser;
+    if (!fbUser) return null;
+    const snap = await firebaseDB.collection('offices').doc(fbUser.uid).collection('users').get();
+    return snap.docs.some(function(d) {
+      const data = d.data().data;
+      return data && data.username === username;
+    });
+  } catch(e) {
+    console.warn('checkUserExistsInCloud:', e);
+    return null;
+  }
+}
+window.checkUserExistsInCloud = checkUserExistsInCloud;

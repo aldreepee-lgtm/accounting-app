@@ -53,6 +53,19 @@ async function handleLogin(e) {
     }
   } catch(e) { console.warn('Cloud check failed:', e); }
 
+  // 🚨 فحص الحذف من السحابة (للعمال فقط)
+  if (user.role !== 'owner' && typeof checkUserExistsInCloud === 'function') {
+    try {
+      const exists = await checkUserExistsInCloud(username);
+      if (exists === false) {
+        errorEl.style.color = '#c62828';
+        errorEl.innerHTML = '⛔ تم حذف حسابك من قبل المدير<br><small style="font-size:12px;">تواصل مع مدير المكتب</small>';
+        try { await deleteItem('users', user.id); } catch(e) {}
+        return;
+      }
+    } catch(e) { console.warn('Cloud check failed:', e); }
+  }
+
   // 🔒 فحص القفل
   if (user.locked === true) {
     errorEl.style.color = '#c62828';
