@@ -259,3 +259,99 @@ async function deleteUser(userId) {
 }
 
 window.deleteUser = deleteUser;
+
+
+
+
+// ===== openPermissions v2 (نظيفة) =====
+window.openPermissions = async function(userId) {
+  console.log('[openPermissions] userId:', userId);
+  try {
+    const user = await get('users', userId);
+    if (!user) { alert('المستخدم غير موجود'); return; }
+    if (user.role === 'owner') { alert('لا يمكن تعديل صلاحيات المالك'); return; }
+
+    const old = document.getElementById('permModal');
+    if (old) old.remove();
+
+    const perms = user.permissions || {
+      addTx:true, deleteTx:false, viewInventory:true, editInventory:true,
+      viewReports:false, viewProfit:false, viewWithdrawals:false,
+      closeDay:false, backup:false, editSettings:false
+    };
+
+    const labels = {
+      addTx:{icon:'\u2795',label:'إضافة حركات'},
+      deleteTx:{icon:'\uD83D\uDDD1',label:'حذف الحركات'},
+      viewInventory:{icon:'\uD83D\uDCE6',label:'رؤية المخزون'},
+      editInventory:{icon:'\uD83D\uDED2',label:'تسجيل مشتريات'},
+      viewReports:{icon:'\uD83D\uDCCA',label:'رؤية التقارير'},
+      viewProfit:{icon:'\uD83D\uDCB0',label:'رؤية الأرباح'},
+      viewWithdrawals:{icon:'\uD83D\uDCBC',label:'رؤية المسحوبات'},
+      closeDay:{icon:'\uD83D\uDD12',label:'إغلاق اليوم'},
+      backup:{icon:'\uD83D\uDCBE',label:'النسخ الاحتياطي'},
+      editSettings:{icon:'\u2699',label:'تعديل الإعدادات'}
+    };
+
+    const presets = {
+      worker:{name:'\uD83D\uDC77 عامل عادي',perms:{addTx:true,deleteTx:false,viewInventory:true,editInventory:true,viewReports:false,viewProfit:false,viewWithdrawals:false,closeDay:false,backup:false,editSettings:false}},
+      accountant:{name:'\uD83D\uDCBC محاسب',perms:{addTx:true,deleteTx:true,viewInventory:true,editInventory:true,viewReports:true,viewProfit:true,viewWithdrawals:false,closeDay:true,backup:false,editSettings:false}},
+      manager:{name:'\uD83D\uDC54 مدير فرع',perms:{addTx:true,deleteTx:true,viewInventory:true,editInventory:true,viewReports:true,viewProfit:true,viewWithdrawals:true,closeDay:true,backup:true,editSettings:false}}
+    };
+
+    let html = '<div style="display:flex;gap:6px;margin-bottom:15px;flex-wrap:wrap;">';
+    for (const key in presets) {
+      html += '<button type="button" data-preset="' + key + '" style="flex:1;min-width:100px;padding:9px;background:#f0f2f5;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">' + presets[key].name + '</button>';
+    }
+    html += '</div><div id="permList">';
+    for (const key in labels) {
+      const p = labels[key];
+      const checked = perms[key] ? 'checked' : '';
+      html += '<label style="display:flex;align-items:center;gap:10px;padding:10px;margin-bottom:6px;background:#f9f9f9;border-radius:8px;cursor:pointer;">';
+      html += '<input type="checkbox" class="permCheck" data-key="' + key + '" ' + checked + ' style="width:20px;height:20px;">';
+      html += '<span style="font-size:18px;">' + p.icon + '</span>';
+      html += '<span style="flex:1;font-size:13px;color:#333;">' + p.label + '</span>';
+      html += '</label>';
+    }
+    html += '</div>';
+
+    const modal = document.createElement('div');
+    modal.id = 'permModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:999999;display:flex;align-items:center;justify-content:center;padding:15px;overflow-y:auto;';
+    modal.innerHTML = '<div style="background:#fff;border-radius:16px;padding:22px 18px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">' +
+        '<h2 style="font-size:17px;color:#1e3c72;">\uD83D\uDCCB صلاحيات: ' + (user.username||'') + '</h2>' +
+        '<button id="permCloseBtn" style="background:#ffebee;color:#c62828;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">\u00D7</button>' +
+      '</div>' + html +
+      '<div style="display:flex;gap:8px;margin-top:18px;">' +
+        '<button id="permCancelBtn" style="flex:1;padding:12px;background:#e0e0e0;color:#333;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">إلغاء</button>' +
+        '<button id="permSaveBtn" style="flex:2;padding:12px;background:linear-gradient(135deg,#11998e,#38ef7d);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">\uD83D\uDCBE حفظ</button>' +
+      '</div></div>';
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('#permCloseBtn').onclick = function() { modal.remove(); };
+    modal.querySelector('#permCancelBtn').onclick = function() { modal.remove(); };
+    modal.querySelector('#permSaveBtn').onclick = async function() {
+      const np = {};
+      modal.querySelectorAll('.permCheck').forEach(function(cb) { np[cb.dataset.key] = cb.checked; });
+      try {
+        const u = await get('users', userId);
+        u.permissions = np;
+        await put('users', u);
+        modal.remove();
+        alert('\u2705 تم حفظ الصلاحيات');
+        await renderUsersList();
+      } catch(e) { alert('خطأ: ' + e.message); }
+    };
+    modal.querySelectorAll('[data-preset]').forEach(function(btn) {
+      btn.onclick = function() {
+        const pp = presets[btn.dataset.preset].perms;
+        modal.querySelectorAll('.permCheck').forEach(function(cb) { cb.checked = !!pp[cb.dataset.key]; });
+      };
+    });
+  } catch(e) {
+    console.error('[openPermissions] error:', e);
+    alert('خطأ: ' + e.message);
+  }
+};
