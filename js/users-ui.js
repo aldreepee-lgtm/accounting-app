@@ -29,7 +29,7 @@ async function renderUsersList() {
     return;
   }
 
-  // 🔄 اسحب المستخدمين من السحابة أولاً (ليظهر العمال الجدد)
+  // 🔄 اسحب المستخدمين من السحابة أولاً
   if (typeof pullUsersFromCloud === 'function') {
     try {
       box.innerHTML = '<div style="text-align:center;padding:15px;color:#666;">⏳ جاري تحديث القائمة...</div>';
@@ -38,13 +38,17 @@ async function renderUsersList() {
   }
 
   const users = await getAll('users');
+
+  // زر تحديث يدوي
+  let refreshBtnHtml = '<button onclick="renderUsersList()" style="width:100%;padding:10px;background:#e3f2fd;color:#1565c0;border:2px solid #90caf9;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:12px;">🔄 تحديث القائمة (' + users.length + ' مستخدم)</button>';
+  box.innerHTML = refreshBtnHtml;
+  let html = refreshBtnHtml;
   users.sort((a, b) => {
     if (a.role === 'owner' && b.role !== 'owner') return -1;
     if (b.role === 'owner' && a.role !== 'owner') return 1;
     return a.username.localeCompare(b.username);
   });
 
-  let html = '';
 
   for (const u of users) {
     const isSelf = u.id === current.id;
@@ -153,7 +157,6 @@ async function openPermissions(userId) {
 
   const perms = user.permissions || PERM_PRESETS.worker.perms;
 
-  let html = '';
   // القوالب الجاهزة
   html += '<div style="display:flex;gap:6px;margin-bottom:15px;flex-wrap:wrap;">';
   for (const key in PERM_PRESETS) {

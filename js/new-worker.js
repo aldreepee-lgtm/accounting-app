@@ -1,4 +1,4 @@
-// ===== منطق إنشاء حساب العامل على جهاز ثانوي =====
+// ===== منطق إنشاء حساب العامل على جهاز ثانوي (نظيف) =====
 
 document.addEventListener('DOMContentLoaded', async () => {
   await openDB();
@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // تحقق أن هذا جهاز ثانوي
   const deviceFlag = await get('settings', 'deviceIsSecondary');
   if (!deviceFlag || !deviceFlag.value) {
-    alert('⚠️ هذه الصفحة مخصصة للأجهزة الثانوية فقط');
+    alert('\u26A0\uFE0F هذه الصفحة مخصصة للأجهزة الثانوية فقط');
     location.href = 'index.html';
     return;
   }
@@ -23,7 +23,7 @@ async function handleCreate(e) {
   const password = document.getElementById('nwPassword').value;
   const password2 = document.getElementById('nwPassword2').value;
 
-  // التحقق
+  // ===== التحقق =====
   if (username.length < 3) {
     err.textContent = 'اسم المستخدم 3 أحرف على الأقل';
     return;
@@ -37,8 +37,15 @@ async function handleCreate(e) {
     return;
   }
 
+  // تحقق من عدم التكرار
+  const existingUsers = await getAll('users');
+  if (existingUsers.find(u => u.username === username)) {
+    err.textContent = 'اسم المستخدم موجود مسبقاً';
+    return;
+  }
+
   try {
-    // 1) أنشئ مستخدم العامل الجديد (بدون حذف الآخرين)
+    // ===== 1) إنشاء العامل الجديد =====
     const newUser = {
       username: username,
       password: password,
@@ -61,38 +68,41 @@ async function handleCreate(e) {
       createdAt: new Date().toISOString()
     };
 
-    // تحقق من عدم التكرار
-    const existingUsers = await getAll('users');
-    if (existingUsers.find(u => u.username === username)) {
-      err.textContent = 'اسم المستخدم موجود مسبقاً';
-      return;
-    }
+    const newId = await addDirect('users', newUser);
+    console.log('\u2705 أُنشئ العامل:', username, '| id:', newId);
 
-    // نستخدم add مباشرة (بدون sync للتفادي)
-    await addDirect('users', newUser);
+    // ===== 2) رفع العامل للسحابة =====
+    err.textContent = '\u23F3 جاري رفع الحساب للسحابة...';
 
-    // 🔄 رفع فوري للسحابة (يظهر عند المالك)
     try {
       if (typeof syncInit === 'function') await syncInit();
-      if (typeof syncUploadDoc === 'function') {
-        const users = await getAll('users');
-        const created = users.find(u => u.username === username);
-        if (created) {
-          await syncUploadDoc('users', created.id, created);
-          console.log('✅ العامل مرفوع للسحابة:', username);
-        }
-      }
-    } catch(se) { console.warn('Sync upload failed:', se); }
 
-    // 3) احفظ جلسة المستخدم
-    const users = await getAll('users');
-    const created = users.find(u => u.username === username);
+      if (typeof syncUploadDoc !== 'function') {
+        throw new Error('syncUploadDoc غير محمّلة');
+      }
+
+      const created = await get('users', newId);
+      if (!created) throw new Error('لم يُعثر على المستخدم بعد الحفظ');
+
+      await syncUploadDoc('users', created.id, created);
+      console.log('\u2705 العامل مرفوع للسحابة:', username);
+
+      // تأكيد الرفع
+      await new Promise(r => setTimeout(r, 1200));
+    } catch (syncErr) {
+      console.error('\u274C فشل الرفع للسحابة:', syncErr);
+      err.textContent = '\u26A0\uFE0F تم إنشاء الحساب محلياً لكن فشل الرفع للسحابة. تواصل مع المدير.';
+      await new Promise(r => setTimeout(r, 3000));
+    }
+
+    // ===== 3) حفظ جلسة العامل =====
+    const created = await get('users', newId);
     if (created) {
       localStorage.setItem('currentUser', JSON.stringify(created));
       sessionStorage.setItem('currentUser', JSON.stringify(created));
     }
 
-    // 4) علّم أن الإعداد تم
+    // ===== 4) إعدادات الإنهاء =====
     await put('settings', { key: 'setupDone', value: true });
     await put('settings', { key: 'license', value: {
       active: true,
@@ -101,19 +111,8 @@ async function handleCreate(e) {
       activatedAt: new Date().toISOString()
     }});
 
-    // 5) رفع المستخدم للسحابة (ليظهر عند المالك)
-    try {
-      if (typeof syncInit === 'function') {
-        await syncInit();
-        if (typeof syncUploadDoc === 'function' && created) {
-          await syncUploadDoc('users', created.id, created);
-          console.log('✅ العامل مرفوع للسحابة');
-        }
-      }
-    } catch(se) { console.warn('Sync upload failed:', se); }
-
-    // 6) رسالة نجاح
-    alert('✅ تم إنشاء حسابك بنجاح!\n\nسيتم تحويلك للوحة التحكم.');
+    // ===== 5) نجاح =====
+    alert('\u2705 تم إنشاء حسابك بنجاح!\n\nسيتم تحويلك للوحة التحكم.');
 
     setTimeout(() => {
       location.href = 'app.html';
@@ -121,22 +120,11 @@ async function handleCreate(e) {
 
   } catch (ex) {
     console.error(ex);
-    err.textContent = '⚠️ خطأ: ' + (ex.message || 'حدث خطأ غير متوقع');
+    err.textContent = '\u26A0\uFE0F خطأ: ' + (ex.message || 'حدث خطأ غير متوقع');
   }
 }
 
-// مسح كل المستخدمين مباشرة (بدون مزامنة)
-function clearAllUsers() {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('users', 'readwrite');
-    const store = tx.objectStore('users');
-    const req = store.clear();
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
-}
-
-// إضافة مباشرة (بدون استدعاء المزامنة)
+// إضافة مباشرة بدون تفعيل المزامنة
 function addDirect(storeName, data) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, 'readwrite');
