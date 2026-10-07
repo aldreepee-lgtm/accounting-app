@@ -119,3 +119,15 @@ function getByIndex(store, indexName, value) {
     req.onerror = () => reject(req.error);
   });
 }
+
+
+// ===== put بدون مزامنة =====
+function putLocal(store, data) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).put(data);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+window.putLocal = putLocal;

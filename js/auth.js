@@ -75,7 +75,10 @@ async function handleLogin(e) {
 
   // تحديث آخر دخول
   user.lastLogin = new Date().toISOString();
-  await put('users', user);
+  try {
+    if (typeof putLocal === 'function') { await putLocal('users', user); }
+    else { await put('users', user); }
+  } catch(e) { console.warn('lastLogin save:', e); }
 
   localStorage.setItem('currentUser', JSON.stringify(user));
 
@@ -192,6 +195,8 @@ async function doCloudLogin() {
     await put('settings', { key: 'syncEnabled', value: true });
     await put('settings', { key: 'syncEmail', value: email });
     await put('settings', { key: 'syncUserId', value: user.uid });
+    await put('settings', { key: 'syncBackupEmail', value: email });
+    await put('settings', { key: 'syncBackupPass', value: pass });
 
     // تحويل المالك إلى عامل محلياً (هذا جهاز ثانوي)
     // ملاحظة: لن نطلب من المستخدم الآن — سنعرض النموذج بعد التوجيه
