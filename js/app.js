@@ -165,39 +165,68 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 // ===== طبّق الصلاحيات على الأزرار =====
-function applyPermissionsUI(user) {
-  if (!user || user.role === 'owner') return;
-  const p = user.permissions || {};
-  const cards = document.querySelectorAll('.menu-card');
-  console.log('[Perms] تطبيق على', cards.length, 'زر');
 
-  cards.forEach(function(card) {
-    const titleEl = card.querySelector('.title');
-    const title = titleEl ? titleEl.textContent.trim() : '';
-    let needed = null;
-
-    if (title.indexOf('إيراد') !== -1) needed = 'addTx';
-    else if (title.indexOf('مصروف مكتب') !== -1) needed = 'addTx';
-    else if (title.indexOf('سجل المشتريات') !== -1) needed = 'viewInventory';
-    else if (title.indexOf('مشتريات') !== -1) needed = 'addTx';
-    else if (title.indexOf('مصروفات شخصية') !== -1) needed = 'addTx';
-    else if (title.indexOf('مسحوبات') !== -1) needed = 'viewWithdrawals';
-    else if (title.indexOf('العملاء') !== -1) needed = 'viewInventory';
-    else if (title.indexOf('المخزون') !== -1) needed = 'viewInventory';
-    else if (title.indexOf('التقارير') !== -1) needed = 'viewReports';
-    else if (title.indexOf('إغلاق') !== -1) needed = 'closeDay';
-    else if (title.indexOf('النسخ الاحتياطي') !== -1) needed = 'backup';
-
-    if (needed) {
-      const ok = p[needed] === true;
-      card.style.display = ok ? '' : 'none';
-      console.log('[Perms]', ok ? '✅' : '❌', title, '(' + needed + ')');
-    }
-  });
-
-  // زر الإعدادات — للمالك فقط أو editSettings
-  const settingsBtn = document.querySelector('button[onclick*="settings.html"]');
-  if (settingsBtn && !p.editSettings) settingsBtn.style.display = 'none';
-}
 
 window.applyPermissionsUI = applyPermissionsUI;
+
+
+// ===== طبّق الصلاحيات (نسخة قوية) =====
+function permIsTrue(v) {
+  if (v === true || v === 1) return true;
+  if (typeof v === 'string') return v.toLowerCase() === 'true';
+  return false;
+}
+
+function applyPermissionsUI(user) {
+  try {
+    if (!user) user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if (!user || !user.username) return;
+    if (user.role === 'owner') {
+      console.log('[P] owner skip');
+      return;
+    }
+    var p = user.permissions || {};
+    console.log('[P] applying for', user.username, JSON.stringify(p));
+
+    var checks = [
+      ['إيراد', 'addTx'],
+      ['مصروف مكتب', 'addTx'],
+      ['مشتريات', 'addTx'],
+      ['سجل المشتريات', 'viewInventory'],
+      ['مصروفات شخصية', 'addTx'],
+      ['مسحوبات', 'viewWithdrawals'],
+      ['العملاء', 'viewInventory'],
+      ['المخزون', 'viewInventory'],
+      ['التقارير', 'viewReports'],
+      ['إغلاق', 'closeDay'],
+      ['النسخ الاحتياطي', 'backup']
+    ];
+
+    var cards = document.querySelectorAll('.menu-card');
+    console.log('[P] cards found:', cards.length);
+
+    for (var i = 0; i < cards.length; i++) {
+      var c = cards[i];
+      var te = c.querySelector('.title');
+      if (!te) continue;
+      var t = te.textContent.trim();
+      for (var j = 0; j < checks.length; j++) {
+        if (t.indexOf(checks[j][0]) !== -1) {
+          var ok = permIsTrue(p[checks[j][1]]);
+          c.style.setProperty('display', ok ? '' : 'none', 'important');
+          console.log('[P]', t, checks[j][1], ok ? 'SHOW' : 'HIDE');
+          break;
+        }
+      }
+    }
+  } catch(e) {
+    console.error('[P]', e);
+  }
+}
+
+// شغّله على الفور + كل 3 ثواني (لمواكبة السحب)
+setTimeout(applyPermissionsUI, 1500);
+setInterval(applyPermissionsUI, 3000);
+
+window.applyPermissionsUI = applyPermissionsUI;
+window.permIsTrue = permIsTrue;
