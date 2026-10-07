@@ -211,52 +211,11 @@ function closePermissions() {
   if (m) m.remove();
 }
 
-async function savePermissions(userId) {
-  try {
-    const user = await get('users', userId);
-    if (!user) { alert('المستخدم غير موجود'); return; }
 
-    const perms = {};
-    for (const key in PERM_LABELS) {
-      const el = document.getElementById('perm_' + key);
-      perms[key] = el ? el.checked : false;
-    }
-
-    user.permissions = perms;
-    await put('users', user);
-
-    closePermissions();
-    alert('✅ تم حفظ الصلاحيات');
-    await renderUsersList();
-  } catch(e) {
-    console.error(e);
-    alert('خطأ: ' + e.message);
-  }
-}
 
 
 // ===== حذف مستخدم =====
-async function deleteUser(userId) {
-  try {
-    const user = await get('users', userId);
-    if (!user) { alert('المستخدم غير موجود'); return; }
-    if (user.role === 'owner') { alert('لا يمكن حذف المالك'); return; }
 
-    if (!confirm('\uD83D\uDDD1\uFE0F هل تريد حذف المستخدم "' + user.username + '" نهائياً؟\n\nلا يمكن التراجع.')) return;
-
-    await deleteItem('users', userId);
-
-    if (typeof syncAfterDelete === 'function') {
-      try { await syncAfterDelete('users', userId); } catch(e) { console.warn('sync delete failed:', e); }
-    }
-
-    alert('\uD83D\uDDD1\uFE0F تم حذف المستخدم');
-    await renderUsersList();
-  } catch(e) {
-    console.error(e);
-    alert('خطأ: ' + e.message);
-  }
-}
 
 window.deleteUser = deleteUser;
 
@@ -355,3 +314,95 @@ window.openPermissions = async function(userId) {
     alert('خطأ: ' + e.message);
   }
 };
+
+
+// ===== savePermissions v3 — مباشر إلى Firestore =====
+async function savePermissions(userId) {
+  try {
+    const user = await get('users', userId);
+    if (!user) { alert('المستخدم غير موجود'); return; }
+
+    const perms = {};
+    for (const key in PERM_LABELS) {
+      const el = document.getElementById('perm_' + key);
+      perms[key] = el ? el.checked : false;
+    }
+    user.permissions = perms;
+    user.updatedAt = new Date().toISOString();
+
+    // حفظ محلي (بدون مزامنة تلقائية)
+    if (typeof putLocal === 'function') { await putLocal('users', user); }
+    else { await put('users', user); }
+
+    // 🔥 رفع مباشر إلى Firestore
+    try {
+      if (typeof initFirebase === 'function') initFirebase();
+      const fb = firebaseAuth && firebaseAuth.currentUser;
+      if (!fb) {
+        alert('⚠️ المزامنة معطّلة على هذا الجهاز\n\nسجّل دخول سحابي أولاً من الإعدادات');
+      } else {
+        await firebaseDB.collection('offices').doc(fb.uid)
+          .collection('users').doc(String(userId))
+          .set({ data: user, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        console.log('OK: صلاحيات مرفوعة للسحابة', userId);
+      }
+    } catch(se) {
+      console.error('Firestore write failed:', se);
+      alert('⚠️ تم الحفظ محلياً لكن فشل الرفع للسحابة\n\n' + (se.message||se));
+    }
+
+    closePermissions();
+    await renderUsersList();
+  } catch(e) {
+    console.error(e);
+    alert('خطأ: ' + e.message);
+  }
+}
+
+// ===== deleteUser v3 — مباشر إلى Firestore =====
+async function deleteUser(userId) {
+  try {
+    const user = await get('users', userId);
+    if (!user) { alert('المستخدم غير موجود'); return; }
+    if (user.role === 'owner') { alert('لا يمكن حذف المالك'); return; }
+
+    if (!confirm('🗑️ حذف المستخدم "' + user.username + '" نهائياً؟')) return;
+
+    // 1) حذف من Firestore مباشرة
+    let cloudDeleted = false;
+    let cloudError = '';
+    try {
+      if (typeof initFirebase === 'function') initFirebase();
+      const fb = firebaseAuth && firebaseAuth.currentUser;
+      if (!fb) {
+        cloudError = 'لا يوجد اتصال سحابي على هذا الجهاز';
+      } else {
+        await firebaseDB.collection('offices').doc(fb.uid)
+          .collection('users').doc(String(userId)).delete();
+        cloudDeleted = true;
+        console.log('OK: محذوف من السحابة', userId);
+      }
+    } catch(se) {
+      cloudError = se.message || String(se);
+      console.error('Firestore delete failed:', se);
+    }
+
+    // 2) حذف محلي
+    await deleteItem('users', userId);
+
+    // 3) تقرير
+    if (cloudDeleted) {
+      alert('🗑️ تم حذف "' + user.username + '" من الجهاز والسحابة ✅');
+    } else {
+      alert('⚠️ حُذف محلياً لكن السحابة فشلت:\n\n' + cloudError);
+    }
+
+    await renderUsersList();
+  } catch(e) {
+    console.error(e);
+    alert('خطأ: ' + e.message);
+  }
+}
+
+window.savePermissions = savePermissions;
+window.deleteUser = deleteUser;
