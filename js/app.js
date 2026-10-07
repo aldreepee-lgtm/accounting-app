@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const badge = document.getElementById('userBadge');
   badge.textContent = user.role === 'owner' ? '👤 المالك' : '👷 العامل';
 
+  // ✅ طبّق الصلاحيات على الواجهة
+  applyPermissionsUI(user);
+
   await loadOfficeInfo();
   await calculateAndShowBalance();
 });
@@ -159,3 +162,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     await checkLowStock();
   } catch(e) {}
 });
+
+
+// ===== طبّق الصلاحيات على الأزرار =====
+function applyPermissionsUI(user) {
+  if (!user || user.role === 'owner') return;
+  const p = user.permissions || {};
+  const cards = document.querySelectorAll('.menu-card');
+  console.log('[Perms] تطبيق على', cards.length, 'زر');
+
+  cards.forEach(function(card) {
+    const titleEl = card.querySelector('.title');
+    const title = titleEl ? titleEl.textContent.trim() : '';
+    let needed = null;
+
+    if (title.indexOf('إيراد') !== -1) needed = 'addTx';
+    else if (title.indexOf('مصروف مكتب') !== -1) needed = 'addTx';
+    else if (title.indexOf('سجل المشتريات') !== -1) needed = 'viewInventory';
+    else if (title.indexOf('مشتريات') !== -1) needed = 'addTx';
+    else if (title.indexOf('مصروفات شخصية') !== -1) needed = 'addTx';
+    else if (title.indexOf('مسحوبات') !== -1) needed = 'viewWithdrawals';
+    else if (title.indexOf('العملاء') !== -1) needed = 'viewInventory';
+    else if (title.indexOf('المخزون') !== -1) needed = 'viewInventory';
+    else if (title.indexOf('التقارير') !== -1) needed = 'viewReports';
+    else if (title.indexOf('إغلاق') !== -1) needed = 'closeDay';
+    else if (title.indexOf('النسخ الاحتياطي') !== -1) needed = 'backup';
+
+    if (needed) {
+      const ok = p[needed] === true;
+      card.style.display = ok ? '' : 'none';
+      console.log('[Perms]', ok ? '✅' : '❌', title, '(' + needed + ')');
+    }
+  });
+
+  // زر الإعدادات — للمالك فقط أو editSettings
+  const settingsBtn = document.querySelector('button[onclick*="settings.html"]');
+  if (settingsBtn && !p.editSettings) settingsBtn.style.display = 'none';
+}
+
+window.applyPermissionsUI = applyPermissionsUI;
