@@ -213,7 +213,7 @@ function applyPermissionsUI(user) {
       for (var j = 0; j < checks.length; j++) {
         if (t.indexOf(checks[j][0]) !== -1) {
           var ok = permIsTrue(p[checks[j][1]]);
-          c.style.setProperty('display', ok ? '' : 'none', 'important');
+          c.style.setProperty('display', ok ? 'block' : 'none', 'important');
           console.log('[P]', t, checks[j][1], ok ? 'SHOW' : 'HIDE');
           break;
         }

@@ -45,8 +45,6 @@
   .menu-card.closing { border-top: 4px solid #e91e63; }
   .menu-card.backup { border-top: 4px solid #673ab7; }
 
-  .owner-only { display: none; }
-  body.is-owner .owner-only { display: block; }
 
   .dev-footer { text-align: center; color: #999; font-size: 12px; padding: 22px 10px; line-height: 1.8; border-top: 1px solid #e0e0e0; margin-top: 20px; }
   .dev-footer b { color: #2a5298; }
@@ -122,13 +120,13 @@
       <div class="sub">تُضاف للمخزون</div>
     </button>
 
-    <button class="menu-card withdraw owner-only" onclick="comingSoon('مسحوبات المالك')">
+    <button class="menu-card withdraw" onclick="comingSoon('مسحوبات المالك')">
       <div class="icon">💼</div>
       <div class="title">مسحوبات المالك</div>
       <div class="sub">سحب شخصي</div>
     </button>
 
-    <button class="menu-card personal owner-only" onclick="comingSoon('مصروفات شخصية')">
+    <button class="menu-card personal" onclick="comingSoon('مصروفات شخصية')">
       <div class="icon">🏠</div>
       <div class="title">مصروفات شخصية</div>
       <div class="sub">أكل، قات، عامل</div>
@@ -140,37 +138,37 @@
       <div class="sub">عرض فقط</div>
     </button>
 
-    <button class="menu-card owner-only" onclick="location.href='customers.html'" style="border-top:4px solid #e91e63;">
+    <button class="menu-card" onclick="location.href='customers.html'" style="border-top:4px solid #e91e63;">
       <div class="icon">👥</div>
       <div class="title">العملاء والديون</div>
       <div class="sub">متابعة الديون</div>
     </button>
 
-    <button class="menu-card owner-only" onclick="location.href='compare.html'" style="border-top:4px solid #ff5722;">
+    <button class="menu-card" onclick="location.href='compare.html'" style="border-top:4px solid #ff5722;">
       <div class="icon">📊</div>
       <div class="title">مقارنة الفترات</div>
       <div class="sub">هذا الشهر vs الماضي</div>
     </button>
 
-    <button class="menu-card owner-only" onclick="location.href='search.html'" style="border-top:4px solid #00bcd4;">
+    <button class="menu-card" onclick="location.href='search.html'" style="border-top:4px solid #00bcd4;">
       <div class="icon">🔍</div>
       <div class="title">بحث شامل</div>
       <div class="sub">فلترة متقدمة</div>
     </button>
 
-    <button class="menu-card reports owner-only" onclick="comingSoon('التقارير')">
+    <button class="menu-card reports" onclick="comingSoon('التقارير')">
       <div class="icon">📊</div>
       <div class="title">التقارير</div>
       <div class="sub">يومي / شهري</div>
     </button>
 
-    <button class="menu-card backup owner-only" onclick="comingSoon('النسخ الاحتياطي')">
+    <button class="menu-card backup" onclick="comingSoon('النسخ الاحتياطي')">
       <div class="icon">💾</div>
       <div class="title">النسخ الاحتياطي</div>
       <div class="sub">تصدير / استيراد</div>
     </button>
 
-    <button class="menu-card closing owner-only" onclick="comingSoon('إغلاق اليوم')">
+    <button class="menu-card closing" onclick="comingSoon('إغلاق اليوم')">
       <div class="icon">🔒</div>
       <div class="title">إغلاق اليوم</div>
       <div class="sub">ترحيل الرصيد</div>
