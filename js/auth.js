@@ -41,6 +41,22 @@ async function handleLogin(e) {
     return;
   }
 
+  // 🔥 إعادة ربط Firebase أولاً (قبل أي قراءة سحابية)
+  if (typeof initFirebase === 'function' && initFirebase()) {
+    if (!firebaseAuth.currentUser) {
+      try {
+        const _be = await get('settings', 'syncBackupEmail');
+        const _bp = await get('settings', 'syncBackupPass');
+        if (_be && _be.value && _bp && _bp.value) {
+          try {
+            await firebaseAuth.signInWithEmailAndPassword(_be.value, _bp.value);
+            console.log('OK: تمت إعادة الربط بـ Firebase');
+          } catch(se) { console.warn('فشل إعادة الربط:', se); }
+        }
+      } catch(_e) {}
+    }
+  }
+
   // 🔒 فحص القفل من السحابة أولاً
   try {
     if (typeof syncUsersFromCloud === 'function') {
@@ -55,20 +71,6 @@ async function handleLogin(e) {
 
   // 🚨 فحص الحذف من السحابة (للعمال فقط)
   if (user.role !== 'owner' && typeof checkUserExistsInCloud === 'function') {
-    try {
-      if (typeof initFirebase === 'function' && initFirebase()) {
-        if (!firebaseAuth.currentUser) {
-          const _be = await get('settings', 'syncBackupEmail');
-          const _bp = await get('settings', 'syncBackupPass');
-          if (_be && _be.value && _bp && _bp.value) {
-            try {
-              await firebaseAuth.signInWithEmailAndPassword(_be.value, _bp.value);
-              console.log('إعادة الربط التلقائي: OK');
-            } catch(se) { console.warn('إعادة الربط التلقائي فشلت:', se); }
-          }
-        }
-      }
-    } catch(_re) {}
     try {
       const exists = await checkUserExistsInCloud(username);
       if (exists === false) {
