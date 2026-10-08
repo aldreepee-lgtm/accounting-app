@@ -183,54 +183,45 @@ function permIsTrue(v) {
   return false;
 }
 
-function applyPermissionsUI(user) {
-  try {
-    if (!user) user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (!user || !user.username) return;
-    if (user.role === 'owner') {
-      console.log('[P] owner skip');
-      return;
-    }
-    var p = user.permissions || {};
-    console.log('[P] applying for', user.username, JSON.stringify(p));
-
-    var checks = [
-      ['إيراد', 'addTx'],
-      ['مصروف مكتب', 'addTx'],
-      ['مشتريات', 'addTx'],
-      ['سجل المشتريات', 'viewInventory'],
-      ['مصروفات شخصية', 'addTx'],
-      ['مسحوبات', 'viewWithdrawals'],
-      ['العملاء', 'viewInventory'],
-      ['المخزون', 'viewInventory'],
-      ['التقارير', 'viewReports'],
-      ['إغلاق', 'closeDay'],
-      ['النسخ الاحتياطي', 'backup']
-    ];
-
-    var cards = document.querySelectorAll('.menu-card');
-    console.log('[P] cards found:', cards.length);
-
-    for (var i = 0; i < cards.length; i++) {
-      var c = cards[i];
-      var te = c.querySelector('.title');
-      if (!te) continue;
-      var t = te.textContent.trim();
-      for (var j = 0; j < checks.length; j++) {
-        if (t.indexOf(checks[j][0]) !== -1) {
-          var ok = permIsTrue(p[checks[j][1]]);
-          c.style.setProperty('display', ok ? 'block' : 'none', 'important');
-          console.log('[P]', t, checks[j][1], ok ? 'SHOW' : 'HIDE');
-          break;
-        }
-      }
-    }
-  } catch(e) {
-    console.error('[P]', e);
-  }
-}
 
 // شغّله على الفور + كل 3 ثواني (لمواكبة السحب)
 
 window.applyPermissionsUI = applyPermissionsUI;
 window.permIsTrue = permIsTrue;
+
+function applyPermissionsUI(user) {
+  try {
+    if (!user) user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if (!user || !user.username) return;
+
+    var cards = document.querySelectorAll('[data-perm]');
+
+    if (user.role === 'owner') {
+      cards.forEach(function(c) {
+        c.style.setProperty('display', 'block', 'important');
+      });
+      console.log('[P] owner: ' + cards.length + ' cards shown');
+      return;
+    }
+
+    var p = user.permissions || {};
+    function isTrue(v) {
+      if (v === true || v === 1) return true;
+      if (typeof v === 'string') return v.toLowerCase() === 'true';
+      return false;
+    }
+
+    var shown = 0, hidden = 0;
+    cards.forEach(function(c) {
+      var need = c.getAttribute('data-perm');
+      var ok = isTrue(p[need]);
+      c.style.setProperty('display', ok ? 'block' : 'none', 'important');
+      if (ok) shown++; else hidden++;
+      var t = c.querySelector('.title');
+      console.log('[P]', t ? t.textContent.trim() : '?', need, ok ? 'SHOW' : 'HIDE');
+    });
+    console.log('[P] total: ' + shown + ' shown, ' + hidden + ' hidden');
+  } catch(e) { console.error('[P]', e); }
+}
+
+window.applyPermissionsUI = applyPermissionsUI;

@@ -97,79 +97,79 @@
 
   <div class="menu-grid">
 
-    <button class="menu-card income" onclick="comingSoon('الإيرادات')">
+    <button data-perm="addTx" class="menu-card income" onclick="comingSoon('الإيرادات')">
       <div class="icon">➕</div>
       <div class="title">إيراد</div>
       <div class="sub">بيع / خدمة</div>
     </button>
 
-    <button class="menu-card expense" onclick="comingSoon('المصروفات')">
+    <button data-perm="addTx" class="menu-card expense" onclick="comingSoon('المصروفات')">
       <div class="icon">➖</div>
       <div class="title">مصروف مكتب</div>
       <div class="sub">كهرباء، إيجار...</div>
     </button>
 
-    <button class="menu-card" onclick="location.href='purchases.html'" style="border-top:4px solid #ff5722;">
+    <button data-perm="editInventory" class="menu-card" onclick="location.href='purchases.html'" style="border-top:4px solid #ff5722;">
       <div class="icon">📦</div>
       <div class="title">سجل المشتريات</div>
       <div class="sub">عرض / حذف</div>
     </button>
 
-    <button class="menu-card purchase" onclick="comingSoon('المشتريات')">
+    <button data-perm="addTx" class="menu-card purchase" onclick="comingSoon('المشتريات')">
       <div class="icon">🛒</div>
       <div class="title">مشتريات</div>
       <div class="sub">تُضاف للمخزون</div>
     </button>
 
-    <button class="menu-card withdraw" onclick="comingSoon('مسحوبات المالك')">
+    <button data-perm="viewWithdrawals" class="menu-card withdraw" onclick="comingSoon('مسحوبات المالك')">
       <div class="icon">💼</div>
       <div class="title">مسحوبات المالك</div>
       <div class="sub">سحب شخصي</div>
     </button>
 
-    <button class="menu-card personal" onclick="comingSoon('مصروفات شخصية')">
+    <button data-perm="addTx" class="menu-card personal" onclick="comingSoon('مصروفات شخصية')">
       <div class="icon">🏠</div>
       <div class="title">مصروفات شخصية</div>
       <div class="sub">أكل، قات، عامل</div>
     </button>
 
-    <button class="menu-card inventory" onclick="comingSoon('المخزون')">
+    <button data-perm="viewInventory" class="menu-card inventory" onclick="comingSoon('المخزون')">
       <div class="icon">📦</div>
       <div class="title">المخزون</div>
       <div class="sub">عرض فقط</div>
     </button>
 
-    <button class="menu-card" onclick="location.href='customers.html'" style="border-top:4px solid #e91e63;">
+    <button data-perm="viewInventory" class="menu-card" onclick="location.href='customers.html'" style="border-top:4px solid #e91e63;">
       <div class="icon">👥</div>
       <div class="title">العملاء والديون</div>
       <div class="sub">متابعة الديون</div>
     </button>
 
-    <button class="menu-card" onclick="location.href='compare.html'" style="border-top:4px solid #ff5722;">
+    <button data-perm="viewReports" class="menu-card" onclick="location.href='compare.html'" style="border-top:4px solid #ff5722;">
       <div class="icon">📊</div>
       <div class="title">مقارنة الفترات</div>
       <div class="sub">هذا الشهر vs الماضي</div>
     </button>
 
-    <button class="menu-card" onclick="location.href='search.html'" style="border-top:4px solid #00bcd4;">
+    <button data-perm="viewInventory" class="menu-card" onclick="location.href='search.html'" style="border-top:4px solid #00bcd4;">
       <div class="icon">🔍</div>
       <div class="title">بحث شامل</div>
       <div class="sub">فلترة متقدمة</div>
     </button>
 
-    <button class="menu-card reports" onclick="comingSoon('التقارير')">
+    <button data-perm="viewReports" class="menu-card reports" onclick="comingSoon('التقارير')">
       <div class="icon">📊</div>
       <div class="title">التقارير</div>
       <div class="sub">يومي / شهري</div>
     </button>
 
-    <button class="menu-card backup" onclick="comingSoon('النسخ الاحتياطي')">
+    <button data-perm="backup" class="menu-card backup" onclick="comingSoon('النسخ الاحتياطي')">
       <div class="icon">💾</div>
       <div class="title">النسخ الاحتياطي</div>
       <div class="sub">تصدير / استيراد</div>
     </button>
 
-    <button class="menu-card closing" onclick="comingSoon('إغلاق اليوم')">
+    <button data-perm="closeDay" class="menu-card closing" onclick="comingSoon('إغلاق اليوم')">
       <div class="icon">🔒</div>
       <div class="title">إغلاق اليوم</div>
       <div class="sub">ترحيل الرصيد</div>
