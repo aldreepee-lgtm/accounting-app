@@ -43,6 +43,9 @@
         u.mustChange = fresh.mustChange;
         localStorage.setItem('currentUser', JSON.stringify(u));
         console.log('PERM: تم تحديث الصلاحيات محلياً');
+        if (typeof applyPermissionsUI === 'function') {
+          try { applyPermissionsUI(u); } catch(e) { console.warn('apply fail:', e); }
+        }
       }
     } catch(e) {
       console.warn('lock-watcher:', e);
