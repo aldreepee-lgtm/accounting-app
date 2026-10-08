@@ -194,15 +194,40 @@ async function doCloudLogin() {
         req.onerror = () => reject(req.error);
       });
 
-      // استعادة البيانات
+      // استعادة البيانات (مع إزالة المكرر في users)
+      const seenUsernames = {};
+      let added = 0;
       for (const docSnap of snapshot.docs) {
         const item = docSnap.data().data;
-        if (item) {
+        if (!item) continue;
+        if (col === 'users' && item.username) {
+          if (seenUsernames[item.username]) {
+            console.log('SKIP مكرر:', item.username);
+            continue;
+          }
+          seenUsernames[item.username] = true;
+          try {
+            const existing = await getAll('users');
+            const dup = existing.find(u => u.username === item.username);
+            if (dup) {
+              await new Promise((resolve, reject) => {
+                const tx = db.transaction('users', 'readwrite');
+                const req = tx.objectStore('users').delete(dup.id);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+              });
+            }
+          } catch(e) {}
+        }
+        try {
           await put(col, item);
+          added++;
           totalLoaded++;
+        } catch(err) {
+          console.warn('SKIP:', col, item.id || item.username, err.message);
         }
       }
-      console.log(`📥 ${col}: ${snapshot.size}`);
+      console.log('محلي:', col, snapshot.size, 'أُضيف', added);
     }
 
     // 4) إعادة حفظ الإعدادات السحابية (حتى لا تُمسح)
