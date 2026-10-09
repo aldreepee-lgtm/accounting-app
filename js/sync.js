@@ -113,6 +113,25 @@ async function syncLogout() {
   await put('settings', { key: 'syncEmail', value: '' });
 }
 
+// ===== إعادة المحاولة عند الفشل =====
+async function retryAsync(fn, maxTries, label) {
+  maxTries = maxTries || 3;
+  for (var i = 0; i < maxTries; i++) {
+    try {
+      await fn();
+      return true;
+    } catch(e) {
+      var delay = Math.pow(2, i) * 1000;
+      console.warn('\u26A0\uFE0F فشل [' + (label||'عملية') + '] محاولة ' + (i+1) + '/' + maxTries + ' — إعادة بعد ' + (delay/1000) + 'ث', e.message || e);
+      if (i < maxTries - 1) {
+        await new Promise(function(r) { setTimeout(r, delay); });
+      }
+    }
+  }
+  console.error('\u274C فشل نهائي: ' + (label||'عملية') + ' بعد ' + maxTries + ' محاولات');
+  return false;
+}
+
 // ===== رفع مستند واحد =====
 async function syncUploadDoc(collection, id, data) {
   if (!syncEnabled || !syncUser) return;
@@ -120,11 +139,13 @@ async function syncUploadDoc(collection, id, data) {
     const ref = firebaseDB
       .collection('offices').doc(syncUser.uid)
       .collection(collection).doc(String(id));
-    await ref.set({
-      data: data,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    console.log('☁️ رُفع:', collection, id);
+    await retryAsync(async function() {
+      await ref.set({
+        data: data,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }, 3, 'رفع ' + collection + '/' + id);
+    console.log('\u2601\uFE0F رُفع:', collection, id);
   } catch (e) {
     console.error('❌ خطأ رفع:', e);
   }
@@ -134,11 +155,13 @@ async function syncUploadDoc(collection, id, data) {
 async function syncDeleteDoc(collection, id) {
   if (!syncEnabled || !syncUser) return;
   try {
-    await firebaseDB
-      .collection('offices').doc(syncUser.uid)
-      .collection(collection).doc(String(id))
-      .delete();
-    console.log('🗑 حُذف من السحابة:', collection, id);
+    await retryAsync(async function() {
+      await firebaseDB
+        .collection('offices').doc(syncUser.uid)
+        .collection(collection).doc(String(id))
+        .delete();
+    }, 3, 'حذف ' + collection + '/' + id);
+    console.log('\uD83D\uDDD1 حُذف من السحابة:', collection, id);
   } catch (e) {
     console.error('❌ خطأ حذف:', e);
   }
