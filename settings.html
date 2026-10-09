@@ -3,36 +3,275 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إعدادات المكتب</title>
+<title>الإعدادات</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-  body { background: #f0f2f5; display: block; padding: 0; min-height: 100vh; }
-  .topbar { background: linear-gradient(135deg, #1e3c72, #2a5298); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-  .topbar h1 { font-size: 18px; }
-  .topbar button { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit; }
-  .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+  * { box-sizing: border-box; }
+  body {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8eef9 100%);
+    display: block; padding: 0; min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    margin: 0;
+  }
 
-  .card { background: #fff; border-radius: 14px; padding: 22px 20px; margin-bottom: 15px; box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
-  .card h2 { color: #2a5298; font-size: 15px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+  /* ═══ الهيدر ═══ */
+  .topbar {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 6px 24px rgba(30,60,114,0.25);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar h1 { font-size: 17px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px; }
+  .topbar button {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  .topbar button:hover { background: rgba(255,255,255,0.28); }
 
+  /* ═══ الحاوية ═══ */
+  .container { max-width: 620px; margin: 0 auto; padding: 18px 14px 30px; }
+
+  /* ═══ البطاقة ═══ */
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 22px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 20px rgba(30,60,114,0.08);
+    border: 1px solid rgba(30,60,114,0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 8px 26px rgba(30,60,114,0.12); }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f4fa;
+  }
+  .card-head .icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, #e8f0ff, #d4e2ff);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .card-head h2 {
+    color: #1e3c72;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  /* ═══ نموذج الحقل ═══ */
   .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; margin-bottom: 6px; color: #333; font-size: 13px; font-weight: 600; }
-  .form-group input { width: 100%; padding: 11px 13px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-family: inherit; }
-  .form-group input:focus { outline: none; border-color: #2a5298; }
+  .form-group:last-child { margin-bottom: 0; }
+  .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fafbff;
+    transition: all 0.2s;
+    color: #1f2937;
+  }
+  .form-group input:focus {
+    outline: none;
+    border-color: #2a5298;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(42,82,152,0.08);
+  }
+  .hint { font-size: 11px; color: #9ca3af; margin-top: 5px; line-height: 1.6; }
 
-  .logo-section { text-align: center; }
-  .logo-preview { display: inline-block; margin-bottom: 12px; }
-  .logo-preview img { max-width: 130px; max-height: 130px; border-radius: 12px; border: 2px solid #e0e0e0; background: #fff; padding: 4px; }
-  .logo-preview .placeholder { width: 130px; height: 130px; background: #f0f2f5; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 50px; border: 2px dashed #ccc; }
-  .logo-actions { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
-  .btn-upload { padding: 9px 18px; background: #2a5298; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; }
-  .btn-remove { padding: 9px 18px; background: #ffebee; color: #c62828; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; }
+  /* ═══ الشعار ═══ */
+  .logo-row {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 4px;
+  }
+  .logo-preview img {
+    width: 80px; height: 80px;
+    border-radius: 14px;
+    border: 2px solid #e5e7eb;
+    background: #fff;
+    padding: 4px;
+    object-fit: cover;
+  }
+  .logo-preview .placeholder {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, #f0f4ff, #e0e8f9);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    border: 2px dashed #c7d4ea;
+  }
+  .logo-actions { display: flex; gap: 8px; flex: 1; flex-wrap: wrap; }
+  .btn-mini {
+    padding: 9px 16px;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    transition: transform 0.15s;
+  }
+  .btn-mini:active { transform: scale(0.97); }
+  .btn-mini.up { background: #2a5298; color: #fff; }
+  .btn-mini.rm { background: #fee2e2; color: #b91c1c; }
 
-  .btn-save { width: 100%; padding: 15px; background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; font-family: inherit; margin-top: 5px; }
-  .msg-box { text-align: center; padding: 12px; margin-top: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; display: none; }
+  /* ═══ التبويبات ═══ */
+  .tabs {
+    display: flex;
+    background: #f3f4f6;
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 16px;
+    gap: 4px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: #6b7280;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: #fff;
+    color: #2a5298;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ═══ مفتاح التبديل (toggle) ═══ */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #f8faff, #eff4ff);
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+  }
+  .toggle-row:hover { border-color: #c7d4ea; }
+  .toggle-info { flex: 1; }
+  .toggle-info .t-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 3px;
+  }
+  .toggle-info .t-desc {
+    font-size: 11px;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+    margin-right: 10px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.3s;
+    border-radius: 26px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+  input:checked + .slider { background-color: #2a5298; }
+  input:checked + .slider:before { transform: translateX(22px); }
+
+  /* ═══ زر الحفظ ═══ */
+  .btn-save {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 6px;
+    box-shadow: 0 6px 18px rgba(17,153,142,0.3);
+    transition: transform 0.15s;
+  }
+  .btn-save:hover { transform: translateY(-1px); }
+  .btn-save:active { transform: translateY(0); }
+
+  /* ═══ رسالة الحفظ ═══ */
+  .msg-box {
+    text-align: center;
+    padding: 12px;
+    margin-top: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    display: none;
+  }
   .msg-box.show { display: block; }
   .msg-box.ok { background: #e8f5e9; color: #2e7d32; }
   .msg-box.err { background: #ffebee; color: #c62828; }
+
+  /* ═══ الفوتر ═══ */
+  .dev-footer {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 11px;
+    padding: 15px 10px;
+    line-height: 1.8;
+    margin-top: 10px;
+  }
+  .dev-footer b { color: #2a5298; }
 </style>
 
 <!-- PWA -->
@@ -48,109 +287,122 @@
 <body>
 
 <div class="topbar">
-  <h1>⚙️ إعدادات المكتب</h1>
+  <h1>⚙️ الإعدادات</h1>
   <button onclick="location.href='app.html'">← رجوع</button>
 </div>
 
 <div class="container">
 
+  <!-- ═══ 1) هوية المكتب ═══ -->
   <div class="card">
-    <h2>🖼 شعار المكتب</h2>
-    <div class="logo-section">
+    <div class="card-head">
+      <div class="icon">🏢</div>
+      <h2>هوية المكتب</h2>
+    </div>
+
+    <div class="logo-row">
       <div class="logo-preview" id="logoPreview">
         <div class="placeholder">📚</div>
       </div>
       <div class="logo-actions">
-        <button class="btn-upload" onclick="document.getElementById('logoFile').click()">📷 اختيار صورة</button>
-        <button class="btn-remove" onclick="removeLogo()">🗑 إزالة</button>
+        <button class="btn-mini up" onclick="document.getElementById('logoFile').click()">📷 صورة</button>
+        <button class="btn-mini rm" onclick="removeLogo()">🗑 إزالة</button>
       </div>
       <input type="file" id="logoFile" accept="image/*" style="display:none;">
     </div>
-  </div>
-
-  <div class="card">
-    <h2>📌 بيانات المكتب</h2>
 
     <div class="form-group">
       <label>اسم المكتب</label>
-      <input type="text" id="officeName">
+      <input type="text" id="officeName" placeholder="مثال: مكتبة السامي">
     </div>
-
     <div class="form-group">
       <label>رقم الهاتف</label>
-      <input type="text" id="officePhone">
+      <input type="text" id="officePhone" placeholder="مثال: 778983131">
     </div>
-
     <div class="form-group">
       <label>العنوان</label>
-      <input type="text" id="officeAddress">
+      <input type="text" id="officeAddress" placeholder="مثال: تعز - أمام بوابة الجامعة">
     </div>
-
     <div class="form-group">
       <label>البريد الإلكتروني</label>
-      <input type="email" id="officeEmail">
+      <input type="email" id="officeEmail" placeholder="اختياري">
     </div>
   </div>
 
+  <!-- ═══ 2) الإعدادات المحاسبية ═══ -->
   <div class="card">
-    <h2>💰 إعدادات محاسبية</h2>
-
-    <div class="form-group">
-      <label>حد التنبيه للمخزون المنخفض</label>
-      <input type="number" id="lowStockAlert" min="1" step="1" value="3">
-      <div class="hint">عندما تصل كمية منتج لهذا الحد أو أقل، سيظهر تنبيه في لوحة التحكم.</div>
+    <div class="card-head">
+      <div class="icon">⚙️</div>
+      <h2>الإعدادات المحاسبية</h2>
     </div>
 
     <div class="form-group">
       <label>العملة</label>
-      <input type="text" id="currency">
+      <input type="text" id="currency" placeholder="مثال: ريال يمني">
     </div>
-
     <div class="form-group">
-      <label>الرصيد الافتتاحي (أول تشغيل — لا يتغير بعد أول إغلاق)</label>
-      <input type="number" id="openingBalance" min="0" step="1">
+      <label>الرصيد الافتتاحي</label>
+      <input type="number" id="openingBalance" min="0" step="1" placeholder="0">
+      <div class="hint">يُستخدم في أول تشغيل — لا يتغير بعد أول إغلاق.</div>
+    </div>
+    <div class="form-group">
+      <label>حد التنبيه للمخزون المنخفض</label>
+      <input type="number" id="lowStockAlert" min="1" step="1" value="3">
+      <div class="hint">عندما تصل كمية منتج لهذا الحد أو أقل، يظهر تنبيه في لوحة التحكم.</div>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="t-title">🔄 الإغلاق التلقائي اليومي</div>
+        <div class="t-desc">يُغلق اليوم السابق تلقائياً عند فتح التطبيق</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="autoCloseEnabled">
+        <span class="slider"></span>
+      </label>
     </div>
   </div>
 
-  <div class="card" id="syncSection">
-    <h2>☁️ المزامنة السحابية</h2>
-    <div id="syncStatusBox" style="margin-bottom:15px;padding:12px;border-radius:8px;background:#fff3e0;color:#e65100;text-align:center;font-size:14px;font-weight:600;">
-      ⏳ جاري الفحص...
+  <!-- ═══ 3) المزامنة والمستخدمون ═══ -->
+  <div class="card">
+    <div class="card-head">
+      <div class="icon">☁️</div>
+      <h2>المزامنة والمستخدمون</h2>
     </div>
 
-    <div id="syncActions">
-      <!-- أزرار المزامنة ستُملأ ديناميكياً -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('sync')">☁️ المزامنة</button>
+      <button class="tab" onclick="switchTab('users')">👥 المستخدمون</button>
     </div>
 
-    <div id="syncForms" style="display:none;">
-      <!-- نموذج التسجيل / الدخول -->
+    <div id="tab-sync" class="tab-panel active">
+      <div id="syncSection">
+        <div id="syncStatusBox" style="margin-bottom:15px;padding:12px;border-radius:8px;background:#fff3e0;color:#e65100;text-align:center;font-size:14px;font-weight:600;">
+          ⏳ جاري الفحص...
+        </div>
+        <div id="syncActions"></div>
+        <div id="syncForms" style="display:none;"></div>
+      </div>
     </div>
 
-    <div class="hint" style="color:#666;font-size:12px;margin-top:12px;line-height:1.7;">
-      💡 المزامنة تسمح لك باستخدام نفس البيانات على أكثر من جهاز (هاتف + كمبيوتر).
-      <br>كل مكتب يحصل على حساب سحابي مستقل.
+    <div id="tab-users" class="tab-panel">
+      <div id="usersSection">
+        <div id="usersListBox">
+          <div style="text-align:center;color:#888;padding:20px;">⏳ جاري التحميل...</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="card" id="usersSection">
-    <h2>👥 إدارة المستخدمين</h2>
-    <div id="usersListBox">
-      <div style="text-align:center;color:#888;padding:20px;">⏳ جاري التحميل...</div>
-    </div>
-    <div class="hint" style="color:#666;font-size:12px;margin-top:12px;line-height:1.7;">
-      💡 انقر على 🔒 لقفل مستخدم (منع الدخول)، أو 🔓 لفتحه.
-      <br>⏰ آخر دخول يُحدّث تلقائياً عند كل تسجيل دخول.
-    </div>
-  </div>
-
+  <!-- ═══ زر الحفظ ═══ -->
   <button class="btn-save" onclick="saveSettings()">💾 حفظ الإعدادات</button>
   <div id="msgBox" class="msg-box"></div>
 
-</div>
+  <div class="dev-footer">
+    💻 برمجة وتطوير: <b>م/ ربيع الحريبي</b><br>📞 778983131<br>
+    © 2026 — جميع الحقوق محفوظة
+  </div>
 
-<div style="text-align:center;color:#aaa;font-size:11px;padding:15px 10px;line-height:1.7;margin-top:10px;">
-  💻 برمجة وتطوير: <b style="color:#2a5298;">م/ ربيع الحريبي</b><br>📞 778983131<br>
-  © 2026 — جميع الحقوق محفوظة
 </div>
 
 <!-- Firebase SDK -->
@@ -175,8 +427,23 @@
       });
     });
   }
+
+  // ═══ تبديل التبويبات ═══
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(function(t, i) {
+      var isActive = (i === 0 && name === 'sync') || (i === 1 && name === 'users');
+      t.classList.toggle('active', isActive);
+    });
+    document.querySelectorAll('.tab-panel').forEach(function(p) {
+      p.classList.remove('active');
+    });
+    var target = document.getElementById('tab-' + name);
+    if (target) target.classList.add('active');
+  }
+  window.switchTab = switchTab;
 </script>
 <script src="js/branding.js"></script>
 <script src="js/lock-watcher.js"></script>
+<script src="js/auto-close.js"></script>
 </body>
 </html>

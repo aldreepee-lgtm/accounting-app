@@ -38,6 +38,11 @@ async function loadSettings() {
   if (logo && logo.value) {
     showLogoPreview(logo.value);
   }
+
+  // 🔄 الإغلاق التلقائي
+  const autoClose = await get('settings', 'autoCloseEnabled');
+  const acEl = document.getElementById('autoCloseEnabled');
+  if (acEl) acEl.checked = autoClose && autoClose.value === true;
 }
 
 function showLogoPreview(src) {
@@ -108,6 +113,12 @@ async function saveSettings() {
 
   if (logoChanged) {
     await put('settings', { key: 'officeLogo', value: newLogoBase64 });
+  }
+
+  // 🔄 حفظ الإغلاق التلقائي
+  const acEl = document.getElementById('autoCloseEnabled');
+  if (acEl) {
+    await put('settings', { key: 'autoCloseEnabled', value: acEl.checked === true });
   }
 
   msg.textContent = '✅ تم حفظ الإعدادات بنجاح';
