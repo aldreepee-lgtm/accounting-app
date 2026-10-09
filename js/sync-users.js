@@ -29,10 +29,8 @@ async function pullUsersFromCloud() {
         if (!cloudUser) continue;
         const localMatch = localUsers.find(function(u) { return u.username === cloudUser.username; });
         if (localMatch) {
-          const cloudTime = doc.data().updatedAt && doc.data().updatedAt.toMillis
-            ? doc.data().updatedAt.toMillis() : 0;
-          const localTime = localMatch.updatedAt
-            ? new Date(localMatch.updatedAt).getTime() : 0;
+          const cloudTime = toMillis(doc.data().updatedAt);
+          const localTime = toMillis(localMatch.updatedAt);
           const permsChanged =
             JSON.stringify(localMatch.permissions || null) !==
             JSON.stringify(cloudUser.permissions || null);

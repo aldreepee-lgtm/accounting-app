@@ -227,13 +227,11 @@ async function syncPullOnStart() {
       for (const doc of snapshot.docs) {
         const cloudItem = doc.data().data;
         if (!cloudItem) continue;
-        const cloudTime = doc.data().updatedAt && doc.data().updatedAt.toMillis
-          ? doc.data().updatedAt.toMillis() : 0;
+        const cloudTime = toMillis(doc.data().updatedAt);
 
         const key = cloudItem.id || cloudItem.key || cloudItem.date || doc.id;
         const localItem = await get(col, isNaN(key) ? key : Number(key));
-        const localTime = localItem && localItem.updatedAt
-          ? new Date(localItem.updatedAt).getTime() : 0;
+        const localTime = toMillis(localItem && localItem.updatedAt);
 
         if (cloudTime > localTime) {
           const merged = localItem

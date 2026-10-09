@@ -141,3 +141,18 @@ function deleteItem(store, key) {
   });
 }
 window.deleteItem = deleteItem;
+
+
+// ===== تحويل updatedAt إلى milliseconds (موحّد) =====
+function toMillis(t) {
+  if (!t) return 0;
+  if (typeof t === 'number') return t;
+  if (typeof t === 'string') {
+    var ms = new Date(t).getTime();
+    return isNaN(ms) ? 0 : ms;
+  }
+  if (typeof t.toMillis === 'function') return t.toMillis();
+  if (t.seconds) return t.seconds * 1000;
+  return 0;
+}
+window.toMillis = toMillis;

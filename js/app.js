@@ -89,6 +89,8 @@ async function calculateAndShowBalance() {
 function logout() {
   if (confirm('هل تريد تسجيل الخروج؟')) {
     localStorage.removeItem('currentUser');
+    try { sessionStorage.removeItem('currentUser'); } catch(e) {}
+    try { sessionStorage.removeItem('syncBackupPass'); } catch(e) {}
     window.location.href = 'index.html';
   }
 }

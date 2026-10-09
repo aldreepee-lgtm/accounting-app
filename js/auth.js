@@ -46,10 +46,12 @@ async function handleLogin(e) {
     if (!firebaseAuth.currentUser) {
       try {
         const _be = await get('settings', 'syncBackupEmail');
-        const _bp = await get('settings', 'syncBackupPass');
-        if (_be && _be.value && _bp && _bp.value) {
+        const _bp = (function() {
+          try { return sessionStorage.getItem('syncBackupPass'); } catch(e) { return null; }
+        })();
+        if (_be && _be.value && _bp) {
           try {
-            await firebaseAuth.signInWithEmailAndPassword(_be.value, _bp.value);
+            await firebaseAuth.signInWithEmailAndPassword(_be.value, _bp);
             console.log('OK: تمت إعادة الربط بـ Firebase');
           } catch(se) { console.warn('فشل إعادة الربط:', se); }
         }
@@ -237,7 +239,10 @@ async function doCloudLogin() {
     await put('settings', { key: 'syncEmail', value: email });
     await put('settings', { key: 'syncUserId', value: user.uid });
     await put('settings', { key: 'syncBackupEmail', value: email });
-    await put('settings', { key: 'syncBackupPass', value: pass });
+    // كلمة السر في sessionStorage (تُمسح عند إغلاق المتصفح) — أكثر أماناً
+    try { sessionStorage.setItem('syncBackupPass', pass); } catch(e) {}
+    // احذف النسخة القديمة من IndexedDB إن وُجدت
+    try { if (typeof deleteItem === 'function') await deleteItem('settings', 'syncBackupPass'); } catch(e) {}
 
     // تحويل المالك إلى عامل محلياً (هذا جهاز ثانوي)
     // ملاحظة: لن نطلب من المستخدم الآن — سنعرض النموذج بعد التوجيه
