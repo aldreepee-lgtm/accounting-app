@@ -22,18 +22,44 @@ async function syncInit() {
   syncEnabled = await isSyncEnabled();
   if (!syncEnabled) return;
   if (!initFirebase()) return;
-  
-  return new Promise((resolve) => {
-    firebaseAuth.onAuthStateChanged(async (user) => {
-      syncUser = user;
-      if (user) {
-        console.log('✅ مستخدم Firebase:', user.email);
-        // نزامن عند الفتح
-        await syncPullOnStart();
-      }
-      resolve(user);
-    });
+
+  // 1) اقرأ المستخدم مباشرة (أسرع)
+  syncUser = firebaseAuth.currentUser;
+
+  if (syncUser) {
+    console.log('\u2705 مستخدم Firebase:', syncUser.email);
+    try { await syncPullOnStart(); } catch(e) { console.warn('pull error:', e); }
+    return syncUser;
+  }
+
+  // 2) في انتظار حالة Firebase مع timeout
+  console.log('\u23F3 في انتظار حالة Firebase...');
+  syncUser = await new Promise((resolve) => {
+    let done = false;
+    let unsub = null;
+    try {
+      unsub = firebaseAuth.onAuthStateChanged((u) => {
+        if (done) return;
+        done = true;
+        try { if (unsub) unsub(); } catch(e) {}
+        resolve(u);
+      });
+    } catch(e) { console.warn('onAuthStateChanged error:', e); }
+    setTimeout(() => {
+      if (done) return;
+      done = true;
+      try { if (unsub) unsub(); } catch(e) {}
+      console.warn('\u26A0\uFE0F timeout انتظار Firebase');
+      resolve(null);
+    }, 5000);
   });
+
+  if (syncUser) {
+    console.log('\u2705 مستخدم Firebase:', syncUser.email);
+    try { await syncPullOnStart(); } catch(e) { console.warn('pull error:', e); }
+  }
+
+  return syncUser;
 }
 
 // ===== تسجيل حساب جديد =====
@@ -184,14 +210,6 @@ async function syncDownloadAll() {
   }
 }
 
-function deleteItem(store, key) {
-  return new Promise(function(resolve, reject) {
-    const t = db.transaction(store, 'readwrite');
-    const req = t.objectStore(store).delete(key);
-    req.onsuccess = function() { resolve(); };
-    req.onerror = function() { reject(req.error); };
-  });
-}
 
 // ===== عند فتح التطبيق: نزامن الأحدث =====
 async function syncPullOnStart() {

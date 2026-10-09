@@ -186,7 +186,7 @@ function permIsTrue(v) {
 
 // شغّله على الفور + كل 3 ثواني (لمواكبة السحب)
 
-window.applyPermissionsUI = applyPermissionsUI;
+
 window.permIsTrue = permIsTrue;
 
 function applyPermissionsUI(user) {
@@ -224,4 +224,4 @@ function applyPermissionsUI(user) {
   } catch(e) { console.error('[P]', e); }
 }
 
-window.applyPermissionsUI = applyPermissionsUI;
+

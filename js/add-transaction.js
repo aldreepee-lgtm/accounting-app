@@ -78,7 +78,6 @@ function autoPurchaseAmount() {
   }
 }
 
-
 async function handleSave(e) {
   e.preventDefault();
   const msg = document.getElementById('formMsg');
@@ -393,15 +392,6 @@ async function deleteTx(id) {
 
   await deleteItem('transactions', id);
   await refreshView();
-}
-
-function deleteItem(store, key) {
-  return new Promise((resolve, reject) => {
-    const t = db.transaction(store, 'readwrite');
-    const req = t.objectStore(store).delete(key);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
 }
 
 // ===== بنود البيع =====

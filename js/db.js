@@ -131,3 +131,13 @@ function putLocal(store, data) {
   });
 }
 window.putLocal = putLocal;
+
+function deleteItem(store, key) {
+  return new Promise(function(resolve, reject) {
+    var t = db.transaction(store, 'readwrite');
+    var req = t.objectStore(store).delete(key);
+    req.onsuccess = function() { resolve(); };
+    req.onerror = function() { reject(req.error); };
+  });
+}
+window.deleteItem = deleteItem;

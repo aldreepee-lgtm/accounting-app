@@ -90,11 +90,3 @@ async function handleSetup(e) {
   }
 }
 
-function deleteItem(store, key) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).delete(key);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
-}
